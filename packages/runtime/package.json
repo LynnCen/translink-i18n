@@ -1,0 +1,86 @@
+{
+  "name": "@translink/i18n-runtime",
+  "version": "1.0.0",
+  "description": "TransLink I18n Runtime - 高性能国际化运行时库，支持 Vue3 和 React",
+  "keywords": [
+    "i18n",
+    "runtime",
+    "internationalization",
+    "translation",
+    "vue",
+    "react",
+    "cache"
+  ],
+  "author": "lynncen",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./vue": {
+      "import": "./dist/vue.esm.js",
+      "require": "./dist/vue.js",
+      "types": "./dist/vue.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react.esm.js",
+      "require": "./dist/react.js",
+      "types": "./dist/react.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "lru-cache": "^10.1.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0",
+    "react": "^18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "rollup": "^4.9.0",
+    "vitest": "^1.2.0",
+    "eslint": "^8.56.0",
+    "vue": "^3.4.0",
+    "react": "^18.2.0",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.0",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "rollup-plugin-dts": "^6.1.0",
+    "rimraf": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
