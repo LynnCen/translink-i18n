@@ -1,69 +1,62 @@
 {
-  "name": "@translink/vite-plugin",
+  "name": "@translink/vite-plugin-i18n",
   "version": "1.0.0",
-  "description": "TransLink I18n Vite Plugin - Vite 国际化插件，支持热更新和构建时优化",
+  "description": "Vite plugin for TransLink I18n with hot reload and build optimization",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "type-check": "tsc --noEmit"
+  },
   "keywords": [
     "vite",
     "plugin",
     "i18n",
     "internationalization",
-    "hmr",
-    "build-time",
     "vue",
-    "react"
+    "react",
+    "hmr",
+    "hot-reload"
   ],
   "author": "lynncen",
   "license": "MIT",
-  "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.esm.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c --watch",
-    "lint": "eslint src --ext .ts,.tsx",
-    "test": "vitest",
-    "type-check": "tsc --noEmit",
-    "clean": "rimraf dist"
-  },
-  "dependencies": {
-    "gogocode": "^1.0.0",
-    "glob": "^10.3.0",
-    "fs-extra": "^11.2.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lynncen/translink-i18n.git",
+    "directory": "packages/vite-plugin"
   },
   "peerDependencies": {
     "vite": "^4.0.0 || ^5.0.0"
   },
+  "dependencies": {
+    "@translink/i18n-cli": "workspace:*",
+    "gogocode": "^1.0.55",
+    "fast-glob": "^3.3.2",
+    "chokidar": "^3.5.3",
+    "picocolors": "^1.0.0",
+    "magic-string": "^0.30.5"
+  },
   "devDependencies": {
-    "typescript": "^5.3.0",
+    "typescript": "^5.2.2",
+    "tsup": "^8.0.1",
+    "vitest": "^1.0.4",
     "vite": "^5.0.0",
-    "rollup": "^4.9.0",
-    "vitest": "^1.2.0",
-    "eslint": "^8.56.0",
-    "@types/node": "^20.11.0",
-    "@types/fs-extra": "^11.0.0",
-    "@rollup/plugin-typescript": "^11.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.0",
-    "@rollup/plugin-commonjs": "^25.0.0",
-    "rollup-plugin-dts": "^6.1.0",
-    "rimraf": "^5.0.0"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
+    "@types/node": "^20.8.0"
   }
 }

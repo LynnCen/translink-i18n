@@ -13,9 +13,9 @@
 - [01. Monorepo 基础架构搭建](./tutorials/01-monorepo-setup.md) - 从零搭建现代化 TypeScript monorepo 项目
 - [02. CLI 工具核心开发](./tutorials/02-cli-core-development.md) - AST 文本提取、智能哈希生成和云端集成
 - [03. 运行时库实现](./tutorials/03-runtime-implementation.md) - 多级缓存系统、框架适配器和插值处理
+- [04. Vite 插件开发](./tutorials/04-vite-plugin-development.md) - 代码转换、热更新、懒加载和构建优化
 
 ### 即将发布的教程
-- [ ] 04. Vite 插件开发 - 热更新和构建优化
 - [ ] 05. 云端集成 - Vika API 集成和同步机制
 - [ ] 06. 测试和部署 - 完整的测试策略和发布流程
 
@@ -111,6 +111,7 @@ pnpm test
 - **2024-09-18**: 完成 Monorepo 基础架构搭建教程
 - **2024-09-18**: 完成 CLI 工具核心开发教程
 - **2024-09-18**: 完成运行时库实现教程
+- **2024-09-18**: 完成 Vite 插件开发教程
 
 ## 📧 联系方式
 
