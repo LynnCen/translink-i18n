@@ -18,30 +18,20 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    
     "baseUrl": ".",
     "paths": {
-      "@translink/i18n-cli": ["packages/cli/src"],
-      "@translink/i18n-runtime": ["packages/runtime/src"],
-      "@translink/vite-plugin": ["packages/vite-plugin/src"]
+      "@translink/i18n-cli": ["../packages/cli/src"],
+      "@translink/i18n-runtime": ["../packages/runtime/src"],
+      "@translink/vite-plugin": ["../packages/vite-plugin/src"]
     }
   },
   "include": [],
   "references": [
     {
-      "path": "./packages/cli"
+      "path": "./docs"
     },
     {
-      "path": "./packages/runtime"
-    },
-    {
-      "path": "./packages/vite-plugin"
-    },
-    {
-      "path": "./apps"
+      "path": "./playground"
     }
   ]
 }

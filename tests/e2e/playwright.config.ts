@@ -55,12 +55,12 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'cd examples/vue-demo && npm run dev',
+      command: 'cd apps/playground/vue-demo && npm run dev',
       port: 3000,
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: 'cd examples/react-demo && npm run dev',
+      command: 'cd apps/playground/react-demo && npm run dev',
       port: 3001,
       reuseExistingServer: !process.env.CI,
     }
