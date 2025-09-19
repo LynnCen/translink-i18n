@@ -29,10 +29,14 @@
     "clean": "turbo run clean",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish"
+    "release": "turbo run build && changeset publish",
+    "demo": "tsx scripts/demo-selector.ts",
+    "demo:list": "tsx scripts/demo-selector.ts --list"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
+    "@types/node": "^24.5.2",
+    "tsx": "^4.20.0",
     "turbo": "^1.13.0"
   },
   "workspaces": [

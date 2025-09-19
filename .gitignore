@@ -32,6 +32,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Scripts temporary files
+scripts/.tsbuildinfo
+
 # Runtime data
 pids
 *.pid
