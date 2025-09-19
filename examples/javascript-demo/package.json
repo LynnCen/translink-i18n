@@ -1,0 +1,33 @@
+{
+  "name": "@translink/javascript-demo",
+  "version": "1.0.0",
+  "description": "JavaScript example demonstrating TransLink I18n usage",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js",
+    "test": "echo \"No tests specified\" && exit 0",
+    "lint": "eslint src --ext .js",
+    "lint:fix": "eslint src --ext .js --fix"
+  },
+  "keywords": [
+    "i18n",
+    "internationalization",
+    "javascript",
+    "translink",
+    "example",
+    "demo"
+  ],
+  "author": "TransLink I18n Team",
+  "license": "MIT",
+  "dependencies": {
+    "@translink/i18n-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

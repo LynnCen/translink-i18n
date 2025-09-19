@@ -261,7 +261,7 @@ export class ASTExtractor {
       /\{\{\s*([tT]|i18n\.t|\$t|\$tsl)\s*\(\s*['"`]([^'"`]+)['"`]\s*\)\s*\}\}/g,
       /v-t\s*=\s*['"`]([^'"`]+)['"`]/g,
     ];
-    
+
     patterns.forEach(pattern => {
       let match;
       while ((match = pattern.exec(templateContent)) !== null) {

@@ -14,10 +14,25 @@
 - [02. CLI 工具核心开发](./tutorials/02-cli-core-development.md) - AST 文本提取、智能哈希生成和云端集成
 - [03. 运行时库实现](./tutorials/03-runtime-implementation.md) - 多级缓存系统、框架适配器和插值处理
 - [04. Vite 插件开发](./tutorials/04-vite-plugin-development.md) - 代码转换、热更新、懒加载和构建优化
+- [05. 测试与文档](./tutorials/05-testing-and-documentation.md) - 全面测试覆盖、API文档和示例项目
 
-### 即将发布的教程
-- [ ] 05. 云端集成 - Vika API 集成和同步机制
-- [ ] 06. 测试和部署 - 完整的测试策略和发布流程
+### API 参考文档
+- [API 文档总览](./api/README.md) - 完整的 API 文档导航
+- [CLI API 文档](./api/cli.md) - 命令行工具完整 API 参考
+- [Runtime API 文档](./api/runtime.md) - 运行时库核心 API 和框架集成
+- [Vite Plugin API 文档](./api/vite-plugin.md) - Vite 插件配置和使用
+- [TypeScript 类型文档](./api/typescript.md) - 完整的类型定义参考
+
+### 使用指南
+- [使用指南总览](./guides/README.md) - 完整的使用指南导航
+- [快速开始](./guides/quick-start.md) - 5分钟快速上手指南
+- [最佳实践](./best-practices.md) - 开发最佳实践和规范
+- [迁移指南](./migration-guide.md) - 从其他 i18n 方案迁移
+- [FAQ 常见问题](./faq.md) - 常见问题解答和故障排除
+
+### 完整教程系列
+
+我们已经完成了 TransLink I18n 的完整开发教程，涵盖从项目初始化到测试文档的全过程。每个教程都包含详细的步骤说明、完整的代码示例和验证清单。
 
 ## 🎯 项目概述
 
@@ -112,6 +127,9 @@ pnpm test
 - **2024-09-18**: 完成 CLI 工具核心开发教程
 - **2024-09-18**: 完成运行时库实现教程
 - **2024-09-18**: 完成 Vite 插件开发教程
+- **2024-09-18**: 完成测试与文档开发教程
+- **2024-09-18**: 发布完整 API 参考文档
+- **2024-09-18**: 发布快速开始使用指南
 
 ## 📧 联系方式
 

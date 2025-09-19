@@ -1,0 +1,205 @@
+<template>
+  <div class="language-switcher">
+    <label for="language-select">{{ $tsl('选择语言') }}:</label>
+    <select 
+      id="language-select"
+      :value="currentLanguage" 
+      @change="handleLanguageChange"
+      :disabled="isLoading"
+      class="language-select"
+    >
+      <option 
+        v-for="lang in availableLanguages" 
+        :key="lang.code" 
+        :value="lang.code"
+      >
+        {{ lang.flag }} {{ lang.name }}
+      </option>
+    </select>
+    
+    <div v-if="isLoading" class="loading-indicator">
+      <span class="spinner"></span>
+      {{ $tsl('切换中...') }}
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useI18n } from '@translink/i18n-runtime/vue';
+
+// 使用 i18n
+const { locale, setLocale, availableLocales, isLoading } = useI18n();
+
+// 语言选项配置
+const languageOptions = {
+  'zh-CN': { name: '中文', flag: '🇨🇳' },
+  'en-US': { name: 'English', flag: '🇺🇸' },
+  'ja-JP': { name: '日本語', flag: '🇯🇵' }
+};
+
+// 计算属性
+const currentLanguage = computed(() => locale.value);
+
+const availableLanguages = computed(() => {
+  return availableLocales.value.map(code => ({
+    code,
+    name: languageOptions[code as keyof typeof languageOptions]?.name || code,
+    flag: languageOptions[code as keyof typeof languageOptions]?.flag || '🌐'
+  }));
+});
+
+// 方法
+const handleLanguageChange = async (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  const newLanguage = target.value;
+  
+  if (newLanguage !== currentLanguage.value) {
+    try {
+      await setLocale(newLanguage);
+      
+      // 显示切换成功提示
+      showNotification($tsl('语言切换成功！'));
+    } catch (error) {
+      console.error('Language switch failed:', error);
+      showNotification($tsl('语言切换失败，请重试。'), 'error');
+    }
+  }
+};
+
+// 通知函数（简单实现）
+const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+  // 创建通知元素
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  
+  // 添加样式
+  Object.assign(notification.style, {
+    position: 'fixed',
+    top: '20px',
+    right: '20px',
+    padding: '12px 20px',
+    borderRadius: '6px',
+    color: 'white',
+    backgroundColor: type === 'success' ? '#4CAF50' : '#f44336',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    zIndex: '9999',
+    fontSize: '14px',
+    fontWeight: '500',
+    transform: 'translateX(100%)',
+    transition: 'transform 0.3s ease'
+  });
+  
+  document.body.appendChild(notification);
+  
+  // 动画显示
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)';
+  }, 10);
+  
+  // 自动移除
+  setTimeout(() => {
+    notification.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 300);
+  }, 3000);
+};
+</script>
+
+<style scoped>
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.language-switcher label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.language-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.language-select:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.language-select:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.language-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.language-select option {
+  background: #2c3e50;
+  color: white;
+  padding: 0.5rem;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  white-space: nowrap;
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .language-switcher {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .language-select {
+    min-width: 100px;
+    font-size: 0.8rem;
+  }
+  
+  .loading-indicator {
+    position: static;
+    margin-top: 0;
+  }
+}
+</style>

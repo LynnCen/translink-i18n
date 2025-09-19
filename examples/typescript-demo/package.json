@@ -1,0 +1,22 @@
+{
+  "name": "translink-i18n-typescript-demo",
+  "version": "1.0.0",
+  "description": "TypeScript + TransLink I18n Demo",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "i18n:extract": "translink extract",
+    "i18n:build": "translink build"
+  },
+  "dependencies": {
+    "@translink/i18n-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@translink/i18n-cli": "workspace:*",
+    "typescript": "^5.2.2",
+    "@types/node": "^20.0.0"
+  }
+}

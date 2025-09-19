@@ -1,0 +1,27 @@
+{
+  "name": "translink-i18n-vue-demo",
+  "version": "1.0.0",
+  "description": "Vue 3 + Vite + TransLink I18n Demo",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "i18n:extract": "translink extract",
+    "i18n:build": "translink build",
+    "i18n:push": "translink push",
+    "i18n:pull": "translink pull"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "@translink/i18n-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@translink/vite-plugin-i18n": "workspace:*",
+    "@translink/i18n-cli": "workspace:*",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vue-tsc": "^1.8.0"
+  }
+}
