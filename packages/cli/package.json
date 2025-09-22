@@ -13,10 +13,17 @@
   "author": "lynncen",
   "license": "MIT",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/cli.js",
+  "types": "./dist/cli.d.ts",
   "bin": {
     "translink": "./dist/cli.js",
     "tl": "./dist/cli.js"
+  },
+  "exports": {                   
+    ".": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.js"
+    }
   },
   "files": [
     "dist",
@@ -52,6 +59,15 @@
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lynncen/translink-i18n.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/lynncen/translink-i18n#readme",
+  "bugs": {
+    "url": "https://github.com/lynncen/translink-i18n/issues"
   },
   "publishConfig": {
     "access": "public"

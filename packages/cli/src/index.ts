@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { Command } from 'commander';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -12,6 +10,9 @@ import { push } from './commands/push.js';
 import { pull } from './commands/pull.js';
 import { analyze } from './commands/analyze.js';
 import { logger } from './utils/logger.js';
+
+// 导出类型
+export type { I18nConfig, ExtractResult, TranslationItem } from './types/config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -82,3 +83,4 @@ program.parse();
 if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
+
