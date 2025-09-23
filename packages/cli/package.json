@@ -33,7 +33,6 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "lint": "eslint src --ext .ts,.tsx",
     "test": "vitest",
     "type-check": "tsc --noEmit",
     "clean": "rimraf dist"
@@ -51,7 +50,6 @@
     "typescript": "^5.3.0",
     "tsup": "^8.0.0",
     "vitest": "^1.2.0",
-    "eslint": "^8.56.0",
     "@types/node": "^20.11.0",
     "@types/fs-extra": "^11.0.0",
     "@types/inquirer": "^9.0.0",

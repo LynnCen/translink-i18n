@@ -42,7 +42,6 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c --watch",
-    "lint": "eslint src --ext .ts,.tsx",
     "test": "vitest",
     "type-check": "tsc --noEmit",
     "clean": "rimraf dist"
@@ -66,7 +65,6 @@
     "typescript": "^5.3.0",
     "rollup": "^4.9.0",
     "vitest": "^1.2.0",
-    "eslint": "^8.56.0",
     "vue": "^3.4.0",
     "react": "^18.2.0",
     "@types/node": "^20.11.0",

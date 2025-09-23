@@ -23,7 +23,6 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
     "test": "turbo run test",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean",
@@ -41,7 +40,6 @@
   },
   "workspaces": [
     "packages/*",
-    "apps/*",
-    "tools/*"
+    "apps/*"
   ]
 }
