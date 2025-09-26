@@ -1,0 +1,100 @@
+# 依赖目录
+node_modules/
+**/node_modules/
+
+# 构建输出
+dist/
+build/
+lib/
+out/
+.next/
+.nuxt/
+.output/
+
+# 缓存目录
+.turbo/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# 覆盖率报告
+coverage/
+.nyc_output/
+
+# 类型声明文件
+*.d.ts
+!src/**/*.d.ts
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 编辑器和IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+
+# 包管理器
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# 文档生成
+docs/dist/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
+# 测试相关
+.jest/
+__snapshots__/
+
+# 特定框架/工具
+.vercel/
+.netlify/
+.firebase/
+.serverless/
+
+# 自动生成的文件
+CHANGELOG.md
+auto-imports.d.ts
+components.d.ts
+
+# Monorepo 特定
+.changeset/
+.turbo/
+
+# 配置文件（如果不需要检查）
+# *.config.js
+# *.config.ts
