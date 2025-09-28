@@ -12,7 +12,11 @@ import { analyze } from './commands/analyze.js';
 import { logger } from './utils/logger.js';
 
 // 导出类型
-export type { I18nConfig, ExtractResult, TranslationItem } from './types/config.js';
+export type {
+  I18nConfig,
+  ExtractResult,
+  TranslationItem,
+} from './types/config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -47,7 +51,7 @@ program.addCommand(analyze);
 program
   .option('-d, --debug', '启用调试模式')
   .option('-q, --quiet', '静默模式')
-  .hook('preAction', (thisCommand) => {
+  .hook('preAction', thisCommand => {
     const options = thisCommand.opts();
     if (options.debug) {
       process.env.DEBUG = '1';
@@ -58,7 +62,7 @@ program
   });
 
 // 错误处理
-program.exitOverride((err) => {
+program.exitOverride(err => {
   if (err.code === 'commander.help') {
     process.exit(0);
   }
@@ -70,7 +74,7 @@ program.exitOverride((err) => {
 });
 
 // 未知命令处理
-program.on('command:*', (operands) => {
+program.on('command:*', operands => {
   logger.error(`未知命令: ${operands[0]}`);
   logger.info('运行 translink --help 查看可用命令');
   process.exit(1);
@@ -83,4 +87,3 @@ program.parse();
 if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
-
