@@ -3,7 +3,6 @@ packages:
   - 'apps/docs'
   - 'apps/playground'
   - 'apps/playground/*'
-  - 'tools/*'
 
 # 目录排除配置
 exclude:

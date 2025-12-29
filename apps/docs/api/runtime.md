@@ -1,504 +1,401 @@
 # Runtime API 文档
 
-`@translink/i18n-runtime` 提供了完整的运行时国际化解决方案，包括核心引擎、缓存管理、资源加载和框架适配器。
+> TransLink I18n 运行时库的完整 API 参考文档
 
-## 📦 安装
+## 📋 概述
+
+TransLink I18n Runtime 提供了强大的运行时国际化支持，包括多级缓存、智能插值、框架集成等功能。
+
+## 🚀 安装
 
 ```bash
+# 核心运行时库
 npm install @translink/i18n-runtime
+
+# Vue 3 支持
+npm install @translink/i18n-runtime vue
+
+# React 支持  
+npm install @translink/i18n-runtime react react-dom
 ```
 
-## 🚀 基本使用
-
-```typescript
-import { I18nEngine } from '@translink/i18n-runtime';
-
-// 创建 i18n 引擎
-const i18n = new I18nEngine({
-  defaultLanguage: 'zh-CN',
-  fallbackLanguage: 'en-US',
-  resources: {
-    'zh-CN': { greeting: '你好，{{name}}！' },
-    'en-US': { greeting: 'Hello, {{name}}!' }
-  }
-});
-
-// 使用翻译
-console.log(i18n.t('greeting', { name: '世界' })); // 输出: 你好，世界！
-```
-
-## 🏗️ Core Classes
+## 🏗️ 核心 API
 
 ### I18nEngine
 
-国际化引擎核心类，提供翻译、语言管理和事件系统。
+核心翻译引擎，提供所有基础国际化功能。
+
+#### 构造函数
 
 ```typescript
-class I18nEngine extends EventEmitter {
-  constructor(options: I18nOptions);
-
-  // 翻译方法
-  t(key: string, params?: Record<string, any>, options?: TranslationOptions): string;
-  
-  // 语言管理
-  getCurrentLanguage(): string;
-  changeLanguage(language: string): Promise<void>;
-  loadLanguage(language: string, namespace?: string): Promise<void>;
-  
-  // 资源管理
-  addResources(language: string, resources: TranslationResource): void;
-  getResources(language: string): TranslationResource | undefined;
-  
-  // 缓存管理
-  clearCache(): void;
-  getCacheStats(): CacheStats;
-  
-  // 事件方法
-  on(event: string, listener: Function): this;
-  emit(event: string, ...args: any[]): boolean;
-}
+new I18nEngine(options: I18nOptions)
 ```
 
 #### I18nOptions
 
 ```typescript
 interface I18nOptions {
-  /** 默认语言 */
+  // 语言配置
   defaultLanguage: string;
-  /** 回退语言 */
-  fallbackLanguage?: string;
-  /** 初始资源 */
+  fallbackLanguage: string;
+  supportedLanguages: string[];
+  
+  // 资源配置
   resources?: Record<string, TranslationResource>;
-  /** 缓存配置 */
-  cache?: CacheOptions;
-  /** 加载器配置 */
-  loader?: LoaderOptions;
-  /** 插值配置 */
-  interpolation?: InterpolationOptions;
+  loadPath?: string;
+  loadFunction?: (lng: string, ns: string) => Promise<TranslationResource>;
+  
+  // 缓存配置
+  cache?: {
+    enabled: boolean;
+    maxSize: number;
+    ttl: number;
+    storage: 'memory' | 'localStorage' | 'sessionStorage';
+  };
+  
+  // 插值配置
+  interpolation?: {
+    prefix: string;
+    suffix: string;
+    escapeValue: boolean;
+    format?: (value: any, format: string, lng: string) => string;
+  };
+  
+  // 调试配置
+  debug?: boolean;
+  logLevel?: 'error' | 'warn' | 'info' | 'debug';
 }
 ```
 
-#### TranslationResource
+#### 方法
 
-```typescript
-type TranslationResource = Record<string, any>;
-```
+##### `init(): Promise<void>`
 
-#### TranslationOptions
-
-```typescript
-interface TranslationOptions {
-  /** 默认值 */
-  defaultValue?: string;
-  /** 计数 */
-  count?: number;
-  /** 上下文 */
-  context?: string;
-  /** 命名空间 */
-  ns?: string;
-}
-```
-
-#### 示例
+初始化 i18n 引擎。
 
 ```typescript
 const i18n = new I18nEngine({
   defaultLanguage: 'zh-CN',
-  fallbackLanguage: 'en-US',
-  resources: {
-    'zh-CN': {
-      common: {
-        greeting: '你好，{{name}}！',
-        welcome: '欢迎使用我们的应用'
-      },
-      errors: {
-        notFound: '页面未找到',
-        serverError: '服务器错误'
-      }
-    },
-    'en-US': {
-      common: {
-        greeting: 'Hello, {{name}}!',
-        welcome: 'Welcome to our app'
-      },
-      errors: {
-        notFound: 'Page not found',
-        serverError: 'Server error'
-      }
-    }
-  },
-  cache: {
-    enabled: true,
-    maxSize: 1000,
-    ttl: 5 * 60 * 1000 // 5分钟
-  }
+  supportedLanguages: ['zh-CN', 'en-US']
 });
 
-// 基本翻译
-i18n.t('common.greeting', { name: 'Alice' });
-
-// 带默认值的翻译
-i18n.t('unknown.key', {}, { defaultValue: '默认文本' });
-
-// 计数翻译
-i18n.t('items', { count: 5 }, { count: 5 });
+await i18n.init();
 ```
 
-### CacheManager
+##### `t(key: string, params?: TranslationParams, options?: TranslationOptions): string`
 
-缓存管理器，提供多级缓存支持。
-
-```typescript
-class CacheManager {
-  constructor(options: CacheManagerOptions);
-
-  /** 获取缓存值 */
-  get(key: string): any;
-  
-  /** 设置缓存值 */
-  set(key: string, value: any, ttl?: number): void;
-  
-  /** 删除缓存 */
-  remove(key: string): void;
-  
-  /** 清空缓存 */
-  clear(): void;
-  
-  /** 获取缓存统计 */
-  getStats(): CacheStats;
-}
-```
-
-#### CacheManagerOptions
+翻译文本的核心方法。
 
 ```typescript
-interface CacheManagerOptions {
-  /** 内存缓存配置 */
-  memory?: {
-    enabled: boolean;
-    maxSize: number;
-    ttl: number;
-  };
-  /** localStorage 缓存配置 */
-  localStorage?: {
-    enabled: boolean;
-    prefix: string;
-    ttl: number;
-  };
-}
-```
+// 基础翻译
+i18n.t('welcome'); // "欢迎使用"
 
-#### CacheStats
+// 带参数翻译
+i18n.t('greeting', { name: '张三' }); // "你好，张三！"
 
-```typescript
-interface CacheStats {
-  /** 缓存大小 */
-  size: number;
-  /** 命中次数 */
-  hits: number;
-  /** 未命中次数 */
-  misses: number;
-  /** 命中率 */
-  hitRate: number;
-}
-```
+// 嵌套键翻译
+i18n.t('user.profile'); // "用户资料"
 
-#### 示例
-
-```typescript
-const cacheManager = new CacheManager({
-  memory: {
-    enabled: true,
-    maxSize: 500,
-    ttl: 10 * 60 * 1000 // 10分钟
-  },
-  localStorage: {
-    enabled: true,
-    prefix: 'i18n_cache_',
-    ttl: 24 * 60 * 60 * 1000 // 24小时
-  }
+// 带选项翻译
+i18n.t('message', { count: 5 }, { 
+  lng: 'en-US',
+  defaultValue: 'Default message'
 });
-
-// 设置缓存
-cacheManager.set('user_preferences', { language: 'zh-CN' });
-
-// 获取缓存
-const preferences = cacheManager.get('user_preferences');
-
-// 查看统计
-const stats = cacheManager.getStats();
-console.log(`缓存命中率: ${(stats.hitRate * 100).toFixed(2)}%`);
 ```
 
-### ResourceLoader
-
-资源加载器，支持动态加载和懒加载。
+**参数类型：**
 
 ```typescript
-class ResourceLoader {
-  constructor(options: LoaderOptions);
+interface TranslationParams {
+  [key: string]: string | number | boolean | Date | null | undefined;
+}
 
-  /** 加载资源 */
-  load(language: string, namespace?: string): Promise<TranslationResource>;
-  
-  /** 预加载资源 */
-  preload(languages: string[]): Promise<void>;
-  
-  /** 检查资源是否已加载 */
-  isLoaded(language: string, namespace?: string): boolean;
+interface TranslationOptions {
+  lng?: string;           // 指定语言
+  ns?: string;            // 指定命名空间
+  defaultValue?: string;  // 默认值
+  count?: number;         // 复数形式
 }
 ```
 
-#### LoaderOptions
+##### `changeLanguage(language: string): Promise<void>`
+
+切换当前语言。
 
 ```typescript
-interface LoaderOptions {
-  /** 加载路径模板 */
-  loadPath?: string;
-  /** 自定义加载函数 */
-  loadFunction?: (language: string, namespace: string) => Promise<TranslationResource>;
-  /** 预加载语言 */
-  preload?: string[];
-  /** 懒加载 */
-  lazy?: boolean;
-}
-```
+// 切换到英文
+await i18n.changeLanguage('en-US');
 
-#### 示例
-
-```typescript
-const loader = new ResourceLoader({
-  loadPath: '/locales/{{lng}}/{{ns}}.json',
-  preload: ['zh-CN', 'en-US'],
-  lazy: true
-});
-
-// 加载特定语言资源
-const zhResources = await loader.load('zh-CN');
-
-// 预加载多个语言
-await loader.preload(['ja-JP', 'ko-KR']);
-```
-
-### Interpolator
-
-插值处理器，处理翻译文本中的动态内容。
-
-```typescript
-class Interpolator {
-  constructor(options?: InterpolationOptions);
-
-  /** 插值处理 */
-  interpolate(
-    text: string, 
-    params: Record<string, any>, 
-    options?: InterpolationOptions
-  ): string;
-  
-  /** 添加格式化器 */
-  addFormatter(name: string, formatter: FormatterFunction): void;
-  
-  /** 移除格式化器 */
-  removeFormatter(name: string): void;
-}
-```
-
-#### InterpolationOptions
-
-```typescript
-interface InterpolationOptions {
-  /** 插值前缀 */
-  prefix?: string;
-  /** 插值后缀 */
-  suffix?: string;
-  /** 转义函数 */
-  escape?: (value: any) => string;
-  /** 格式化器 */
-  formatters?: Record<string, FormatterFunction>;
-}
-```
-
-#### FormatterFunction
-
-```typescript
-type FormatterFunction = (value: any, options?: any) => string;
-```
-
-#### 示例
-
-```typescript
-const interpolator = new Interpolator({
-  prefix: '{{',
-  suffix: '}}',
-  formatters: {
-    currency: (value: number) => `¥${value.toFixed(2)}`,
-    date: (value: Date) => value.toLocaleDateString('zh-CN'),
-    upper: (value: string) => value.toUpperCase()
-  }
-});
-
-// 基本插值
-interpolator.interpolate('Hello, {{name}}!', { name: 'World' });
-// 输出: Hello, World!
-
-// 使用格式化器
-interpolator.interpolate('价格: {{price, currency}}', { price: 99.99 });
-// 输出: 价格: ¥99.99
-
-interpolator.interpolate('今天是 {{today, date}}', { today: new Date() });
-// 输出: 今天是 2023/12/25
-```
-
-### EventEmitter
-
-事件发射器，提供事件系统支持。
-
-```typescript
-class EventEmitter {
-  /** 添加事件监听器 */
-  on(event: string, listener: Function): this;
-  
-  /** 添加一次性事件监听器 */
-  once(event: string, listener: Function): this;
-  
-  /** 移除事件监听器 */
-  off(event: string, listener?: Function): this;
-  
-  /** 发射事件 */
-  emit(event: string, ...args: any[]): boolean;
-  
-  /** 获取监听器列表 */
-  listeners(event: string): Function[];
-}
-```
-
-#### 事件类型
-
-| 事件名 | 参数 | 描述 |
-|--------|------|------|
-| `languageChanged` | `(language: string)` | 语言切换时触发 |
-| `languageLoaded` | `(language: string)` | 语言资源加载完成时触发 |
-| `translationMissing` | `(key: string, language: string)` | 翻译缺失时触发 |
-| `error` | `(error: Error)` | 发生错误时触发 |
-| `resourcesAdded` | `(language: string, resources: any)` | 添加资源时触发 |
-
-#### 示例
-
-```typescript
-// 监听语言切换
+// 监听语言切换事件
 i18n.on('languageChanged', (language) => {
-  console.log(`语言已切换到: ${language}`);
-  // 更新 UI 或执行其他操作
-});
-
-// 监听翻译缺失
-i18n.on('translationMissing', (key, language) => {
-  console.warn(`缺失翻译: ${key} (${language})`);
-  // 记录到错误追踪系统
-});
-
-// 监听错误
-i18n.on('error', (error) => {
-  console.error('I18n 错误:', error);
-  // 错误处理逻辑
+  console.log('Language changed to:', language);
 });
 ```
 
-## 🔌 Framework Adapters
+##### `getCurrentLanguage(): string`
 
-### Vue Adapter
-
-Vue 3 适配器，提供 Vue 特定的 API 和响应式支持。
+获取当前语言。
 
 ```typescript
-// 安装插件
-import { createApp } from 'vue';
+const currentLang = i18n.getCurrentLanguage(); // "zh-CN"
+```
+
+##### `getSupportedLanguages(): string[]`
+
+获取支持的语言列表。
+
+```typescript
+const languages = i18n.getSupportedLanguages(); // ["zh-CN", "en-US"]
+```
+
+##### `addResourceBundle(lng: string, ns: string, resources: TranslationResource): void`
+
+动态添加翻译资源。
+
+```typescript
+i18n.addResourceBundle('zh-CN', 'common', {
+  button: {
+    save: '保存',
+    cancel: '取消'
+  }
+});
+```
+
+##### `removeResourceBundle(lng: string, ns?: string): void`
+
+移除翻译资源。
+
+```typescript
+// 移除特定命名空间
+i18n.removeResourceBundle('zh-CN', 'common');
+
+// 移除整个语言
+i18n.removeResourceBundle('zh-CN');
+```
+
+#### 事件系统
+
+I18nEngine 继承自 EventEmitter，支持以下事件：
+
+```typescript
+// 初始化完成
+i18n.on('ready', () => {
+  console.log('I18n is ready');
+});
+
+// 语言切换
+i18n.on('languageChanged', (language: string) => {
+  console.log('Language changed:', language);
+});
+
+// 翻译缺失
+i18n.on('translationMissing', (key: string, language: string) => {
+  console.log('Missing translation:', key, 'for', language);
+});
+
+// 资源加载
+i18n.on('resourceLoaded', (language: string, namespace: string) => {
+  console.log('Resource loaded:', language, namespace);
+});
+
+// 错误事件
+i18n.on('error', (error: Error) => {
+  console.error('I18n error:', error);
+});
+```
+
+#### 缓存管理
+
+```typescript
+// 获取缓存统计
+const stats = i18n.getCacheStats();
+console.log('Cache size:', stats.size);
+console.log('Hit rate:', stats.hitRate);
+
+// 清除缓存
+i18n.clearCache();
+
+// 预热缓存
+await i18n.preloadLanguage('en-US');
+```
+
+---
+
+## 🎯 Vue 3 集成
+
+### createI18n
+
+创建 Vue 3 i18n 实例。
+
+```typescript
 import { createI18n } from '@translink/i18n-runtime/vue';
 
 const i18n = createI18n({
   defaultLanguage: 'zh-CN',
-  resources: { /* ... */ }
+  supportedLanguages: ['zh-CN', 'en-US'],
+  globalInjection: true,
+  globalProperties: true
 });
 
-const app = createApp(App);
 app.use(i18n);
 ```
 
-#### useI18n
-
-组合式 API 钩子。
+#### VueI18nOptions
 
 ```typescript
-function useI18n(): {
-  /** 翻译函数 */
-  t: (key: string, params?: any, options?: any) => string;
-  /** 当前语言 */
-  locale: Ref<string>;
-  /** 切换语言 */
-  setLocale: (language: string) => Promise<void>;
-  /** 可用语言列表 */
-  availableLocales: Ref<string[]>;
+interface VueI18nOptions extends I18nOptions {
+  globalInjection?: boolean;    // 是否全局注入
+  globalProperties?: boolean;   // 是否添加全局属性
 }
 ```
 
-#### 全局属性
+### useI18n
+
+Vue 3 Composition API Hook。
 
 ```typescript
-// 在模板中使用
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $t: (key: string, params?: any, options?: any) => string;
-    $tsl: (text: string, params?: any) => string;
+import { useI18n } from '@translink/i18n-runtime/vue';
+
+export default {
+  setup() {
+    const { t, locale, setLocale, availableLocales, isReady, isLoading } = useI18n();
+    
+    return {
+      t,
+      locale,
+      setLocale,
+      availableLocales,
+      isReady,
+      isLoading
+    };
   }
+};
+```
+
+#### UseI18nReturn
+
+```typescript
+interface UseI18nReturn {
+  t: (key: string, params?: TranslationParams) => string;
+  locale: ComputedRef<string>;
+  setLocale: (locale: string) => Promise<void>;
+  availableLocales: ComputedRef<string[]>;
+  isReady: Ref<boolean>;
+  isLoading: Ref<boolean>;
 }
 ```
 
-#### 示例
+### 全局属性
+
+当启用 `globalProperties` 时，可以在模板中直接使用：
 
 ```vue
 <template>
   <div>
-    <!-- 使用全局属性 -->
-    <h1>{{ $t('common.title') }}</h1>
-    <p>{{ $tsl('这是直接翻译的文本') }}</p>
+    <h1>{{ $t('welcome') }}</h1>
+    <p>{{ $t('greeting', { name: 'Vue' }) }}</p>
     
-    <!-- 使用组合式 API -->
-    <button @click="switchLanguage">
-      {{ t('common.switchLanguage') }}
-    </button>
-    
-    <!-- 插值示例 -->
-    <p>{{ $t('user.greeting', { name: userName }) }}</p>
+    <!-- 当前语言 -->
+    <span>{{ $i18n.locale }}</span>
   </div>
 </template>
+```
 
-<script setup lang="ts">
-import { useI18n } from '@translink/i18n-runtime/vue';
-import { ref } from 'vue';
+### v-t 指令
 
-const { t, locale, setLocale } = useI18n();
-const userName = ref('Alice');
+自定义翻译指令。
 
-const switchLanguage = async () => {
-  const newLocale = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN';
-  await setLocale(newLocale);
-};
+```vue
+<template>
+  <!-- 基础使用 -->
+  <p v-t="'welcome'"></p>
+  
+  <!-- 带参数 -->
+  <p v-t="{ key: 'greeting', params: { name: 'Vue' } }"></p>
+  
+  <!-- HTML 内容 -->
+  <div v-t.html="'richContent'"></div>
+</template>
+
+<script setup>
+import { vT } from '@translink/i18n-runtime/vue';
+
+// 注册指令
+app.directive('t', vT);
 </script>
 ```
 
-### React Adapter
+### Translation 组件
 
-React 适配器，提供 React 特定的 Hook 和组件。
+声明式翻译组件。
+
+```vue
+<template>
+  <!-- 基础翻译 -->
+  <Translation i18nKey="welcome" />
+  
+  <!-- 带参数翻译 -->
+  <Translation 
+    i18nKey="greeting" 
+    :params="{ name: 'Vue' }"
+  />
+  
+  <!-- 自定义标签 -->
+  <Translation 
+    i18nKey="title" 
+    tag="h1"
+    class="page-title"
+  />
+  
+  <!-- 插槽内容 -->
+  <Translation i18nKey="richContent">
+    <template #link="{ text }">
+      <router-link to="/about">{{ text }}</router-link>
+    </template>
+  </Translation>
+</template>
+```
+
+#### Translation Props
 
 ```typescript
-// 设置 Provider
+interface TranslationProps {
+  i18nKey: string;
+  params?: TranslationParams;
+  tag?: string;
+  defaultValue?: string;
+  ns?: string;
+}
+```
+
+---
+
+## ⚛️ React 集成
+
+### I18nProvider
+
+React Context Provider。
+
+```tsx
 import { I18nProvider } from '@translink/i18n-runtime/react';
+import { I18nEngine } from '@translink/i18n-runtime';
+
+const i18nEngine = new I18nEngine({
+  defaultLanguage: 'zh-CN',
+  supportedLanguages: ['zh-CN', 'en-US']
+});
 
 function App() {
   return (
-    <I18nProvider
-      defaultLanguage="zh-CN"
-      resources={{ /* ... */ }}
+    <I18nProvider 
+      i18n={i18nEngine}
+      fallback={<div>Loading...</div>}
+      errorFallback={({ error, retry }) => (
+        <div>
+          <p>Error: {error.message}</p>
+          <button onClick={retry}>Retry</button>
+        </div>
+      )}
     >
       <MyComponent />
     </I18nProvider>
@@ -506,277 +403,461 @@ function App() {
 }
 ```
 
-#### useTranslation
-
-React Hook。
+#### I18nProviderProps
 
 ```typescript
-function useTranslation(): {
-  /** 翻译函数 */
-  t: (key: string, params?: any, options?: any) => string;
-  /** 当前语言 */
-  language: string;
-  /** 切换语言 */
-  changeLanguage: (language: string) => Promise<void>;
-  /** i18n 引擎实例 */
+interface I18nProviderProps {
   i18n: I18nEngine;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  errorFallback?: React.ComponentType<{
+    error: Error;
+    retry: () => void;
+  }>;
 }
 ```
 
-#### Trans 组件
+### useTranslation
 
-用于复杂翻译的组件。
-
-```typescript
-interface TransProps {
-  /** 翻译键 */
-  i18nKey: string;
-  /** 插值参数 */
-  values?: Record<string, any>;
-  /** 组件映射 */
-  components?: Record<string, React.ComponentType>;
-  /** 默认值 */
-  defaults?: string;
-}
-
-function Trans(props: TransProps): JSX.Element;
-```
-
-#### 示例
+React Hook for translations.
 
 ```tsx
-import React from 'react';
-import { useTranslation, Trans } from '@translink/i18n-runtime/react';
+import { useTranslation } from '@translink/i18n-runtime/react';
 
 function MyComponent() {
-  const { t, language, changeLanguage } = useTranslation();
-
+  const { t, i18n, ready } = useTranslation();
+  
+  if (!ready) {
+    return <div>Loading translations...</div>;
+  }
+  
   return (
     <div>
-      {/* 基本翻译 */}
-      <h1>{t('common.title')}</h1>
-      
-      {/* 插值翻译 */}
-      <p>{t('user.greeting', { name: 'Bob' })}</p>
-      
-      {/* 复杂翻译 */}
-      <Trans
-        i18nKey="user.welcomeMessage"
-        values={{ name: 'Bob', count: 5 }}
-        components={{
-          strong: <strong />,
-          link: <a href="/profile" />
-        }}
-      />
-      
-      {/* 语言切换 */}
-      <button onClick={() => changeLanguage('en-US')}>
-        {t('common.switchToEnglish')}
+      <h1>{t('welcome')}</h1>
+      <p>{t('greeting', { name: 'React' })}</p>
+      <button onClick={() => i18n.setLocale('en-US')}>
+        Switch to English
       </button>
-      
-      <p>当前语言: {language}</p>
     </div>
   );
 }
 ```
 
-## 🔧 Configuration
-
-### CacheOptions
-
-缓存配置选项。
+#### UseTranslationReturn
 
 ```typescript
-interface CacheOptions {
-  /** 是否启用缓存 */
-  enabled: boolean;
-  /** 最大缓存大小 */
-  maxSize: number;
-  /** 缓存 TTL（毫秒） */
-  ttl: number;
-  /** 存储类型 */
-  storage?: 'memory' | 'localStorage' | 'sessionStorage';
+interface UseTranslationReturn {
+  t: (key: string, params?: TranslationParams) => string;
+  i18n: {
+    locale: string;
+    setLocale: (locale: string) => Promise<void>;
+    availableLocales: string[];
+    isReady: boolean;
+    isLoading: boolean;
+  };
+  ready: boolean;
 }
 ```
 
-### LoaderOptions
+### useI18n
 
-加载器配置选项。
+React Hook for i18n instance.
 
-```typescript
-interface LoaderOptions {
-  /** 加载路径模板 */
-  loadPath?: string;
-  /** 自定义加载函数 */
-  loadFunction?: LoadFunction;
-  /** 预加载语言 */
-  preload?: string[];
-  /** 懒加载模式 */
-  lazy?: boolean;
-  /** 加载超时时间 */
-  timeout?: number;
+```tsx
+import { useI18n } from '@translink/i18n-runtime/react';
+
+function LanguageSwitcher() {
+  const { locale, setLocale, availableLocales, isLoading } = useI18n();
+  
+  return (
+    <select 
+      value={locale} 
+      onChange={(e) => setLocale(e.target.value)}
+      disabled={isLoading}
+    >
+      {availableLocales.map(lang => (
+        <option key={lang} value={lang}>{lang}</option>
+      ))}
+    </select>
+  );
 }
 ```
 
-### LoadFunction
+### Translation 组件
 
-自定义加载函数类型。
+React 翻译组件。
 
-```typescript
-type LoadFunction = (
-  language: string, 
-  namespace: string
-) => Promise<TranslationResource>;
+```tsx
+import { Translation } from '@translink/i18n-runtime/react';
+
+function MyComponent() {
+  return (
+    <div>
+      {/* 基础翻译 */}
+      <Translation i18nKey="welcome" />
+      
+      {/* 带参数翻译 */}
+      <Translation 
+        i18nKey="greeting" 
+        values={{ name: 'React' }}
+      />
+      
+      {/* 组件插值 */}
+      <Translation 
+        i18nKey="richText"
+        values={{ name: 'React' }}
+        components={{
+          Link: ({ children }) => <a href="/about">{children}</a>,
+          Bold: ({ children }) => <strong>{children}</strong>
+        }}
+      />
+      
+      {/* Render prop */}
+      <Translation i18nKey="customRender">
+        {(translation) => (
+          <div className="custom-style">{translation}</div>
+        )}
+      </Translation>
+    </div>
+  );
+}
 ```
 
-## 🚀 Advanced Features
+#### Translation Props
 
-### Lazy Loading
+```typescript
+interface TranslationProps {
+  i18nKey: string;
+  values?: TranslationParams;
+  components?: Record<string, React.ComponentType<any>>;
+  children?: (translation: string) => React.ReactNode;
+  defaultValue?: string;
+  ns?: string;
+}
+```
 
-懒加载功能，按需加载语言资源。
+### withTranslation HOC
+
+高阶组件包装器。
+
+```tsx
+import { withTranslation } from '@translink/i18n-runtime/react';
+
+interface MyComponentProps {
+  title: string;
+  t: (key: string, params?: any) => string;
+  i18n: any;
+}
+
+const MyComponent: React.FC<MyComponentProps> = ({ title, t, i18n }) => {
+  return (
+    <div>
+      <h1>{title}</h1>
+      <p>{t('welcome')}</p>
+      <p>Current language: {i18n.locale}</p>
+    </div>
+  );
+};
+
+export default withTranslation(MyComponent);
+```
+
+---
+
+## 🔧 高级功能
+
+### 插值系统
+
+#### 基础插值
+
+```typescript
+// 模板: "Hello, {{name}}!"
+i18n.t('greeting', { name: 'World' }); // "Hello, World!"
+```
+
+#### 格式化函数
 
 ```typescript
 const i18n = new I18nEngine({
-  defaultLanguage: 'zh-CN',
-  loader: {
-    lazy: true,
-    loadFunction: async (language) => {
-      // 动态导入语言文件
-      const module = await import(`./locales/${language}.json`);
-      return module.default;
+  interpolation: {
+    format: (value, format, lng) => {
+      if (format === 'uppercase') return value.toUpperCase();
+      if (format === 'currency') {
+        return new Intl.NumberFormat(lng, {
+          style: 'currency',
+          currency: lng === 'zh-CN' ? 'CNY' : 'USD'
+        }).format(value);
+      }
+      return value;
     }
   }
 });
 
-// 语言会在首次使用时自动加载
-await i18n.changeLanguage('ja-JP');
+// 模板: "Price: {{amount, currency}}"
+i18n.t('price', { amount: 99.99 }); // "Price: ¥99.99"
 ```
 
-### Namespace Support
-
-命名空间支持，组织大型项目的翻译。
+#### 嵌套对象插值
 
 ```typescript
-// 加载特定命名空间
-await i18n.loadLanguage('zh-CN', 'common');
-await i18n.loadLanguage('zh-CN', 'errors');
+// 模板: "Welcome {{user.name}}, your level is {{user.level}}"
+i18n.t('userWelcome', {
+  user: { name: 'John', level: 'VIP' }
+}); // "Welcome John, your level is VIP"
+```
+
+### 复数形式
+
+```typescript
+// 资源定义
+{
+  "itemCount": "{{count}} item",
+  "itemCount_plural": "{{count}} items"
+}
+
+// 使用
+i18n.t('itemCount', { count: 1 });  // "1 item"
+i18n.t('itemCount', { count: 5 });  // "5 items"
+```
+
+### 命名空间
+
+```typescript
+// 加载命名空间资源
+await i18n.loadNamespace('common');
 
 // 使用命名空间
-i18n.t('common:greeting', { name: 'World' });
-i18n.t('errors:notFound');
+i18n.t('common:button.save');  // 明确指定命名空间
+i18n.t('button.save', {}, { ns: 'common' });  // 通过选项指定
 ```
 
-### Pluralization
-
-复数形式支持。
+### 动态资源加载
 
 ```typescript
-// 定义复数规则
-const resources = {
-  'en-US': {
-    items: {
-      zero: 'No items',
-      one: 'One item',
-      other: '{{count}} items'
-    }
-  },
-  'zh-CN': {
-    items: {
-      other: '{{count}} 个项目'
-    }
-  }
-};
-
-// 使用复数翻译
-i18n.t('items', { count: 0 }); // "No items"
-i18n.t('items', { count: 1 }); // "One item"  
-i18n.t('items', { count: 5 }); // "5 items"
-```
-
-### Context Support
-
-上下文支持，根据上下文选择不同翻译。
-
-```typescript
-const resources = {
-  'en-US': {
-    friend: 'A friend',
-    friend_male: 'A boyfriend', 
-    friend_female: 'A girlfriend'
-  }
-};
-
-// 使用上下文
-i18n.t('friend', {}, { context: 'male' }); // "A boyfriend"
-i18n.t('friend', {}, { context: 'female' }); // "A girlfriend"
-```
-
-## 🧪 Testing
-
-### MockI18nEngine
-
-用于测试的模拟引擎。
-
-```typescript
-import { MockI18nEngine } from '@translink/i18n-runtime/testing';
-
-const mockI18n = new MockI18nEngine({
-  'greeting': 'Hello, {{name}}!',
-  'farewell': 'Goodbye!'
-});
-
-// 在测试中使用
-expect(mockI18n.t('greeting', { name: 'Test' })).toBe('Hello, Test!');
-```
-
-### TestUtils
-
-测试工具函数。
-
-```typescript
-import { TestUtils } from '@translink/i18n-runtime/testing';
-
-// 创建测试资源
-const testResources = TestUtils.createTestResources({
-  'zh-CN': { greeting: '你好' },
-  'en-US': { greeting: 'Hello' }
-});
-
-// 验证翻译结果
-TestUtils.expectTranslation(i18n, 'greeting', '你好');
-```
-
-## 📊 Performance
-
-### 性能监控
-
-```typescript
-// 启用性能监控
 const i18n = new I18nEngine({
-  // ... 其他配置
-  performance: {
-    enabled: true,
-    logThreshold: 10 // 记录超过 10ms 的操作
+  loadFunction: async (lng, ns) => {
+    const response = await fetch(`/api/translations/${lng}/${ns}`);
+    return response.json();
   }
 });
 
-// 获取性能统计
-const stats = i18n.getPerformanceStats();
-console.log('平均翻译时间:', stats.averageTranslationTime);
-console.log('缓存命中率:', stats.cacheHitRate);
+// 预加载资源
+await i18n.preloadLanguage('en-US');
+await i18n.preloadNamespace('common');
 ```
 
-### 优化建议
+### 缓存策略
 
-1. **启用缓存**: 减少重复翻译的计算开销
-2. **使用懒加载**: 按需加载语言资源
-3. **预加载关键语言**: 提前加载常用语言
-4. **合理设置 TTL**: 平衡内存使用和性能
+```typescript
+const i18n = new I18nEngine({
+  cache: {
+    enabled: true,
+    maxSize: 1000,           // 最大缓存条目数
+    ttl: 5 * 60 * 1000,     // 5分钟 TTL
+    storage: 'localStorage'   // 持久化存储
+  }
+});
 
-## 🔗 相关链接
+// 缓存管理
+const stats = i18n.getCacheStats();
+console.log('Cache hit rate:', stats.hitRate);
 
-- [CLI API](./cli.md)
-- [Vite Plugin API](./vite-plugin.md)
-- [TypeScript 类型定义](./typescript.md)
-- [Vue 示例](../../examples/vue-demo/README.md)
-- [React 示例](../../examples/react-demo/README.md)
+// 手动缓存控制
+i18n.clearCache();
+i18n.preloadTranslations(['welcome', 'greeting']);
+```
+
+---
+
+## 🎨 类型定义
+
+### 核心类型
+
+```typescript
+// 翻译资源类型
+interface TranslationResource {
+  [key: string]: string | TranslationResource;
+}
+
+// 翻译参数类型
+interface TranslationParams {
+  [key: string]: string | number | boolean | Date | null | undefined;
+}
+
+// 缓存条目类型
+interface CacheEntry<T = any> {
+  value: T;
+  timestamp: number;
+  ttl: number;
+  accessCount: number;
+  lastAccessed: number;
+}
+
+// 事件类型
+interface I18nEvents {
+  ready: () => void;
+  languageChanged: (language: string) => void;
+  translationMissing: (key: string, language: string) => void;
+  resourceLoaded: (language: string, namespace: string) => void;
+  error: (error: Error) => void;
+}
+```
+
+### Vue 类型
+
+```typescript
+// Vue i18n 实例类型
+interface VueI18nInstance {
+  global: {
+    t: (key: string, params?: TranslationParams) => string;
+    locale: ComputedRef<string>;
+    availableLocales: ComputedRef<string[]>;
+    engine: I18nEngine;
+  };
+  install: (app: App) => void;
+}
+
+// Vue Hook 返回类型
+interface UseI18nReturn {
+  t: (key: string, params?: TranslationParams) => string;
+  locale: ComputedRef<string>;
+  setLocale: (locale: string) => Promise<void>;
+  availableLocales: ComputedRef<string[]>;
+  isReady: Ref<boolean>;
+  isLoading: Ref<boolean>;
+}
+```
+
+### React 类型
+
+```typescript
+// React Context 类型
+interface I18nContextValue {
+  engine: I18nEngine;
+  t: (key: string, params?: TranslationParams) => string;
+  locale: string;
+  setLocale: (locale: string) => Promise<void>;
+  availableLocales: string[];
+  isReady: boolean;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+// React Hook 返回类型
+interface UseTranslationReturn {
+  t: (key: string, params?: TranslationParams) => string;
+  i18n: I18nContextValue;
+  ready: boolean;
+}
+```
+
+---
+
+## 🚨 错误处理
+
+### 错误类型
+
+```typescript
+// 自定义错误类
+class I18nError extends Error {
+  code: string;
+  details?: any;
+}
+
+// 常见错误
+try {
+  await i18n.changeLanguage('invalid-lang');
+} catch (error) {
+  if (error instanceof I18nError) {
+    switch (error.code) {
+      case 'UNSUPPORTED_LANGUAGE':
+        console.error('Language not supported:', error.details);
+        break;
+      case 'RESOURCE_LOAD_FAILED':
+        console.error('Failed to load resources:', error.details);
+        break;
+    }
+  }
+}
+```
+
+### 错误恢复
+
+```typescript
+// 设置错误处理器
+i18n.on('error', (error) => {
+  console.error('I18n error:', error);
+  
+  // 自动恢复到默认语言
+  if (error.code === 'RESOURCE_LOAD_FAILED') {
+    i18n.changeLanguage(i18n.options.defaultLanguage);
+  }
+});
+
+// 设置翻译缺失处理
+i18n.on('translationMissing', (key, language) => {
+  // 记录缺失的翻译
+  console.warn(`Missing translation: ${key} for ${language}`);
+  
+  // 可选：发送到监控系统
+  analytics.track('translation_missing', { key, language });
+});
+```
+
+---
+
+## 📈 性能优化
+
+### 预加载策略
+
+```typescript
+// 应用启动时预加载关键语言
+await Promise.all([
+  i18n.preloadLanguage('zh-CN'),
+  i18n.preloadLanguage('en-US')
+]);
+
+// 懒加载其他语言
+const loadLanguageOnDemand = async (language: string) => {
+  if (!i18n.hasLanguage(language)) {
+    await i18n.loadLanguage(language);
+  }
+  await i18n.changeLanguage(language);
+};
+```
+
+### 缓存优化
+
+```typescript
+// 配置多级缓存
+const i18n = new I18nEngine({
+  cache: {
+    enabled: true,
+    maxSize: 2000,
+    ttl: 30 * 60 * 1000,  // 30分钟
+    storage: 'localStorage'
+  }
+});
+
+// 批量预热缓存
+const criticalKeys = ['welcome', 'navigation.home', 'button.save'];
+await i18n.preloadTranslations(criticalKeys);
+```
+
+### 内存管理
+
+```typescript
+// 定期清理过期缓存
+setInterval(() => {
+  i18n.cleanupExpiredCache();
+}, 5 * 60 * 1000); // 每5分钟清理一次
+
+// 组件卸载时清理
+onUnmounted(() => {
+  i18n.clearCache();
+});
+```
+
+---
+
+*本文档涵盖了 TransLink I18n Runtime 的所有核心 API 和功能。如需更多信息，请参考 [使用指南](../guides/README.md) 或 [示例项目](../../playground/README.md)。*

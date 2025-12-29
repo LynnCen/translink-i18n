@@ -5,30 +5,31 @@
 ## 📚 文档目录
 
 ### 技术方案
-- [技术实施方案](../TECHNICAL_PLAN.md) - 项目整体技术架构和设计方案
-- [详细实施计划](../IMPLEMENTATION_PLAN.md) - 具体的开发实施计划和代码规范
-- [命名策略](../NAMING_STRATEGY.md) - 项目命名规范和品牌策略
+- [技术实施方案](./apps/docs/technical/technical-plan.md) - 项目整体技术架构和设计方案
+- [详细实施计划](./apps/docs/technical/implementation-plan.md) - 具体的开发实施计划和代码规范
+- [命名策略](./apps/docs/technical/naming-strategy.md) - 项目命名规范和品牌策略
+- [ESLint & Prettier 配置指南](./apps/docs/technical/eslint-prettier-guide.md) - 代码格式化和检查工具配置
 
 ### 开发教程
-- [01. Monorepo 基础架构搭建](./tutorials/01-monorepo-setup.md) - 从零搭建现代化 TypeScript monorepo 项目
-- [02. CLI 工具核心开发](./tutorials/02-cli-core-development.md) - AST 文本提取、智能哈希生成和云端集成
-- [03. 运行时库实现](./tutorials/03-runtime-implementation.md) - 多级缓存系统、框架适配器和插值处理
-- [04. Vite 插件开发](./tutorials/04-vite-plugin-development.md) - 代码转换、热更新、懒加载和构建优化
-- [05. 测试与文档](./tutorials/05-testing-and-documentation.md) - 全面测试覆盖、API文档和示例项目
+- [01. Monorepo 基础架构搭建](./apps/docs/tutorials/01-monorepo-setup.md) - 从零搭建现代化 TypeScript monorepo 项目
+- [02. CLI 工具核心开发](./apps/docs/tutorials/02-cli-core-development.md) - AST 文本提取、智能哈希生成和云端集成
+- [03. 运行时库实现](./apps/docs/tutorials/03-runtime-implementation.md) - 多级缓存系统、框架适配器和插值处理
+- [04. Vite 插件开发](./apps/docs/tutorials/04-vite-plugin-development.md) - 代码转换、热更新、懒加载和构建优化
+- [05. 测试与文档](./apps/docs/tutorials/05-testing-and-documentation.md) - 全面测试覆盖、API文档和示例项目
 
 ### API 参考文档
-- [API 文档总览](./api/README.md) - 完整的 API 文档导航
-- [CLI API 文档](./api/cli.md) - 命令行工具完整 API 参考
-- [Runtime API 文档](./api/runtime.md) - 运行时库核心 API 和框架集成
-- [Vite Plugin API 文档](./api/vite-plugin.md) - Vite 插件配置和使用
-- [TypeScript 类型文档](./api/typescript.md) - 完整的类型定义参考
+- [API 文档总览](./apps/docs/api/README.md) - 完整的 API 文档导航
+- [CLI API 文档](./apps/docs/api/cli.md) - 命令行工具完整 API 参考
+- [Runtime API 文档](./apps/docs/api/runtime.md) - 运行时库核心 API 和框架集成
+- [Vite Plugin API 文档](./apps/docs/api/vite-plugin.md) - Vite 插件配置和使用
+- [TypeScript 类型文档](./apps/docs/api/typescript.md) - 完整的类型定义参考
 
 ### 使用指南
-- [使用指南总览](./guides/README.md) - 完整的使用指南导航
-- [快速开始](./guides/quick-start.md) - 5分钟快速上手指南
-- [最佳实践](./best-practices.md) - 开发最佳实践和规范
-- [迁移指南](./migration-guide.md) - 从其他 i18n 方案迁移
-- [FAQ 常见问题](./faq.md) - 常见问题解答和故障排除
+- [使用指南总览](./apps/docs/guides/README.md) - 完整的使用指南导航
+- [快速开始](./apps/docs/guides/quick-start.md) - 5分钟快速上手指南
+- [最佳实践](./apps/docs/best-practices.md) - 开发最佳实践和规范
+- [迁移指南](./apps/docs/migration-guide.md) - 从其他 i18n 方案迁移
+- [FAQ 常见问题](./apps/docs/faq.md) - 常见问题解答和故障排除
 
 ### 完整教程系列
 
@@ -55,10 +56,12 @@ translink-i18n/
 ├── apps/
 │   ├── docs/          # 文档站点
 │   └── playground/    # 示例应用
-├── tools/
-│   └── eslint-config/ # 共享 ESLint 配置
-└── docs/              # 项目文档
-    └── tutorials/     # 开发教程
+├── apps/
+│   ├── docs/          # 文档站点
+│   │   ├── technical/ # 技术文档
+│   │   ├── tutorials/ # 开发教程
+│   │   └── api/       # API 文档
+│   └── playground/    # 示例应用
 ```
 
 ## 🚀 快速开始
@@ -107,8 +110,8 @@ pnpm test
 欢迎为项目文档做出贡献！
 
 ### 文档结构规范
-- 技术方案文档放在根目录
-- 教程文档放在 `docs/tutorials/` 目录
+- 技术方案文档放在 `apps/docs/technical/` 目录
+- 教程文档放在 `apps/docs/tutorials/` 目录
 - 使用清晰的标题和目录结构
 - 提供完整的代码示例
 - 包含验证步骤和检查清单

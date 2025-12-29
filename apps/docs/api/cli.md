@@ -1,849 +1,560 @@
 # CLI API 文档
 
-`@translink/i18n-cli` 提供了完整的命令行工具，用于 i18n 项目的管理和维护。
+> TransLink I18n CLI 工具的完整 API 参考文档
 
-## 📦 安装
+## 📋 概述
+
+TransLink I18n CLI 提供了一套完整的命令行工具，用于管理国际化项目的文本提取、语言文件生成、云端同步等功能。
+
+## 🚀 安装
 
 ```bash
 # 全局安装
 npm install -g @translink/i18n-cli
 
-# 项目本地安装
+# 项目安装
 npm install --save-dev @translink/i18n-cli
 ```
 
-## 🚀 基本使用
+## 📖 命令参考
 
-```bash
-# 查看帮助
-translink-i18n --help
-
-# 查看版本
-translink-i18n --version
-
-# 初始化项目
-translink-i18n init
-
-# 提取文本
-translink-i18n extract
-
-# 构建语言文件
-translink-i18n build
-```
-
-## 📋 Commands
-
-### init
+### `translink init`
 
 初始化 i18n 项目配置。
 
+#### 语法
 ```bash
-translink-i18n init [options]
+translink init [options]
 ```
 
 #### 选项
-
 | 选项 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| `--config-file` | `string` | `i18n.config.ts` | 配置文件路径 |
+| `--config` | `string` | `i18n.config.ts` | 配置文件路径 |
 | `--template` | `string` | `default` | 配置模板类型 |
 | `--force` | `boolean` | `false` | 强制覆盖已存在的配置 |
 
 #### 示例
-
 ```bash
 # 使用默认配置初始化
-translink-i18n init
+translink init
 
 # 指定配置文件路径
-translink-i18n init --config-file ./config/i18n.config.ts
+translink init --config ./config/i18n.config.ts
 
 # 使用 Vue 模板
-translink-i18n init --template vue
+translink init --template vue
 
 # 强制覆盖现有配置
-translink-i18n init --force
+translink init --force
 ```
 
 #### 配置模板
 
-| 模板 | 描述 | 适用场景 |
-|------|------|----------|
-| `default` | 通用配置 | 大多数项目 |
-| `vue` | Vue 项目优化配置 | Vue 3 项目 |
-| `react` | React 项目优化配置 | React 项目 |
-| `minimal` | 最小化配置 | 简单项目 |
+**default** - 通用配置
+```typescript
+export default {
+  defaultLanguage: 'zh-CN',
+  supportedLanguages: ['zh-CN', 'en-US'],
+  loadPath: './locales/{{lng}}.json'
+};
+```
 
-### extract
+**vue** - Vue 项目配置
+```typescript
+export default {
+  defaultLanguage: 'zh-CN',
+  supportedLanguages: ['zh-CN', 'en-US'],
+  loadPath: './src/locales/{{lng}}.json',
+  extractRules: {
+    vue: {
+      patterns: [
+        /\$tsl\(['"`]([^'"`]*[\u4e00-\u9fff][^'"`]*)['"`]\)/g,
+        /t\(['"`]([^'"`]*[\u4e00-\u9fff][^'"`]*)['"`]\)/g
+      ]
+    }
+  }
+};
+```
+
+---
+
+### `translink extract`
 
 从源代码中提取需要翻译的文本。
 
+#### 语法
 ```bash
-translink-i18n extract [patterns...] [options]
+translink extract [source] [options]
 ```
 
 #### 参数
-
-| 参数 | 类型 | 描述 |
-|------|------|------|
-| `patterns` | `string[]` | 文件匹配模式 |
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `source` | `string` | `src` | 源代码目录 |
 
 #### 选项
-
 | 选项 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| `--config` | `string` | `i18n.config.ts` | 配置文件路径 |
-| `--output` | `string` | - | 输出文件路径 |
-| `--format` | `string` | `json` | 输出格式 |
+| `--output, -o` | `string` | `locales` | 输出目录 |
+| `--config, -c` | `string` | `i18n.config.ts` | 配置文件路径 |
+| `--include` | `string[]` | `['**/*.{vue,ts,js,tsx,jsx}']` | 包含的文件模式 |
+| `--exclude` | `string[]` | `['node_modules/**']` | 排除的文件模式 |
+| `--merge` | `boolean` | `true` | 是否合并已存在的翻译 |
+| `--report` | `boolean` | `false` | 生成提取报告 |
 | `--dry-run` | `boolean` | `false` | 预览模式，不写入文件 |
-| `--verbose` | `boolean` | `false` | 详细输出 |
 
 #### 示例
-
 ```bash
-# 使用配置文件中的模式提取
-translink-i18n extract
+# 基础提取
+translink extract
 
-# 指定文件模式
-translink-i18n extract "src/**/*.{vue,ts,js}"
+# 指定源目录和输出目录
+translink extract src --output dist/locales
+
+# 只处理 Vue 文件
+translink extract --include "**/*.vue"
+
+# 排除测试文件
+translink extract --exclude "**/*.test.*" "**/*.spec.*"
+
+# 生成详细报告
+translink extract --report
 
 # 预览提取结果
-translink-i18n extract --dry-run
-
-# 输出到指定文件
-translink-i18n extract --output ./extracted-texts.json
+translink extract --dry-run
 ```
 
-#### 支持的文件类型
+#### 提取规则配置
 
-| 文件类型 | 扩展名 | 提取方式 |
-|----------|--------|----------|
-| Vue 单文件组件 | `.vue` | 模板和脚本中的 `t()` 和 `$tsl()` |
-| TypeScript | `.ts` | AST 解析提取函数调用 |
-| JavaScript | `.js` | AST 解析提取函数调用 |
-| JSX/TSX | `.jsx`, `.tsx` | JSX 表达式中的翻译函数 |
+```typescript
+// i18n.config.ts
+export default {
+  extractRules: {
+    vue: {
+      patterns: [
+        // $tsl 函数调用
+        /\$tsl\(['"`]([^'"`]*[\u4e00-\u9fff][^'"`]*)['"`]\)/g,
+        // t 函数调用
+        /t\(['"`]([^'"`]*[\u4e00-\u9fff][^'"`]*)['"`]\)/g
+      ],
+      // 自定义提取器
+      customExtractor: (content: string, filePath: string) => {
+        // 返回提取的文本数组
+        return [];
+      }
+    },
+    typescript: {
+      patterns: [
+        /i18n\.t\(['"`]([^'"`]*[\u4e00-\u9fff][^'"`]*)['"`]\)/g
+      ]
+    }
+  }
+};
+```
 
-### build
+---
+
+### `translink build`
 
 构建最终的语言文件。
 
+#### 语法
 ```bash
-translink-i18n build [options]
+translink build [options]
 ```
 
 #### 选项
-
 | 选项 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| `--config` | `string` | `i18n.config.ts` | 配置文件路径 |
-| `--output-dir` | `string` | - | 输出目录 |
-| `--languages` | `string[]` | - | 指定构建的语言 |
+| `--input, -i` | `string` | `locales` | 输入目录 |
+| `--output, -o` | `string` | `dist/locales` | 输出目录 |
 | `--format` | `string` | `json` | 输出格式 |
 | `--minify` | `boolean` | `false` | 压缩输出 |
-| `--watch` | `boolean` | `false` | 监听模式 |
+| `--split` | `boolean` | `false` | 按命名空间分割 |
+| `--hash` | `boolean` | `false` | 生成文件哈希 |
 
 #### 示例
-
 ```bash
-# 构建所有语言
-translink-i18n build
-
-# 构建指定语言
-translink-i18n build --languages zh-CN,en-US
-
-# 输出到指定目录
-translink-i18n build --output-dir ./dist/locales
+# 基础构建
+translink build
 
 # 压缩输出
-translink-i18n build --minify
+translink build --minify
 
-# 监听模式
-translink-i18n build --watch
+# 按命名空间分割
+translink build --split
+
+# 生成多种格式
+translink build --format json,js,ts
 ```
 
 #### 输出格式
 
-| 格式 | 扩展名 | 描述 |
-|------|--------|------|
-| `json` | `.json` | 标准 JSON 格式 |
-| `js` | `.js` | JavaScript 模块 |
-| `ts` | `.ts` | TypeScript 模块 |
-| `yaml` | `.yaml` | YAML 格式 |
+**json** - 标准 JSON 格式
+```json
+{
+  "welcome": "欢迎使用",
+  "user": {
+    "profile": "用户资料"
+  }
+}
+```
 
-### push
+**js** - JavaScript 模块
+```javascript
+export default {
+  "welcome": "欢迎使用",
+  "user": {
+    "profile": "用户资料"
+  }
+};
+```
 
-将本地翻译推送到云端。
+**ts** - TypeScript 模块
+```typescript
+const translations: Record<string, any> = {
+  "welcome": "欢迎使用",
+  "user": {
+    "profile": "用户资料"
+  }
+};
 
+export default translations;
+```
+
+---
+
+### `translink push`
+
+推送本地翻译到云端。
+
+#### 语法
 ```bash
-translink-i18n push [options]
+translink push [options]
 ```
 
 #### 选项
-
 | 选项 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| `--config` | `string` | `i18n.config.ts` | 配置文件路径 |
-| `--force` | `boolean` | `false` | 强制覆盖云端数据 |
-| `--dry-run` | `boolean` | `false` | 预览模式 |
-| `--languages` | `string[]` | - | 指定推送的语言 |
+| `--source, -s` | `string` | `locales` | 本地翻译目录 |
+| `--language, -l` | `string[]` | `all` | 推送的语言 |
+| `--force` | `boolean` | `false` | 强制覆盖云端翻译 |
+| `--dry-run` | `boolean` | `false` | 预览推送内容 |
 
 #### 示例
-
 ```bash
 # 推送所有语言
-translink-i18n push
+translink push
 
-# 推送指定语言
-translink-i18n push --languages zh-CN
-
-# 预览推送内容
-translink-i18n push --dry-run
+# 推送特定语言
+translink push --language zh-CN en-US
 
 # 强制覆盖
-translink-i18n push --force
+translink push --force
+
+# 预览推送内容
+translink push --dry-run
 ```
 
-### pull
+---
+
+### `translink pull`
 
 从云端拉取翻译到本地。
 
+#### 语法
 ```bash
-translink-i18n pull [options]
+translink pull [options]
 ```
 
 #### 选项
-
 | 选项 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| `--config` | `string` | `i18n.config.ts` | 配置文件路径 |
-| `--force` | `boolean` | `false` | 强制覆盖本地数据 |
-| `--languages` | `string[]` | - | 指定拉取的语言 |
+| `--output, -o` | `string` | `locales` | 输出目录 |
+| `--language, -l` | `string[]` | `all` | 拉取的语言 |
+| `--merge` | `boolean` | `true` | 合并本地翻译 |
 | `--backup` | `boolean` | `true` | 备份本地文件 |
 
 #### 示例
-
 ```bash
 # 拉取所有语言
-translink-i18n pull
+translink pull
 
-# 拉取指定语言
-translink-i18n pull --languages en-US
+# 拉取特定语言
+translink pull --language zh-CN en-US
+
+# 不合并本地翻译
+translink pull --no-merge
 
 # 不备份本地文件
-translink-i18n pull --no-backup
-
-# 强制覆盖
-translink-i18n pull --force
+translink pull --no-backup
 ```
 
-### analyze
+---
 
-分析项目的 i18n 使用情况。
+### `translink analyze`
 
+分析翻译完整性和质量。
+
+#### 语法
 ```bash
-translink-i18n analyze [options]
+translink analyze [options]
 ```
 
 #### 选项
-
 | 选项 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| `--config` | `string` | `i18n.config.ts` | 配置文件路径 |
-| `--output` | `string` | - | 输出报告文件 |
-| `--format` | `string` | `console` | 报告格式 |
-| `--detailed` | `boolean` | `false` | 详细报告 |
+| `--source, -s` | `string` | `locales` | 翻译文件目录 |
+| `--report, -r` | `string` | `console` | 报告输出格式 |
+| `--threshold` | `number` | `80` | 完整性阈值 |
 
 #### 示例
-
 ```bash
-# 控制台输出分析结果
-translink-i18n analyze
+# 基础分析
+translink analyze
 
-# 输出详细报告
-translink-i18n analyze --detailed
+# 生成 HTML 报告
+translink analyze --report html
 
-# 输出到文件
-translink-i18n analyze --output ./i18n-report.json --format json
+# 设置完整性阈值
+translink analyze --threshold 90
 ```
 
-#### 分析报告内容
+#### 分析报告
 
-- 翻译覆盖率统计
-- 未使用的翻译键
-- 缺失的翻译
-- 文件使用统计
-- 性能建议
+```bash
+📊 翻译分析报告
+├── 总体统计
+│   ├── 支持语言: 3 (zh-CN, en-US, ja-JP)
+│   ├── 翻译键数: 156
+│   └── 平均完整性: 87.3%
+├── 语言详情
+│   ├── zh-CN: 100% (156/156) ✅
+│   ├── en-US: 89.1% (139/156) ⚠️
+│   └── ja-JP: 72.4% (113/156) ❌
+├── 缺失翻译
+│   ├── en-US: 17 个缺失
+│   └── ja-JP: 43 个缺失
+└── 建议
+    ├── 优先翻译高频使用的键
+    └── 考虑使用机器翻译作为初始版本
+```
 
-## 🔧 Configuration
+## 🔧 配置文件
 
-### I18nConfig
+### 完整配置示例
 
-主配置接口，定义了所有 CLI 工具的行为。
+```typescript
+// i18n.config.ts
+import type { I18nConfig } from '@translink/i18n-cli';
+
+const config: I18nConfig = {
+  // 基础配置
+  defaultLanguage: 'zh-CN',
+  fallbackLanguage: 'zh-CN',
+  supportedLanguages: ['zh-CN', 'en-US', 'ja-JP'],
+  
+  // 文件路径
+  loadPath: './src/locales/{{lng}}.json',
+  
+  // 提取规则
+  extractRules: {
+    vue: {
+      patterns: [
+        /\$tsl\(['"`]([^'"`]*[\u4e00-\u9fff][^'"`]*)['"`]\)/g,
+        /t\(['"`]([^'"`]*[\u4e00-\u9fff][^'"`]*)['"`]\)/g
+      ],
+      customExtractor: (content, filePath) => {
+        // 自定义提取逻辑
+        return [];
+      }
+    }
+  },
+  
+  // 云端配置
+  cloud: {
+    provider: 'vika',
+    apiKey: process.env.VIKA_API_KEY,
+    spaceId: process.env.VIKA_SPACE_ID,
+    datasheetId: process.env.VIKA_DATASHEET_ID
+  },
+  
+  // 构建配置
+  build: {
+    outputFormats: ['json', 'js'],
+    minify: true,
+    splitByNamespace: false,
+    generateTypes: true
+  },
+  
+  // 哈希配置
+  hash: {
+    algorithm: 'md5',
+    length: 8,
+    includeContext: true
+  }
+};
+
+export default config;
+```
+
+### 配置类型定义
 
 ```typescript
 interface I18nConfig {
-  extract: ExtractConfig;
-  hash: HashConfig;
-  languages: LanguageConfig;
-  output: OutputConfig;
-  vika?: VikaConfig;
-  plugins?: PluginConfig[];
-}
-```
-
-### ExtractConfig
-
-文本提取配置。
-
-```typescript
-interface ExtractConfig {
-  /** 文件匹配模式 */
-  patterns: string[];
-  /** 排除模式 */
-  exclude: string[];
-  /** 翻译函数名称 */
-  functions: string[];
-  /** 支持的文件扩展名 */
-  extensions: string[];
-}
-```
-
-#### 示例
-
-```typescript
-{
-  extract: {
-    patterns: [
-      'src/**/*.{vue,ts,js,tsx,jsx}',
-      'components/**/*.vue'
-    ],
-    exclude: [
-      'node_modules',
-      'dist',
-      '**/*.test.{ts,js}',
-      '**/*.spec.{ts,js}'
-    ],
-    functions: ['t', '$tsl', 'i18n.t'],
-    extensions: ['.vue', '.ts', '.js', '.tsx', '.jsx']
-  }
-}
-```
-
-### HashConfig
-
-哈希生成配置。
-
-```typescript
-interface HashConfig {
-  /** 哈希算法 */
-  algorithm: 'md5' | 'sha1' | 'sha256';
-  /** 哈希长度 */
-  length: number;
-  /** 是否包含上下文 */
-  includeContext: boolean;
-  /** 上下文字段 */
-  contextFields: Array<'filePath' | 'componentName' | 'functionName'>;
-}
-```
-
-#### 示例
-
-```typescript
-{
-  hash: {
-    algorithm: 'md5',
-    length: 8,
-    includeContext: true,
-    contextFields: ['componentName', 'functionName']
-  }
-}
-```
-
-### LanguageConfig
-
-语言配置。
-
-```typescript
-interface LanguageConfig {
-  /** 默认语言 */
-  default: string;
-  /** 支持的语言列表 */
-  supported: string[];
-  /** 回退语言 */
-  fallback: string;
-}
-```
-
-#### 示例
-
-```typescript
-{
-  languages: {
-    default: 'zh-CN',
-    supported: ['zh-CN', 'en-US', 'ja-JP', 'ko-KR'],
-    fallback: 'en-US'
-  }
-}
-```
-
-### OutputConfig
-
-输出配置。
-
-```typescript
-interface OutputConfig {
-  /** 输出目录 */
-  directory: string;
-  /** 输出格式 */
-  format: 'json' | 'js' | 'ts' | 'yaml';
-  /** 是否按命名空间分割 */
-  splitByNamespace: boolean;
-  /** 是否扁平化键名 */
-  flattenKeys: boolean;
-}
-```
-
-#### 示例
-
-```typescript
-{
-  output: {
-    directory: 'src/locales',
-    format: 'json',
-    splitByNamespace: false,
-    flattenKeys: false
-  }
-}
-```
-
-### VikaConfig
-
-Vika 云端同步配置。
-
-```typescript
-interface VikaConfig {
-  /** API 密钥 */
-  apiKey: string;
-  /** 数据表 ID */
-  datasheetId: string;
-  /** 自动同步 */
-  autoSync: boolean;
-  /** 同步间隔（毫秒） */
-  syncInterval: number;
-}
-```
-
-#### 示例
-
-```typescript
-{
-  vika: {
-    apiKey: process.env.VIKA_API_KEY!,
-    datasheetId: 'dstXXXXXXXXXXXXXX',
-    autoSync: false,
-    syncInterval: 30 * 60 * 1000 // 30分钟
-  }
-}
-```
-
-## 🏗️ Core Classes
-
-### ASTExtractor
-
-AST 文本提取器，负责从源代码中提取翻译文本。
-
-```typescript
-class ASTExtractor {
-  constructor(
-    config: ExtractConfig,
-    hashGenerator: HashGenerator
-  );
-
-  /** 从项目中提取文本 */
-  extractFromProject(): Promise<ExtractionResult[]>;
-
-  /** 从单个文件提取文本 */
-  extractFromFile(filePath: string): Promise<ExtractionResult[]>;
-
-  /** 从代码字符串提取文本 */
-  extractFromCode(
-    code: string, 
-    filePath: string, 
-    language: string
-  ): ExtractionResult[];
-}
-```
-
-#### ExtractionResult
-
-```typescript
-interface ExtractionResult {
-  /** 提取的文本 */
-  text: string;
-  /** 生成的键 */
-  key: string;
-  /** 文件路径 */
-  filePath: string;
-  /** 行号 */
-  line: number;
-  /** 列号 */
-  column: number;
-  /** 上下文信息 */
-  context?: ExtractionContext;
-}
-```
-
-#### ExtractionContext
-
-```typescript
-interface ExtractionContext {
-  /** 文件路径 */
-  filePath?: string;
-  /** 组件名称 */
-  componentName?: string;
-  /** 函数名称 */
-  functionName?: string;
-}
-```
-
-### HashGenerator
-
-哈希生成器，为提取的文本生成唯一键。
-
-```typescript
-class HashGenerator {
-  constructor(config: HashConfig);
-
-  /** 生成哈希 */
-  generate(
-    content: string, 
-    context?: ExtractionContext
-  ): string;
-
-  /** 验证哈希 */
-  validate(hash: string): boolean;
-}
-```
-
-### VikaClient
-
-Vika 云端客户端，处理与 Vika 平台的数据同步。
-
-```typescript
-class VikaClient {
-  constructor(config: VikaConfig);
-
-  /** 推送翻译数据 */
-  push(
-    translations: Record<string, any>, 
-    language: string
-  ): Promise<void>;
-
-  /** 拉取翻译数据 */
-  pull(language: string): Promise<Record<string, any>>;
-
-  /** 获取支持的语言列表 */
-  getLanguages(): Promise<string[]>;
-
-  /** 测试连接 */
-  testConnection(): Promise<boolean>;
-}
-```
-
-### ConfigManager
-
-配置管理器，负责加载和验证配置文件。
-
-```typescript
-class ConfigManager {
-  constructor(configPath: string);
-
-  /** 加载配置 */
-  load(): Promise<I18nConfig>;
-
-  /** 验证配置 */
-  validate(config: I18nConfig): ValidationResult;
-
-  /** 保存配置 */
-  save(config: I18nConfig): Promise<void>;
-}
-```
-
-#### ValidationResult
-
-```typescript
-interface ValidationResult {
-  /** 是否有效 */
-  valid: boolean;
-  /** 错误信息 */
-  errors: string[];
-  /** 警告信息 */
-  warnings: string[];
-}
-```
-
-## 🔌 Plugin System
-
-### PluginConfig
-
-插件配置接口。
-
-```typescript
-interface PluginConfig {
-  /** 插件名称 */
-  name: string;
-  /** 插件选项 */
-  options?: Record<string, any>;
-}
-```
-
-### Plugin
-
-插件基类。
-
-```typescript
-abstract class Plugin {
-  abstract name: string;
-
-  /** 插件初始化 */
-  abstract init(config: I18nConfig): Promise<void>;
-
-  /** 处理提取结果 */
-  processExtractionResults?(
-    results: ExtractionResult[]
-  ): Promise<ExtractionResult[]>;
-
-  /** 处理构建输出 */
-  processBuildOutput?(
-    output: Record<string, any>
-  ): Promise<Record<string, any>>;
-}
-```
-
-### 内置插件
-
-#### DeduplicationPlugin
-
-去重插件，移除重复的翻译条目。
-
-```typescript
-class DeduplicationPlugin extends Plugin {
-  name = 'deduplication';
+  // 基础配置
+  defaultLanguage: string;
+  fallbackLanguage?: string;
+  supportedLanguages: string[];
+  loadPath: string;
   
-  processExtractionResults(
-    results: ExtractionResult[]
-  ): Promise<ExtractionResult[]>;
-}
-```
-
-#### ValidationPlugin
-
-验证插件，检查翻译的完整性和一致性。
-
-```typescript
-class ValidationPlugin extends Plugin {
-  name = 'validation';
+  // 提取配置
+  extractRules?: {
+    [fileType: string]: {
+      patterns: RegExp[];
+      customExtractor?: (content: string, filePath: string) => string[];
+    };
+  };
   
-  processBuildOutput(
-    output: Record<string, any>
-  ): Promise<Record<string, any>>;
-}
-```
-
-## 📊 Error Handling
-
-### CLIError
-
-CLI 错误基类。
-
-```typescript
-class CLIError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public details?: any
-  );
-}
-```
-
-### 错误代码
-
-| 代码 | 描述 |
-|------|------|
-| `CONFIG_NOT_FOUND` | 配置文件未找到 |
-| `CONFIG_INVALID` | 配置文件无效 |
-| `EXTRACTION_FAILED` | 文本提取失败 |
-| `BUILD_FAILED` | 构建失败 |
-| `VIKA_CONNECTION_FAILED` | Vika 连接失败 |
-| `VIKA_AUTH_FAILED` | Vika 认证失败 |
-
-## 🧪 Testing
-
-### MockExtractor
-
-用于测试的模拟提取器。
-
-```typescript
-class MockExtractor extends ASTExtractor {
-  setMockResults(results: ExtractionResult[]): void;
-  clearMockResults(): void;
-}
-```
-
-### TestUtils
-
-测试工具函数。
-
-```typescript
-namespace TestUtils {
-  /** 创建测试配置 */
-  function createTestConfig(overrides?: Partial<I18nConfig>): I18nConfig;
+  // 云端配置
+  cloud?: {
+    provider: 'vika' | 'custom';
+    apiKey: string;
+    spaceId?: string;
+    datasheetId?: string;
+    customEndpoint?: string;
+  };
   
-  /** 创建测试提取结果 */
-  function createTestExtractionResult(
-    overrides?: Partial<ExtractionResult>
-  ): ExtractionResult;
+  // 构建配置
+  build?: {
+    outputFormats: ('json' | 'js' | 'ts')[];
+    minify: boolean;
+    splitByNamespace: boolean;
+    generateTypes: boolean;
+  };
   
-  /** 验证提取结果 */
-  function validateExtractionResults(
-    results: ExtractionResult[]
-  ): boolean;
+  // 哈希配置
+  hash?: {
+    algorithm: 'md5' | 'sha1' | 'sha256';
+    length: number;
+    includeContext: boolean;
+  };
 }
 ```
 
-## 📝 Examples
+## 🔌 插件系统
 
-### 基本配置示例
-
-```typescript
-// i18n.config.ts
-import { defineConfig } from '@translink/i18n-cli';
-
-export default defineConfig({
-  extract: {
-    patterns: ['src/**/*.{vue,ts,js}'],
-    exclude: ['node_modules', 'dist'],
-    functions: ['t', '$tsl'],
-    extensions: ['.vue', '.ts', '.js']
-  },
-  hash: {
-    algorithm: 'md5',
-    length: 8,
-    includeContext: false,
-    contextFields: []
-  },
-  languages: {
-    default: 'zh-CN',
-    supported: ['zh-CN', 'en-US'],
-    fallback: 'en-US'
-  },
-  output: {
-    directory: 'src/locales',
-    format: 'json',
-    splitByNamespace: false,
-    flattenKeys: false
-  }
-});
-```
-
-### 高级配置示例
+### 自定义提取器
 
 ```typescript
-// i18n.config.ts
-import { defineConfig } from '@translink/i18n-cli';
+// plugins/custom-extractor.ts
+import type { ExtractorPlugin } from '@translink/i18n-cli';
 
-export default defineConfig({
-  extract: {
-    patterns: [
-      'src/**/*.{vue,ts,js,tsx,jsx}',
-      'components/**/*.vue',
-      'pages/**/*.{vue,tsx}'
-    ],
-    exclude: [
-      'node_modules',
-      'dist',
-      'build',
-      '**/*.test.{ts,js}',
-      '**/*.spec.{ts,js}',
-      'src/vendor/**'
-    ],
-    functions: ['t', '$tsl', 'i18n.t', 'translate'],
-    extensions: ['.vue', '.ts', '.js', '.tsx', '.jsx']
-  },
-  hash: {
-    algorithm: 'sha256',
-    length: 12,
-    includeContext: true,
-    contextFields: ['componentName', 'functionName']
-  },
-  languages: {
-    default: 'zh-CN',
-    supported: ['zh-CN', 'en-US', 'ja-JP', 'ko-KR', 'fr-FR'],
-    fallback: 'en-US'
-  },
-  output: {
-    directory: 'locales',
-    format: 'json',
-    splitByNamespace: true,
-    flattenKeys: false
-  },
-  vika: {
-    apiKey: process.env.VIKA_API_KEY!,
-    datasheetId: process.env.VIKA_DATASHEET_ID!,
-    autoSync: true,
-    syncInterval: 15 * 60 * 1000 // 15分钟
-  },
-  plugins: [
-    {
-      name: 'deduplication',
-      options: {
-        strategy: 'merge'
-      }
-    },
-    {
-      name: 'validation',
-      options: {
-        strictMode: true,
-        checkInterpolation: true
-      }
+export const customExtractor: ExtractorPlugin = {
+  name: 'custom-extractor',
+  fileTypes: ['vue', 'ts'],
+  
+  extract(content: string, filePath: string) {
+    const results: string[] = [];
+    
+    // 自定义提取逻辑
+    const pattern = /customT\(['"`]([^'"`]*[\u4e00-\u9fff][^'"`]*)['"`]\)/g;
+    let match;
+    
+    while ((match = pattern.exec(content)) !== null) {
+      results.push(match[1]);
     }
-  ]
-});
+    
+    return results;
+  }
+};
 ```
 
-### 编程式使用示例
+### 自定义云端提供商
 
 ```typescript
-import { 
-  ASTExtractor, 
-  HashGenerator, 
-  ConfigManager,
-  VikaClient 
-} from '@translink/i18n-cli';
+// plugins/custom-cloud.ts
+import type { CloudProvider } from '@translink/i18n-cli';
 
-// 加载配置
-const configManager = new ConfigManager('./i18n.config.ts');
-const config = await configManager.load();
-
-// 创建提取器
-const hashGenerator = new HashGenerator(config.hash);
-const extractor = new ASTExtractor(config.extract, hashGenerator);
-
-// 提取文本
-const results = await extractor.extractFromProject();
-console.log(`提取到 ${results.length} 个文本`);
-
-// 同步到云端
-if (config.vika) {
-  const vikaClient = new VikaClient(config.vika);
-  await vikaClient.push(results, 'zh-CN');
-}
+export const customCloudProvider: CloudProvider = {
+  name: 'custom-cloud',
+  
+  async push(translations: Record<string, any>, options: any) {
+    // 实现推送逻辑
+  },
+  
+  async pull(languages: string[], options: any) {
+    // 实现拉取逻辑
+    return {};
+  }
+};
 ```
 
-## 🔗 相关链接
+## 🚨 错误处理
 
-- [Runtime API](./runtime.md)
-- [Vite Plugin API](./vite-plugin.md)
-- [TypeScript 类型定义](./typescript.md)
-- [使用指南](../guides/README.md)
-- [示例项目](../../examples/README.md)
+### 常见错误码
+
+| 错误码 | 描述 | 解决方案 |
+|--------|------|----------|
+| `E001` | 配置文件不存在 | 运行 `translink init` 创建配置 |
+| `E002` | 源目录不存在 | 检查 source 参数路径 |
+| `E003` | 云端 API 认证失败 | 检查 API 密钥配置 |
+| `E004` | 翻译文件格式错误 | 检查 JSON 文件语法 |
+| `E005` | 网络连接失败 | 检查网络连接和代理设置 |
+
+### 调试模式
+
+```bash
+# 启用详细日志
+DEBUG=translink:* translink extract
+
+# 启用特定模块日志
+DEBUG=translink:extractor translink extract
+
+# 保存日志到文件
+translink extract --verbose > extract.log 2>&1
+```
+
+## 📈 性能优化
+
+### 提取性能优化
+
+```typescript
+// i18n.config.ts
+export default {
+  // 使用更精确的包含模式
+  include: ['src/**/*.{vue,ts}'], // 而不是 '**/*'
+  
+  // 排除不必要的目录
+  exclude: [
+    'node_modules/**',
+    'dist/**',
+    '**/*.test.*',
+    '**/*.spec.*'
+  ],
+  
+  // 启用缓存
+  cache: {
+    enabled: true,
+    directory: '.translink-cache'
+  }
+};
+```
+
+### 构建性能优化
+
+```bash
+# 并行处理多个语言
+translink build --parallel
+
+# 增量构建
+translink build --incremental
+
+# 使用缓存
+translink build --cache
+```
+
+---
+
+*本文档涵盖了 TransLink I18n CLI 的所有核心功能和 API。如需更多信息，请参考 [使用指南](../guides/README.md) 或 [示例项目](../../playground/README.md)。*
