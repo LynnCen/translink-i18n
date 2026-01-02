@@ -10,7 +10,7 @@ export interface I18nConfig {
     functions: string[];
     extensions: string[];
   };
-  
+
   // 哈希配置
   hash: {
     algorithm: 'md5' | 'sha1' | 'sha256';
@@ -18,14 +18,14 @@ export interface I18nConfig {
     includeContext: boolean;
     contextFields: ('filePath' | 'componentName' | 'functionName')[];
   };
-  
+
   // 语言配置
   languages: {
     default: string;
     supported: string[];
     fallback: string;
   };
-  
+
   // 输出配置
   output: {
     directory: string;
@@ -33,7 +33,7 @@ export interface I18nConfig {
     splitByNamespace: boolean;
     flattenKeys: boolean;
   };
-  
+
   // 云端配置
   vika: {
     apiKey: string;
@@ -41,7 +41,7 @@ export interface I18nConfig {
     autoSync: boolean;
     syncInterval: number;
   };
-  
+
   // 插件配置
   plugins: Array<string | [string, any]>;
 }
