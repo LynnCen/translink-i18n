@@ -5,12 +5,14 @@
 ## 📚 文档目录
 
 ### 技术方案
+
 - [技术实施方案](./apps/docs/technical/technical-plan.md) - 项目整体技术架构和设计方案
 - [详细实施计划](./apps/docs/technical/implementation-plan.md) - 具体的开发实施计划和代码规范
 - [命名策略](./apps/docs/technical/naming-strategy.md) - 项目命名规范和品牌策略
 - [ESLint & Prettier 配置指南](./apps/docs/technical/eslint-prettier-guide.md) - 代码格式化和检查工具配置
 
 ### 开发教程
+
 - [01. Monorepo 基础架构搭建](./apps/docs/tutorials/01-monorepo-setup.md) - 从零搭建现代化 TypeScript monorepo 项目
 - [02. CLI 工具核心开发](./apps/docs/tutorials/02-cli-core-development.md) - AST 文本提取、智能哈希生成和云端集成
 - [03. 运行时库实现](./apps/docs/tutorials/03-runtime-implementation.md) - 多级缓存系统、框架适配器和插值处理
@@ -18,6 +20,7 @@
 - [05. 测试与文档](./apps/docs/tutorials/05-testing-and-documentation.md) - 全面测试覆盖、API文档和示例项目
 
 ### API 参考文档
+
 - [API 文档总览](./apps/docs/api/README.md) - 完整的 API 文档导航
 - [CLI API 文档](./apps/docs/api/cli.md) - 命令行工具完整 API 参考
 - [Runtime API 文档](./apps/docs/api/runtime.md) - 运行时库核心 API 和框架集成
@@ -25,6 +28,7 @@
 - [TypeScript 类型文档](./apps/docs/api/typescript.md) - 完整的类型定义参考
 
 ### 使用指南
+
 - [使用指南总览](./apps/docs/guides/README.md) - 完整的使用指南导航
 - [快速开始](./apps/docs/guides/quick-start.md) - 5分钟快速上手指南
 - [最佳实践](./apps/docs/best-practices.md) - 开发最佳实践和规范
@@ -67,15 +71,18 @@ translink-i18n/
 ## 🚀 快速开始
 
 ### 环境要求
+
 - Node.js >= 16.0.0
 - pnpm >= 8.0.0
 
 ### 安装依赖
+
 ```bash
 pnpm install
 ```
 
 ### 开发命令
+
 ```bash
 # 构建所有包
 pnpm build
@@ -100,6 +107,7 @@ pnpm test
 3. **实施计划** - 查看详细的开发计划和代码规范
 
 每个教程都包含：
+
 - 📋 详细的步骤说明
 - 💻 完整的代码示例
 - 🎯 关键知识点总结
@@ -110,6 +118,7 @@ pnpm test
 欢迎为项目文档做出贡献！
 
 ### 文档结构规范
+
 - 技术方案文档放在 `apps/docs/technical/` 目录
 - 教程文档放在 `apps/docs/tutorials/` 目录
 - 使用清晰的标题和目录结构
@@ -117,6 +126,7 @@ pnpm test
 - 包含验证步骤和检查清单
 
 ### 教程编写规范
+
 - 使用 `##-title.md` 格式命名
 - 包含目标概述和最终效果
 - 提供详细的步骤说明
@@ -142,4 +152,4 @@ pnpm test
 
 ---
 
-*持续更新中，敬请关注！*
+_持续更新中，敬请关注！_
