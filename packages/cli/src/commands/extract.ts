@@ -20,8 +20,37 @@ async function extractCommand(options: ExtractOptions) {
 
   try {
     // 加载配置
-    const config = await configManager.loadConfig();
-    
+    let config;
+    try {
+      config = await configManager.loadConfig();
+    } catch (error) {
+      logger.error('无法加载配置文件');
+      logger.info('请先运行 translink init 初始化配置');
+      process.exit(1);
+    }
+
+    // 验证配置
+    if (!config.extract.patterns || config.extract.patterns.length === 0) {
+      logger.error('配置错误：未设置扫描模式');
+      logger.info('请在配置文件中设置 extract.patterns');
+      process.exit(1);
+    }
+
+    if (!config.extract.functions || config.extract.functions.length === 0) {
+      logger.error('配置错误：未设置翻译函数');
+      logger.info('请在配置文件中设置 extract.functions');
+      process.exit(1);
+    }
+
+    if (
+      !config.languages.supported ||
+      config.languages.supported.length === 0
+    ) {
+      logger.error('配置错误：未设置支持的语言');
+      logger.info('请在配置文件中设置 languages.supported');
+      process.exit(1);
+    }
+
     // 应用命令行选项覆盖
     if (options.pattern) {
       config.extract.patterns = options.pattern;
@@ -44,36 +73,56 @@ async function extractCommand(options: ExtractOptions) {
     const extractor = new ASTExtractor(config.extract, hashGenerator);
 
     // 执行提取
-    const results = await extractor.extractFromProject();
-    
+    let results: ExtractResult[];
+    try {
+      results = await extractor.extractFromProject();
+    } catch (error) {
+      logger.error(`提取过程出错: ${error}`);
+      const stats = extractor.getStats();
+      if (stats.errors > 0) {
+        logger.warn(`处理过程中遇到 ${stats.errors} 个错误`);
+      }
+      throw error;
+    }
+
     if (results.length === 0) {
       logger.warn('未发现需要翻译的中文文本');
+      logger.info('请检查：');
+      logger.info('  1. 扫描模式是否正确');
+      logger.info('  2. 代码中是否使用了配置的翻译函数');
+      logger.info('  3. 是否包含中文文本');
       return;
     }
 
     // 显示提取统计
     const stats = extractor.getStats();
     const hashStats = hashGenerator.getCollisionStats();
-    
+
     logger.br();
     logger.success('📊 提取统计:');
     logger.info(`  扫描文件: ${stats.totalFiles} 个`);
     logger.info(`  处理文件: ${stats.processedFiles} 个`);
     logger.info(`  提取文本: ${stats.chineseTexts} 个`);
     logger.info(`  生成哈希: ${hashStats.totalHashes} 个`);
-    
+
     if (hashStats.collisions > 0) {
-      logger.warn(`  哈希冲突: ${hashStats.collisions} 个 (${(hashStats.collisionRate * 100).toFixed(2)}%)`);
+      logger.warn(
+        `  哈希冲突: ${hashStats.collisions} 个 (${(hashStats.collisionRate * 100).toFixed(2)}%)`
+      );
     }
 
     if (options.verbose) {
       logger.br();
       logger.info('🔍 详细结果:');
       results.slice(0, 10).forEach((result, index) => {
-        logger.info(`  ${index + 1}. ${result.key} -> "${result.text.substring(0, 30)}..."`);
-        logger.info(`     文件: ${result.filePath}:${result.line}:${result.column}`);
+        logger.info(
+          `  ${index + 1}. ${result.key} -> "${result.text.substring(0, 30)}..."`
+        );
+        logger.info(
+          `     文件: ${result.filePath}:${result.line}:${result.column}`
+        );
       });
-      
+
       if (results.length > 10) {
         logger.info(`  ... 还有 ${results.length - 10} 个结果`);
       }
@@ -85,16 +134,23 @@ async function extractCommand(options: ExtractOptions) {
     }
 
     // 生成语言文件
-    await generateLanguageFiles(results, config);
-    
+    try {
+      await generateLanguageFiles(results, config);
+    } catch (error) {
+      logger.error(`生成语言文件失败: ${error}`);
+      throw error;
+    }
+
     logger.br();
     logger.success('🎉 提取完成！');
     logger.info('下一步可以运行:');
-    logger.info('  translink build  # 构建语言包');
-    logger.info('  translink push   # 推送到云端（如果已配置）');
-
+    logger.info('  translink build   # 构建语言包');
+    logger.info('  translink export  # 导出为 Excel/CSV 格式');
   } catch (error) {
     logger.error(`提取失败: ${error}`);
+    if (error instanceof Error && error.stack && process.env.DEBUG) {
+      logger.debug(error.stack);
+    }
     process.exit(1);
   }
 }
@@ -104,50 +160,72 @@ async function extractCommand(options: ExtractOptions) {
  */
 async function generateLanguageFiles(results: ExtractResult[], config: any) {
   const outputDir = resolve(process.cwd(), config.output.directory);
-  
+
   // 确保输出目录存在
   if (!existsSync(outputDir)) {
-    mkdirSync(outputDir, { recursive: true });
-    logger.info(`创建输出目录: ${config.output.directory}`);
+    try {
+      mkdirSync(outputDir, { recursive: true });
+      logger.info(`创建输出目录: ${config.output.directory}`);
+    } catch (error) {
+      logger.error(`无法创建输出目录: ${error}`);
+      throw error;
+    }
   }
 
   // 按语言生成文件
   for (const language of config.languages.supported) {
-    const languageData: Record<string, any> = {};
-    
-    // 构建语言数据
-    for (const result of results) {
-      if (config.output.flattenKeys) {
-        // 扁平化键值结构
-        languageData[result.key] = language === config.languages.default ? result.text : '';
-      } else {
-        // 嵌套键值结构（如果需要支持命名空间）
-        setNestedValue(languageData, result.key, language === config.languages.default ? result.text : '');
-      }
-    }
+    try {
+      const languageData: Record<string, any> = {};
 
-    // 写入文件
-    const fileName = `${language}.${config.output.format}`;
-    const filePath = resolve(outputDir, fileName);
-    
-    const content = formatLanguageFile(languageData, config.output.format);
-    writeFileSync(filePath, content, 'utf-8');
-    
-    logger.success(`生成语言文件: ${fileName} (${Object.keys(languageData).length} 个键)`);
+      // 构建语言数据
+      for (const result of results) {
+        if (config.output.flattenKeys) {
+          // 扁平化键值结构
+          languageData[result.key] =
+            language === config.languages.default ? result.text : '';
+        } else {
+          // 嵌套键值结构（如果需要支持命名空间）
+          setNestedValue(
+            languageData,
+            result.key,
+            language === config.languages.default ? result.text : ''
+          );
+        }
+      }
+
+      // 写入文件
+      const fileName = `${language}.${config.output.format}`;
+      const filePath = resolve(outputDir, fileName);
+
+      const content = formatLanguageFile(languageData, config.output.format);
+      writeFileSync(filePath, content, 'utf-8');
+
+      logger.success(
+        `生成语言文件: ${fileName} (${Object.keys(languageData).length} 个键)`
+      );
+    } catch (error) {
+      logger.error(`生成 ${language} 语言文件失败: ${error}`);
+      throw error;
+    }
   }
 
   // 生成键值映射文件（用于开发调试）
-  const mappingData = results.map(result => ({
-    key: result.key,
-    text: result.text,
-    file: result.filePath,
-    line: result.line,
-    context: result.context,
-  }));
+  try {
+    const mappingData = results.map(result => ({
+      key: result.key,
+      text: result.text,
+      file: result.filePath,
+      line: result.line,
+      context: result.context,
+    }));
 
-  const mappingPath = resolve(outputDir, 'extraction-mapping.json');
-  writeFileSync(mappingPath, JSON.stringify(mappingData, null, 2), 'utf-8');
-  logger.info(`生成映射文件: extraction-mapping.json`);
+    const mappingPath = resolve(outputDir, 'extraction-mapping.json');
+    writeFileSync(mappingPath, JSON.stringify(mappingData, null, 2), 'utf-8');
+    logger.info(`生成映射文件: extraction-mapping.json`);
+  } catch (error) {
+    logger.warn(`生成映射文件失败: ${error}`);
+    // 映射文件失败不影响主流程
+  }
 }
 
 /**
@@ -158,7 +236,7 @@ function setNestedValue(obj: any, key: string, value: any) {
   if (key.includes('.')) {
     const keys = key.split('.');
     let current = obj;
-    
+
     for (let i = 0; i < keys.length - 1; i++) {
       const k = keys[i];
       if (!(k in current)) {
@@ -166,7 +244,7 @@ function setNestedValue(obj: any, key: string, value: any) {
       }
       current = current[k];
     }
-    
+
     current[keys[keys.length - 1]] = value;
   } else {
     obj[key] = value;

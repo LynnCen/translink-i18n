@@ -1,5 +1,11 @@
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+} from 'fs';
 import { resolve, extname, basename } from 'path';
 import { configManager } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
@@ -28,11 +34,18 @@ async function buildCommand(options: BuildOptions) {
 
   try {
     // 加载配置
-    const config = await configManager.loadConfig();
-    
+    let config;
+    try {
+      config = await configManager.loadConfig();
+    } catch (error) {
+      logger.error('无法加载配置文件');
+      logger.info('请先运行 translink init 初始化配置');
+      process.exit(1);
+    }
+
     const inputDir = options.input || config.output.directory;
     const outputDir = options.output || resolve(inputDir, '../dist');
-    
+
     logger.info(`输入目录: ${inputDir}`);
     logger.info(`输出目录: ${outputDir}`);
     logger.br();
@@ -46,8 +59,14 @@ async function buildCommand(options: BuildOptions) {
     }
 
     // 读取所有语言文件
-    const languageFiles = await scanLanguageFiles(inputPath);
-    
+    let languageFiles;
+    try {
+      languageFiles = await scanLanguageFiles(inputPath);
+    } catch (error) {
+      logger.error(`扫描语言文件失败: ${error}`);
+      process.exit(1);
+    }
+
     if (languageFiles.length === 0) {
       logger.warn('未找到语言文件');
       logger.info('请先运行 translink extract 生成语言文件');
@@ -61,7 +80,13 @@ async function buildCommand(options: BuildOptions) {
     logger.br();
 
     // 构建语言包
-    const buildStats = await buildLanguagePacks(languageFiles, outputDir, options);
+    let buildStats;
+    try {
+      buildStats = await buildLanguagePacks(languageFiles, outputDir, options);
+    } catch (error) {
+      logger.error(`构建语言包失败: ${error}`);
+      throw error;
+    }
 
     // 显示构建统计
     logger.success('📊 构建统计:');
@@ -69,7 +94,7 @@ async function buildCommand(options: BuildOptions) {
     logger.info(`  翻译键数: ${buildStats.keys}`);
     logger.info(`  总大小: ${formatBytes(buildStats.totalSize)}`);
     logger.info(`  输出文件: ${buildStats.files.length} 个`);
-    
+
     if (options.split) {
       logger.info('  ✓ 启用了按需分割');
     }
@@ -80,9 +105,11 @@ async function buildCommand(options: BuildOptions) {
     logger.br();
     logger.success('🎉 构建完成！');
     logger.info('语言包已准备就绪，可以在应用中使用');
-
   } catch (error) {
     logger.error(`构建失败: ${error}`);
+    if (error instanceof Error && error.stack && process.env.DEBUG) {
+      logger.debug(error.stack);
+    }
     process.exit(1);
   }
 }
@@ -90,13 +117,19 @@ async function buildCommand(options: BuildOptions) {
 /**
  * 扫描语言文件
  */
-async function scanLanguageFiles(inputDir: string): Promise<Array<{
-  language: string;
-  path: string;
-  format: string;
-}>> {
+async function scanLanguageFiles(inputDir: string): Promise<
+  Array<{
+    language: string;
+    path: string;
+    format: string;
+  }>
+> {
   const files = readdirSync(inputDir);
-  const languageFiles: Array<{ language: string; path: string; format: string }> = [];
+  const languageFiles: Array<{
+    language: string;
+    path: string;
+    format: string;
+  }> = [];
 
   for (const file of files) {
     const filePath = resolve(inputDir, file);
@@ -147,8 +180,27 @@ async function buildLanguagePacks(
 
     try {
       // 读取和解析语言文件
-      const rawData = readFileSync(languageFile.path, 'utf-8');
-      const languageData = parseLanguageFile(rawData, languageFile.format);
+      let rawData: string;
+      try {
+        rawData = readFileSync(languageFile.path, 'utf-8');
+      } catch (error) {
+        logger.stopSpinner(
+          `✗ ${languageFile.language} 读取失败: ${error}`,
+          false
+        );
+        continue;
+      }
+
+      let languageData: LanguageData;
+      try {
+        languageData = parseLanguageFile(rawData, languageFile.format);
+      } catch (error) {
+        logger.stopSpinner(
+          `✗ ${languageFile.language} 解析失败: ${error}`,
+          false
+        );
+        continue;
+      }
 
       // 验证和清理数据
       const cleanedData = cleanLanguageData(languageData);
@@ -160,12 +212,21 @@ async function buildLanguagePacks(
       }
 
       // 生成不同格式的输出文件
-      const outputFiles = await generateOutputFiles(
-        languageFile.language,
-        cleanedData,
-        outputDir,
-        options
-      );
+      let outputFiles;
+      try {
+        outputFiles = await generateOutputFiles(
+          languageFile.language,
+          cleanedData,
+          outputDir,
+          options
+        );
+      } catch (error) {
+        logger.stopSpinner(
+          `✗ ${languageFile.language} 生成文件失败: ${error}`,
+          false
+        );
+        continue;
+      }
 
       // 更新统计信息
       stats.languages++;
@@ -173,10 +234,14 @@ async function buildLanguagePacks(
       stats.files.push(...outputFiles.map(f => f.name));
       stats.totalSize += outputFiles.reduce((sum, f) => sum + f.size, 0);
 
-      logger.stopSpinner(`✓ ${languageFile.language} 构建完成 (${keyCount} 个键)`);
-
+      logger.stopSpinner(
+        `✓ ${languageFile.language} 构建完成 (${keyCount} 个键)`
+      );
     } catch (error) {
-      logger.stopSpinner(`✗ ${languageFile.language} 构建失败: ${error}`, false);
+      logger.stopSpinner(
+        `✗ ${languageFile.language} 构建失败: ${error}`,
+        false
+      );
     }
   }
 
@@ -221,7 +286,7 @@ function parseLanguageFile(content: string, format: string): LanguageData {
  */
 function cleanLanguageData(data: LanguageData): LanguageData {
   const cleaned: LanguageData = {};
-  
+
   for (const [key, value] of Object.entries(data)) {
     if (typeof value === 'string' && value.trim()) {
       // 只保留非空字符串值
@@ -234,7 +299,7 @@ function cleanLanguageData(data: LanguageData): LanguageData {
       }
     }
   }
-  
+
   return cleaned;
 }
 
@@ -243,7 +308,7 @@ function cleanLanguageData(data: LanguageData): LanguageData {
  */
 function countKeys(data: LanguageData): number {
   let count = 0;
-  
+
   for (const value of Object.values(data)) {
     if (typeof value === 'string') {
       count++;
@@ -251,7 +316,7 @@ function countKeys(data: LanguageData): number {
       count += countKeys(value);
     }
   }
-  
+
   return count;
 }
 
@@ -267,10 +332,10 @@ async function generateOutputFiles(
   const files: Array<{ name: string; size: number }> = [];
 
   // 生成 JSON 格式
-  const jsonContent = options.minify 
+  const jsonContent = options.minify
     ? JSON.stringify(data)
     : JSON.stringify(data, null, 2);
-  
+
   const jsonPath = resolve(outputDir, `${language}.json`);
   writeFileSync(jsonPath, jsonContent, 'utf-8');
   files.push({
@@ -289,7 +354,12 @@ async function generateOutputFiles(
 
   // 如果启用分割，按命名空间分割
   if (options.split) {
-    const splitFiles = await splitByNamespace(language, data, outputDir, options);
+    const splitFiles = await splitByNamespace(
+      language,
+      data,
+      outputDir,
+      options
+    );
     files.push(...splitFiles);
   }
 
@@ -307,7 +377,7 @@ async function splitByNamespace(
 ): Promise<Array<{ name: string; size: number }>> {
   const files: Array<{ name: string; size: number }> = [];
   const splitDir = resolve(outputDir, 'split', language);
-  
+
   if (!existsSync(splitDir)) {
     mkdirSync(splitDir, { recursive: true });
   }
@@ -315,13 +385,13 @@ async function splitByNamespace(
   // 按第一级键分割
   for (const [namespace, namespaceData] of Object.entries(data)) {
     if (typeof namespaceData === 'object' && namespaceData !== null) {
-      const content = options.minify 
+      const content = options.minify
         ? JSON.stringify(namespaceData)
         : JSON.stringify(namespaceData, null, 2);
-      
+
       const filePath = resolve(splitDir, `${namespace}.json`);
       writeFileSync(filePath, content, 'utf-8');
-      
+
       files.push({
         name: `split/${language}/${namespace}.json`,
         size: Buffer.byteLength(content, 'utf-8'),
@@ -345,13 +415,16 @@ async function generateMetadata(
     buildTime: new Date().toISOString(),
     languages: languageFiles.map(f => f.language),
     stats,
-    files: stats.files.reduce((acc, file) => {
-      acc[file] = {
-        path: file,
-        language: file.split('.')[0],
-      };
-      return acc;
-    }, {} as Record<string, any>),
+    files: stats.files.reduce(
+      (acc, file) => {
+        acc[file] = {
+          path: file,
+          language: file.split('.')[0],
+        };
+        return acc;
+      },
+      {} as Record<string, any>
+    ),
   };
 
   const metadataPath = resolve(outputDir, 'metadata.json');
@@ -378,11 +451,11 @@ function isValidLanguageCode(code: string): boolean {
  */
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
-  
+
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
