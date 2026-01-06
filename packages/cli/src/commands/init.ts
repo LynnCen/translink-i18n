@@ -43,14 +43,6 @@ export default {
     flattenKeys: false,
   },
   
-  // 云端配置 (需要配置环境变量)
-  vika: {
-    apiKey: process.env.VIKA_API_KEY || '',
-    datasheetId: process.env.VIKA_DATASHEET_ID || '',
-    autoSync: false,
-    syncInterval: 3600,
-  },
-  
   // 插件配置
   plugins: [],
 } satisfies I18nConfig;
@@ -87,14 +79,6 @@ export default {
     format: 'json',
     splitByNamespace: false,
     flattenKeys: false,
-  },
-  
-  // 云端配置 (需要配置环境变量)
-  vika: {
-    apiKey: process.env.VIKA_API_KEY || '',
-    datasheetId: process.env.VIKA_DATASHEET_ID || '',
-    autoSync: false,
-    syncInterval: 3600,
   },
   
   // 插件配置
@@ -169,12 +153,6 @@ async function initCommand(options: InitOptions) {
       ],
       default: 'json',
     },
-    {
-      type: 'confirm',
-      name: 'useVika',
-      message: '是否使用 Vika 云端翻译管理？',
-      default: false,
-    },
   ]);
 
   // 生成配置内容
@@ -189,8 +167,7 @@ async function initCommand(options: InitOptions) {
     )
     .replace("fallback: 'zh-CN',", `fallback: '${answers.defaultLanguage}',`)
     .replace("directory: 'src/locales',", `directory: '${answers.outputDirectory}',`)
-    .replace("format: 'json',", `format: '${answers.outputFormat}',`)
-    .replace('autoSync: false,', `autoSync: ${answers.useVika},`);
+    .replace("format: 'json',", `format: '${answers.outputFormat}',`);
 
   try {
     // 写入配置文件
@@ -216,22 +193,11 @@ async function initCommand(options: InitOptions) {
       }
     }
 
-    // 环境变量提示
-    if (answers.useVika) {
-      logger.br();
-      logger.info('请配置以下环境变量以使用 Vika 云端管理:');
-      logger.info('  VIKA_API_KEY=your_api_key');
-      logger.info('  VIKA_DATASHEET_ID=your_datasheet_id');
-    }
-
     logger.br();
     logger.success('初始化完成！你可以运行以下命令开始使用:');
     logger.info('  translink extract  # 提取翻译文本');
     logger.info('  translink build    # 构建语言包');
-    if (answers.useVika) {
-      logger.info('  translink push     # 推送到云端');
-      logger.info('  translink pull     # 从云端拉取');
-    }
+    logger.info('  translink analyze # 分析翻译覆盖率');
   } catch (error) {
     logger.error(`创建配置文件失败: ${error}`);
     process.exit(1);

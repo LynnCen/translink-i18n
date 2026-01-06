@@ -6,8 +6,6 @@ import { fileURLToPath } from 'url';
 import { init } from './commands/init.js';
 import { extract } from './commands/extract.js';
 import { build } from './commands/build.js';
-import { push } from './commands/push.js';
-import { pull } from './commands/pull.js';
 import { analyze } from './commands/analyze.js';
 import { logger } from './utils/logger.js';
 
@@ -43,8 +41,6 @@ program
 program.addCommand(init);
 program.addCommand(extract);
 program.addCommand(build);
-program.addCommand(push);
-program.addCommand(pull);
 program.addCommand(analyze);
 
 // 添加全局选项

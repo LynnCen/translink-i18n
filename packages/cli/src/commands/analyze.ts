@@ -5,13 +5,11 @@ import { configManager } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 import { ASTExtractor } from '../extractors/ast-extractor.js';
 import { HashGenerator } from '../generators/hash-generator.js';
-import { VikaClient } from '../integrations/vika-client.js';
 
 interface AnalyzeOptions {
   input?: string;
   output?: string;
   format?: 'json' | 'html' | 'markdown';
-  includeCloud?: boolean;
   verbose?: boolean;
 }
 
@@ -39,11 +37,6 @@ interface AnalysisReport {
     context: any;
     translations: Record<string, string>;
   }>;
-  cloudStatus?: {
-    connected: boolean;
-    totalRecords: number;
-    translationStats: any;
-  };
   recommendations: string[];
 }
 
@@ -80,40 +73,13 @@ async function analyzeCommand(options: AnalyzeOptions) {
     const localTranslations = await analyzeLocalTranslations(inputDir, config.languages.supported);
     logger.stopSpinner(`✓ 分析完成，发现 ${Object.keys(localTranslations).length} 个语言文件`);
 
-    // 分析云端状态（如果启用）
-    let cloudStatus;
-    if (options.includeCloud && config.vika.apiKey && config.vika.datasheetId) {
-      logger.startSpinner('分析云端翻译状态...');
-      try {
-        const vikaClient = new VikaClient(config.vika.apiKey, config.vika.datasheetId);
-        const isConnected = await vikaClient.testConnection();
-        
-        if (isConnected) {
-          const translationStats = await vikaClient.getTranslationStats();
-          cloudStatus = {
-            connected: true,
-            totalRecords: translationStats.total,
-            translationStats,
-          };
-          logger.stopSpinner('✓ 云端状态分析完成');
-        } else {
-          cloudStatus = { connected: false, totalRecords: 0, translationStats: null };
-          logger.stopSpinner('⚠ 云端连接失败', false);
-        }
-      } catch (error) {
-        cloudStatus = { connected: false, totalRecords: 0, translationStats: null };
-        logger.stopSpinner('⚠ 云端分析失败', false);
-      }
-    }
-
     // 生成分析报告
     const report = generateAnalysisReport(
       extractResults,
       extractStats,
       hashStats,
       localTranslations,
-      config,
-      cloudStatus
+      config
     );
 
     // 显示分析结果
@@ -178,8 +144,7 @@ function generateAnalysisReport(
   extractStats: any,
   hashStats: any,
   localTranslations: Record<string, Record<string, string>>,
-  config: any,
-  cloudStatus?: any
+  config: any
 ): AnalysisReport {
   // 计算翻译覆盖率
   const translationCoverage: Record<string, number> = {};
@@ -216,8 +181,7 @@ function generateAnalysisReport(
   const recommendations = generateRecommendations(
     extractStats,
     hashStats,
-    translationCoverage,
-    cloudStatus
+    translationCoverage
   );
 
   return {
@@ -231,7 +195,6 @@ function generateAnalysisReport(
     },
     fileAnalysis,
     translationAnalysis,
-    cloudStatus,
     recommendations,
   };
 }
@@ -287,8 +250,7 @@ function analyzeByFile(extractResults: any[]): Array<{
 function generateRecommendations(
   extractStats: any,
   hashStats: any,
-  translationCoverage: Record<string, number>,
-  cloudStatus?: any
+  translationCoverage: Record<string, number>
 ): string[] {
   const recommendations: string[] = [];
 
@@ -309,19 +271,6 @@ function generateRecommendations(
     }
   }
 
-  // 云端状态建议
-  if (cloudStatus) {
-    if (!cloudStatus.connected) {
-      recommendations.push('云端连接失败，检查 Vika 配置和网络连接');
-    } else if (cloudStatus.translationStats) {
-      const stats = cloudStatus.translationStats;
-      if (stats.pending > stats.translated) {
-        recommendations.push('云端有较多待翻译项目，建议通知翻译人员处理');
-      }
-    }
-  } else {
-    recommendations.push('考虑配置云端翻译管理，提高翻译协作效率');
-  }
 
   // 文件组织建议
   if (extractStats.processedFiles > 100) {
@@ -353,24 +302,6 @@ function displayAnalysisResults(report: AnalysisReport, verbose: boolean) {
     logger.info(`  ${status} ${language}: ${coverage.toFixed(1)}%`);
   }
 
-  // 云端状态
-  if (report.cloudStatus) {
-    logger.br();
-    logger.info('云端状态:');
-    if (report.cloudStatus.connected) {
-      logger.info(`  ✓ 连接正常`);
-      logger.info(`  总记录数: ${report.cloudStatus.totalRecords}`);
-      
-      if (report.cloudStatus.translationStats) {
-        const stats = report.cloudStatus.translationStats;
-        logger.info(`  待翻译: ${stats.pending}`);
-        logger.info(`  已翻译: ${stats.translated}`);
-        logger.info(`  已审核: ${stats.reviewed}`);
-      }
-    } else {
-      logger.warn(`  ✗ 连接失败`);
-    }
-  }
 
   // 详细信息
   if (verbose) {
@@ -536,6 +467,5 @@ export const analyze = new Command('analyze')
   .option('-i, --input <directory>', '输入目录')
   .option('-o, --output <file>', '输出报告文件')
   .option('-f, --format <format>', '报告格式 (json|html|markdown)', 'json')
-  .option('-c, --include-cloud', '包含云端状态分析')
   .option('-v, --verbose', '显示详细信息')
   .action(analyzeCommand);
