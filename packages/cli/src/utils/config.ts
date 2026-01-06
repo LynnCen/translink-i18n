@@ -28,12 +28,6 @@ export const DEFAULT_CONFIG: I18nConfig = {
     splitByNamespace: false,
     flattenKeys: false,
   },
-  vika: {
-    apiKey: process.env.VIKA_API_KEY || '',
-    datasheetId: process.env.VIKA_DATASHEET_ID || '',
-    autoSync: false,
-    syncInterval: 3600, // 1 hour
-  },
   plugins: [],
 };
 
@@ -97,7 +91,6 @@ export class ConfigManager {
       hash: { ...defaultConfig.hash, ...userConfig.hash },
       languages: { ...defaultConfig.languages, ...userConfig.languages },
       output: { ...defaultConfig.output, ...userConfig.output },
-      vika: { ...defaultConfig.vika, ...userConfig.vika },
       plugins: userConfig.plugins || defaultConfig.plugins,
     };
   }

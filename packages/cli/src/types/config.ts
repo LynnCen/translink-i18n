@@ -34,14 +34,6 @@ export interface I18nConfig {
     flattenKeys: boolean;
   };
 
-  // 云端配置
-  vika: {
-    apiKey: string;
-    datasheetId: string;
-    autoSync: boolean;
-    syncInterval: number;
-  };
-
   // 插件配置
   plugins: Array<string | [string, any]>;
 }
