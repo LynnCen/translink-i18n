@@ -4,26 +4,57 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "package.json", "tsconfig.json"],
-      "outputs": ["dist/**", "lib/**", "es/**", "*.d.ts"]
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        "tsup.config.ts",
+        "rollup.config.js"
+      ],
+      "outputs": ["dist/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "**/*.json", "**/*.md"],
+      "dependsOn": [],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+        "**/*.json",
+        "**/*.md",
+        ".eslintrc*",
+        "eslint.config.*"
+      ],
       "outputs": []
     },
     "test": {
-      "dependsOn": ["build"],
-      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "test/**/*", "**/*.test.*"],
+      "dependsOn": [],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+        "tests/**/*",
+        "**/*.test.*",
+        "**/*.spec.*",
+        "vitest.config.*"
+      ],
       "outputs": ["coverage/**"]
     },
     "type-check": {
-      "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tsconfig.json"],
+      "dependsOn": [],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+        "tsconfig.json",
+        "tsconfig.base.json"
+      ],
       "outputs": []
     },
     "clean": {

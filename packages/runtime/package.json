@@ -40,8 +40,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "vitest",
     "type-check": "tsc --noEmit",
     "clean": "rimraf dist"
@@ -63,16 +63,12 @@
   },
   "devDependencies": {
     "typescript": "^5.3.0",
-    "rollup": "^4.9.0",
+    "tsup": "^8.0.0",
     "vitest": "^1.2.0",
     "vue": "^3.4.0",
     "react": "^18.2.0",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
-    "@rollup/plugin-typescript": "^11.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.0",
-    "@rollup/plugin-commonjs": "^25.0.0",
-    "rollup-plugin-dts": "^6.1.0",
     "rimraf": "^5.0.0"
   },
   "engines": {

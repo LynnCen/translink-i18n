@@ -5,11 +5,15 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['packages/*/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: [
+      'packages/*/tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+      'tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+    ],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       '**/.{idea,git,cache,output,temp}/**',
+      '**/src/**',
     ],
     coverage: {
       provider: 'v8',
@@ -17,7 +21,8 @@ export default defineConfig({
       exclude: [
         'coverage/**',
         'dist/**',
-        'packages/*/test/**',
+        'packages/*/tests/**',
+        'tests/**',
         '**/*.d.ts',
         '**/*.config.*',
         '**/index.ts',
