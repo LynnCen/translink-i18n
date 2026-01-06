@@ -44,7 +44,8 @@
     "gogocode": "^1.0.0",
     "glob": "^10.3.0",
     "fs-extra": "^11.2.0",
-    "inquirer": "^9.2.0"
+    "inquirer": "^9.2.0",
+    "exceljs": "^4.4.0"
   },
   "devDependencies": {
     "typescript": "^5.3.0",

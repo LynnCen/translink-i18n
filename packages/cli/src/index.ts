@@ -7,6 +7,8 @@ import { init } from './commands/init.js';
 import { extract } from './commands/extract.js';
 import { build } from './commands/build.js';
 import { analyze } from './commands/analyze.js';
+import { exportCmd } from './commands/export.js';
+import { importCmd } from './commands/import.js';
 import { logger } from './utils/logger.js';
 
 // 导出类型
@@ -42,6 +44,8 @@ program.addCommand(init);
 program.addCommand(extract);
 program.addCommand(build);
 program.addCommand(analyze);
+program.addCommand(exportCmd);
+program.addCommand(importCmd);
 
 // 添加全局选项
 program
