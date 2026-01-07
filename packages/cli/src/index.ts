@@ -10,6 +10,8 @@ import { analyze } from './commands/analyze.js';
 import { exportCmd } from './commands/export.js';
 import { importCmd } from './commands/import.js';
 import { logger } from './utils/logger.js';
+import { PluginManager } from './plugins/manager.js';
+import { configManager } from './utils/config.js';
 
 // 导出类型
 export type {
@@ -17,6 +19,17 @@ export type {
   ExtractResult,
   TranslationItem,
 } from './types/config.js';
+
+// 导出插件类型
+export type {
+  I18nPlugin,
+  PluginMetadata,
+  PluginConfig,
+  PluginContext,
+  PushResult,
+  PullResult,
+  TranslationStats,
+} from './plugins/types.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,6 +51,32 @@ program
     }
     logger.title('连接不同语言的智能桥梁');
   });
+
+// 初始化插件系统
+const pluginManager = new PluginManager();
+
+// 异步初始化插件（在命令执行前）
+program.hook('preAction', async () => {
+  try {
+    const config = await configManager.loadConfig();
+    await pluginManager.initialize(
+      {
+        config,
+        logger,
+        cwd: process.cwd(),
+      },
+      config.plugins || []
+    );
+
+    // 注册插件命令
+    pluginManager.registerPluginCommands(program);
+  } catch (error) {
+    // 插件加载失败不影响主命令执行
+    if (process.env.DEBUG) {
+      logger.debug(`Plugin initialization failed: ${error}`);
+    }
+  }
+});
 
 // 注册所有命令
 program.addCommand(init);
