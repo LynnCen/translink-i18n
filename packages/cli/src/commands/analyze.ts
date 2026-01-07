@@ -46,7 +46,7 @@ async function analyzeCommand(options: AnalyzeOptions) {
   try {
     // 加载配置
     const config = await configManager.loadConfig();
-    
+
     const inputDir = options.input || config.output.directory;
     const outputFile = options.output;
     const format = options.format || 'json';
@@ -70,8 +70,13 @@ async function analyzeCommand(options: AnalyzeOptions) {
 
     // 分析本地翻译文件
     logger.startSpinner('分析本地翻译文件...');
-    const localTranslations = await analyzeLocalTranslations(inputDir, config.languages.supported);
-    logger.stopSpinner(`✓ 分析完成，发现 ${Object.keys(localTranslations).length} 个语言文件`);
+    const localTranslations = await analyzeLocalTranslations(
+      inputDir,
+      config.languages.supported
+    );
+    logger.stopSpinner(
+      `✓ 分析完成，发现 ${Object.keys(localTranslations).length} 个语言文件`
+    );
 
     // 生成分析报告
     const report = generateAnalysisReport(
@@ -99,7 +104,6 @@ async function analyzeCommand(options: AnalyzeOptions) {
         logger.info(`  ${index + 1}. ${rec}`);
       });
     }
-
   } catch (error) {
     logger.error(`分析失败: ${error}`);
     process.exit(1);
@@ -118,7 +122,7 @@ async function analyzeLocalTranslations(
 
   for (const language of supportedLanguages) {
     const filePath = resolve(inputPath, `${language}.json`);
-    
+
     if (existsSync(filePath)) {
       try {
         const content = readFileSync(filePath, 'utf-8');
@@ -155,8 +159,9 @@ function generateAnalysisReport(
     const translatedCount = Object.keys(languageTranslations).filter(
       key => languageTranslations[key] && languageTranslations[key].trim()
     ).length;
-    
-    translationCoverage[language] = totalKeys > 0 ? (translatedCount / totalKeys) * 100 : 0;
+
+    translationCoverage[language] =
+      totalKeys > 0 ? (translatedCount / totalKeys) * 100 : 0;
   }
 
   // 文件级分析
@@ -172,7 +177,7 @@ function generateAnalysisReport(
     translations: Object.fromEntries(
       config.languages.supported.map((lang: string) => [
         lang,
-        localTranslations[lang]?.[result.key] || ''
+        localTranslations[lang]?.[result.key] || '',
       ])
     ),
   }));
@@ -209,11 +214,14 @@ function analyzeByFile(extractResults: any[]): Array<{
   functions: string[];
   coverage: number;
 }> {
-  const fileMap = new Map<string, {
-    textCount: number;
-    chineseCount: number;
-    functions: Set<string>;
-  }>();
+  const fileMap = new Map<
+    string,
+    {
+      textCount: number;
+      chineseCount: number;
+      functions: Set<string>;
+    }
+  >();
 
   // 统计每个文件的情况
   for (const result of extractResults) {
@@ -228,7 +236,7 @@ function analyzeByFile(extractResults: any[]): Array<{
     const fileStats = fileMap.get(result.filePath)!;
     fileStats.textCount++;
     fileStats.chineseCount++;
-    
+
     if (result.context?.functionName) {
       fileStats.functions.add(result.context.functionName);
     }
@@ -256,25 +264,32 @@ function generateRecommendations(
 
   // 扫描相关建议
   if (extractStats.errors > 0) {
-    recommendations.push(`修复 ${extractStats.errors} 个文件扫描错误，提高提取准确性`);
+    recommendations.push(
+      `修复 ${extractStats.errors} 个文件扫描错误，提高提取准确性`
+    );
   }
 
   // 哈希冲突建议
   if (hashStats.collisionRate > 0.1) {
-    recommendations.push('哈希冲突率较高，考虑增加哈希长度或启用更多上下文信息');
+    recommendations.push(
+      '哈希冲突率较高，考虑增加哈希长度或启用更多上下文信息'
+    );
   }
 
   // 翻译覆盖率建议
   for (const [language, coverage] of Object.entries(translationCoverage)) {
     if (coverage < 50) {
-      recommendations.push(`${language} 翻译覆盖率较低 (${coverage.toFixed(1)}%)，建议完善翻译`);
+      recommendations.push(
+        `${language} 翻译覆盖率较低 (${coverage.toFixed(1)}%)，建议完善翻译`
+      );
     }
   }
 
-
   // 文件组织建议
   if (extractStats.processedFiles > 100) {
-    recommendations.push('项目文件较多，考虑使用更精确的扫描模式或排除不必要的文件');
+    recommendations.push(
+      '项目文件较多，考虑使用更精确的扫描模式或排除不必要的文件'
+    );
   }
 
   return recommendations;
@@ -286,7 +301,7 @@ function generateRecommendations(
 function displayAnalysisResults(report: AnalysisReport, verbose: boolean) {
   logger.br();
   logger.success('📊 分析结果:');
-  
+
   // 基础统计
   logger.info('基础统计:');
   logger.info(`  扫描文件: ${report.summary.totalFiles} 个`);
@@ -297,11 +312,12 @@ function displayAnalysisResults(report: AnalysisReport, verbose: boolean) {
   // 翻译覆盖率
   logger.br();
   logger.info('翻译覆盖率:');
-  for (const [language, coverage] of Object.entries(report.summary.translationCoverage)) {
+  for (const [language, coverage] of Object.entries(
+    report.summary.translationCoverage
+  )) {
     const status = coverage >= 90 ? '🟢' : coverage >= 70 ? '🟡' : '🔴';
     logger.info(`  ${status} ${language}: ${coverage.toFixed(1)}%`);
   }
-
 
   // 详细信息
   if (verbose) {
@@ -322,21 +338,27 @@ function displayAnalysisResults(report: AnalysisReport, verbose: boolean) {
 /**
  * 保存分析报告
  */
-async function saveAnalysisReport(report: AnalysisReport, outputFile: string, format: string) {
+async function saveAnalysisReport(
+  report: AnalysisReport,
+  outputFile: string,
+  format: string
+) {
   const outputPath = resolve(process.cwd(), outputFile);
-  
+
   switch (format) {
     case 'json':
       writeFileSync(outputPath, JSON.stringify(report, null, 2), 'utf-8');
       break;
-    case 'html':
+    case 'html': {
       const htmlContent = generateHTMLReport(report);
       writeFileSync(outputPath, htmlContent, 'utf-8');
       break;
-    case 'markdown':
+    }
+    case 'markdown': {
       const markdownContent = generateMarkdownReport(report);
       writeFileSync(outputPath, markdownContent, 'utf-8');
       break;
+    }
     default:
       throw new Error(`不支持的输出格式: ${format}`);
   }
@@ -382,13 +404,16 @@ function generateHTMLReport(report: AnalysisReport): string {
 
         <h2>🌐 翻译覆盖率</h2>
         <div class="coverage">
-            ${Object.entries(report.summary.translationCoverage).map(([lang, coverage]) => {
-              const level = coverage >= 90 ? 'high' : coverage >= 70 ? 'medium' : 'low';
-              return `<div class="coverage-item ${level}">
+            ${Object.entries(report.summary.translationCoverage)
+              .map(([lang, coverage]) => {
+                const level =
+                  coverage >= 90 ? 'high' : coverage >= 70 ? 'medium' : 'low';
+                return `<div class="coverage-item ${level}">
                 <h3>${lang}</h3>
                 <p><strong>${coverage.toFixed(1)}%</strong></p>
               </div>`;
-            }).join('')}
+              })
+              .join('')}
         </div>
 
         <h2>📁 文件分析</h2>
@@ -401,22 +426,31 @@ function generateHTMLReport(report: AnalysisReport): string {
                 </tr>
             </thead>
             <tbody>
-                ${report.fileAnalysis.slice(0, 20).map(file => `
+                ${report.fileAnalysis
+                  .slice(0, 20)
+                  .map(
+                    file => `
                     <tr>
                         <td>${file.filePath}</td>
                         <td>${file.chineseCount}</td>
                         <td>${file.functions.join(', ')}</td>
                     </tr>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </tbody>
         </table>
 
-        ${report.recommendations.length > 0 ? `
+        ${
+          report.recommendations.length > 0
+            ? `
         <h2>💡 优化建议</h2>
         <ul>
             ${report.recommendations.map(rec => `<li>${rec}</li>`).join('')}
         </ul>
-        ` : ''}
+        `
+            : ''
+        }
     </div>
 </body>
 </html>
@@ -441,24 +475,34 @@ function generateMarkdownReport(report: AnalysisReport): string {
 
 ## 🌐 翻译覆盖率
 
-${Object.entries(report.summary.translationCoverage).map(([lang, coverage]) => {
-  const status = coverage >= 90 ? '🟢' : coverage >= 70 ? '🟡' : '🔴';
-  return `- ${status} **${lang}**: ${coverage.toFixed(1)}%`;
-}).join('\n')}
+${Object.entries(report.summary.translationCoverage)
+  .map(([lang, coverage]) => {
+    const status = coverage >= 90 ? '🟢' : coverage >= 70 ? '🟡' : '🔴';
+    return `- ${status} **${lang}**: ${coverage.toFixed(1)}%`;
+  })
+  .join('\n')}
 
 ## 📁 文件分析
 
 | 文件路径 | 中文文本数 | 使用函数 |
 |---------|-----------|---------|
-${report.fileAnalysis.slice(0, 20).map(file => 
-  `| ${file.filePath} | ${file.chineseCount} | ${file.functions.join(', ') || '-'} |`
-).join('\n')}
+${report.fileAnalysis
+  .slice(0, 20)
+  .map(
+    file =>
+      `| ${file.filePath} | ${file.chineseCount} | ${file.functions.join(', ') || '-'} |`
+  )
+  .join('\n')}
 
-${report.recommendations.length > 0 ? `
+${
+  report.recommendations.length > 0
+    ? `
 ## 💡 优化建议
 
 ${report.recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}
-` : ''}
+`
+    : ''
+}
   `.trim();
 }
 

@@ -10,9 +10,11 @@ const Header: React.FC = () => {
       <div className="header-container">
         <div className="header-brand">
           <h1>{$tsl('TransLink I18n React 演示')}</h1>
-          <p className="brand-subtitle">{$tsl('现代化 React 国际化解决方案')}</p>
+          <p className="brand-subtitle">
+            {$tsl('现代化 React 国际化解决方案')}
+          </p>
         </div>
-        
+
         <nav className="header-nav">
           <a href="#features" className="nav-link">
             {$tsl('功能特性')}
@@ -27,7 +29,7 @@ const Header: React.FC = () => {
             {$tsl('GitHub')}
           </a>
         </nav>
-        
+
         <div className="header-actions">
           <LanguageSwitcher />
         </div>

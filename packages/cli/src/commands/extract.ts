@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { resolve } from 'path';
 import { configManager } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 import { ASTExtractor } from '../extractors/ast-extractor.js';
@@ -23,7 +23,7 @@ async function extractCommand(options: ExtractOptions) {
     let config;
     try {
       config = await configManager.loadConfig();
-    } catch (error) {
+    } catch {
       logger.error('无法加载配置文件');
       logger.info('请先运行 translink init 初始化配置');
       process.exit(1);

@@ -10,7 +10,7 @@ const originalConsole = { ...console };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  
+
   // Reset console mocks
   console.log = vi.fn();
   console.error = vi.fn();
@@ -30,22 +30,27 @@ export const createMockFile = (content: string) => {
 
 export const createMockDirectory = (files: Record<string, string>) => {
   const mockFs = vi.mocked(fs);
-  
+
   mockFs.readFile.mockImplementation((filePath: string) => {
     const normalizedPath = path.normalize(filePath.toString());
     const fileName = path.basename(normalizedPath);
-    
+
     if (files[fileName]) {
       return Promise.resolve(files[fileName]);
     }
-    
+
     throw new Error(`File not found: ${filePath}`);
   });
-  
+
   mockFs.writeFile.mockResolvedValue(undefined);
   mockFs.mkdir.mockResolvedValue(undefined);
 };
 
-export const expectConsoleOutput = (method: 'log' | 'error' | 'warn' | 'info', message: string) => {
-  expect(console[method]).toHaveBeenCalledWith(expect.stringContaining(message));
+export const expectConsoleOutput = (
+  method: 'log' | 'error' | 'warn' | 'info',
+  message: string
+) => {
+  expect(console[method]).toHaveBeenCalledWith(
+    expect.stringContaining(message)
+  );
 };

@@ -2,14 +2,17 @@
   <div class="user-profile">
     <div class="profile-header">
       <div class="avatar">
-        <img :src="user.avatar" :alt="$tsl('用户头像')" />
+        <img
+:src="user.avatar" :alt="$tsl('用户头像')" />
       </div>
       <div class="profile-info">
         <h4>{{ user.name }}</h4>
-        <p class="user-role">{{ $tsl('高级用户') }}</p>
+        <p class="user-role">
+          {{ $tsl('高级用户') }}
+        </p>
       </div>
     </div>
-    
+
     <div class="profile-stats">
       <div class="stat-item">
         <span class="stat-value">{{ user.posts }}</span>
@@ -24,16 +27,18 @@
         <span class="stat-label">{{ $tsl('正在关注') }}</span>
       </div>
     </div>
-    
+
     <div class="profile-actions">
-      <button class="btn btn-primary" @click="editProfile">
+      <button class="btn btn-primary"
+@click="editProfile">
         {{ $tsl('编辑资料') }}
       </button>
-      <button class="btn btn-secondary" @click="viewPosts">
+      <button class="btn btn-secondary"
+@click="viewPosts">
         {{ $tsl('查看文章') }}
       </button>
     </div>
-    
+
     <div class="profile-details">
       <div class="detail-item">
         <span class="detail-label">{{ $tsl('加入时间') }}:</span>
@@ -41,7 +46,9 @@
       </div>
       <div class="detail-item">
         <span class="detail-label">{{ $tsl('最后活动') }}:</span>
-        <span class="detail-value">{{ formatRelativeTime(user.lastActive) }}</span>
+        <span class="detail-value">{{
+          formatRelativeTime(user.lastActive)
+        }}</span>
       </div>
       <div class="detail-item">
         <span class="detail-label">{{ $tsl('用户等级') }}:</span>
@@ -60,12 +67,13 @@ const { t } = useI18n();
 // 用户数据
 const user = ref({
   name: '张小明',
-  avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+  avatar:
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
   posts: 128,
   followers: 1234,
   following: 567,
   joinDate: new Date('2023-01-15'),
-  lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2小时前
+  lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2小时前
 });
 
 // 格式化日期
@@ -73,7 +81,7 @@ const formatDate = (date: Date) => {
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 };
 
@@ -82,7 +90,7 @@ const formatRelativeTime = (date: Date) => {
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const hours = Math.floor(diff / (1000 * 60 * 60));
-  
+
   if (hours < 1) {
     return t('刚刚');
   } else if (hours < 24) {
@@ -248,11 +256,11 @@ const viewPosts = () => {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .profile-actions {
     flex-direction: column;
   }
-  
+
   .detail-item {
     flex-direction: column;
     align-items: flex-start;

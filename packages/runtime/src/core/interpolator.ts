@@ -3,7 +3,11 @@
  * 支持变量替换、格式化函数、嵌套插值等
  */
 
-import type { TranslationParams, FormatFunction, InterpolationOptions } from '../types/index.js';
+import type {
+  TranslationParams,
+  FormatFunction,
+  InterpolationOptions,
+} from '../types/index.js';
 
 export class Interpolator {
   private options: InterpolationOptions;
@@ -27,8 +31,8 @@ export class Interpolator {
    * 插值处理主函数
    */
   interpolate(
-    template: string, 
-    params: TranslationParams = {}, 
+    template: string,
+    params: TranslationParams = {},
     language: string = 'en'
   ): string {
     if (!template || typeof template !== 'string') {
@@ -41,7 +45,7 @@ export class Interpolator {
     // 递归处理嵌套插值
     let result = template;
     let maxIterations = 10; // 防止无限递归
-    
+
     while (maxIterations > 0 && this.hasInterpolation(result)) {
       const newResult = this.processInterpolation(result, allParams, language);
       if (newResult === result) {
@@ -80,17 +84,20 @@ export class Interpolator {
    * 处理插值
    */
   private processInterpolation(
-    template: string, 
-    params: TranslationParams, 
+    template: string,
+    params: TranslationParams,
     language: string
   ): string {
     const regex = this.createInterpolationRegex();
-    
+
     return template.replace(regex, (match, expression) => {
       try {
         return this.evaluateExpression(expression.trim(), params, language);
       } catch (error) {
-        console.warn(`Interpolation error in expression "${expression}":`, error);
+        console.warn(
+          `Interpolation error in expression "${expression}":`,
+          error
+        );
         return match; // 返回原始匹配，避免丢失内容
       }
     });
@@ -100,8 +107,8 @@ export class Interpolator {
    * 评估插值表达式
    */
   private evaluateExpression(
-    expression: string, 
-    params: TranslationParams, 
+    expression: string,
+    params: TranslationParams,
     language: string
   ): string {
     // 解析表达式：变量名, 格式化函数, 参数
@@ -118,7 +125,8 @@ export class Interpolator {
 
     // 应用格式化函数
     if (formatter) {
-      const formatFunction = this.formatters.get(formatter) || this.options.format;
+      const formatFunction =
+        this.formatters.get(formatter) || this.options.format;
       value = formatFunction(value, formatter, language, formatArgs);
     }
 
@@ -140,7 +148,7 @@ export class Interpolator {
     // 支持格式：variable, variable|formatter, variable|formatter:arg1:arg2
     const parts = expression.split('|');
     const variable = parts[0].trim();
-    
+
     if (parts.length === 1) {
       return { variable };
     }
@@ -206,7 +214,12 @@ export class Interpolator {
   /**
    * 默认格式化函数
    */
-  private defaultFormat(value: any, format: string, language: string, args?: any[]): string {
+  private defaultFormat(
+    value: any,
+    format: string,
+    language: string,
+    args?: any[]
+  ): string {
     const formatter = this.formatters.get(format);
     if (formatter) {
       return formatter(value, format, language, args);
@@ -226,7 +239,7 @@ export class Interpolator {
       if (isNaN(num)) return String(value);
 
       const options: Intl.NumberFormatOptions = {};
-      
+
       if (args && args.length > 0) {
         const [minimumFractionDigits, maximumFractionDigits] = args;
         if (minimumFractionDigits !== undefined) {
@@ -258,7 +271,7 @@ export class Interpolator {
       if (isNaN(date.getTime())) return String(value);
 
       const options: Intl.DateTimeFormatOptions = {};
-      
+
       if (args && args.length > 0) {
         const style = args[0];
         switch (style) {
@@ -309,7 +322,7 @@ export class Interpolator {
       // 使用 Intl.RelativeTimeFormat（如果支持）
       if ('RelativeTimeFormat' in Intl) {
         const rtf = new Intl.RelativeTimeFormat(language, { numeric: 'auto' });
-        
+
         const absDiff = Math.abs(diffSec);
         if (absDiff < 60) {
           return rtf.format(diffSec, 'second');
@@ -327,9 +340,9 @@ export class Interpolator {
     });
 
     // 大小写转换
-    this.registerFormatter('uppercase', (value) => String(value).toUpperCase());
-    this.registerFormatter('lowercase', (value) => String(value).toLowerCase());
-    this.registerFormatter('capitalize', (value) => {
+    this.registerFormatter('uppercase', value => String(value).toUpperCase());
+    this.registerFormatter('lowercase', value => String(value).toLowerCase());
+    this.registerFormatter('capitalize', value => {
       const str = String(value);
       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     });

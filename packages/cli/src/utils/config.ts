@@ -1,4 +1,4 @@
-import { resolve, dirname } from 'path';
+import { resolve } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { pathToFileURL } from 'url';
 import type { I18nConfig } from '../types/config.js';
@@ -65,7 +65,7 @@ export class ConfigManager {
   private async loadConfigFile(configPath: string): Promise<I18nConfig> {
     try {
       let config: any;
-      
+
       if (configPath.endsWith('.ts') || configPath.endsWith('.js')) {
         // 动态导入配置文件
         const fileUrl = pathToFileURL(configPath).href;

@@ -24,7 +24,9 @@ describe('CLI 与 Runtime 集成测试', () => {
       // 1. 创建包含中文的源文件
       const sourceFile = join(testProjectDir, 'src/App.vue');
       await fs.mkdir(join(testProjectDir, 'src'), { recursive: true });
-      await fs.writeFile(sourceFile, `
+      await fs.writeFile(
+        sourceFile,
+        `
 <template>
   <div>
     <h1>{{ $tsl('欢迎使用 TransLink I18n') }}</h1>
@@ -38,11 +40,14 @@ const handleClick = () => {
   alert($tsl('按钮被点击了'));
 };
 </script>
-      `);
+      `
+      );
 
       // 2. 创建 i18n 配置文件
       const configFile = join(testProjectDir, 'i18n.config.ts');
-      await fs.writeFile(configFile, `
+      await fs.writeFile(
+        configFile,
+        `
 export default {
   extract: {
     patterns: ['src/**/*.{vue,ts,js,tsx,jsx}'],
@@ -58,7 +63,8 @@ export default {
     format: 'json'
   }
 };
-      `);
+      `
+      );
 
       // 3. 运行 CLI 提取命令
       const extractResult = await runCLICommand('extract', testProjectDir);
@@ -66,7 +72,12 @@ export default {
 
       // 4. 验证生成的语言文件
       const zhCNFile = join(localesDir, 'zh-CN.json');
-      expect(await fs.access(zhCNFile).then(() => true).catch(() => false)).toBe(true);
+      expect(
+        await fs
+          .access(zhCNFile)
+          .then(() => true)
+          .catch(() => false)
+      ).toBe(true);
 
       const zhCNContent = JSON.parse(await fs.readFile(zhCNFile, 'utf-8'));
       expect(Object.keys(zhCNContent)).toHaveLength(4);
@@ -82,11 +93,11 @@ export default {
         // 简单的翻译映射
         const translations: Record<string, string> = {
           '欢迎使用 TransLink I18n': 'Welcome to TransLink I18n',
-          '这是一个集成测试': 'This is an integration test',
-          '点击按钮': 'Click Button',
-          '按钮被点击了': 'Button was clicked'
+          这是一个集成测试: 'This is an integration test',
+          点击按钮: 'Click Button',
+          按钮被点击了: 'Button was clicked',
         };
-        enUSContent[key] = translations[value as string] || value as string;
+        enUSContent[key] = translations[value as string] || (value as string);
       }
       await fs.writeFile(enUSFile, JSON.stringify(enUSContent, null, 2));
 
@@ -96,8 +107,8 @@ export default {
         supportedLanguages: ['zh-CN', 'en-US'],
         resources: {
           'zh-CN': zhCNContent,
-          'en-US': enUSContent
-        }
+          'en-US': enUSContent,
+        },
       });
 
       await i18nEngine.init();
@@ -115,30 +126,36 @@ export default {
       // 1. 初始文件
       const sourceFile = join(testProjectDir, 'src/App.vue');
       await fs.mkdir(join(testProjectDir, 'src'), { recursive: true });
-      await fs.writeFile(sourceFile, `
+      await fs.writeFile(
+        sourceFile,
+        `
 <template>
   <h1>{{ $tsl('初始文本') }}</h1>
 </template>
-      `);
+      `
+      );
 
       // 2. 首次提取
       await runCLICommand('extract', testProjectDir);
-      
+
       const zhCNFile = join(localesDir, 'zh-CN.json');
       const initialContent = JSON.parse(await fs.readFile(zhCNFile, 'utf-8'));
       expect(Object.keys(initialContent)).toHaveLength(1);
 
       // 3. 添加新文本
-      await fs.writeFile(sourceFile, `
+      await fs.writeFile(
+        sourceFile,
+        `
 <template>
   <h1>{{ $tsl('初始文本') }}</h1>
   <p>{{ $tsl('新增文本') }}</p>
 </template>
-      `);
+      `
+      );
 
       // 4. 再次提取
       await runCLICommand('extract', testProjectDir);
-      
+
       const updatedContent = JSON.parse(await fs.readFile(zhCNFile, 'utf-8'));
       expect(Object.keys(updatedContent)).toHaveLength(2);
       expect(Object.values(updatedContent)).toContain('初始文本');
@@ -151,18 +168,21 @@ export default {
       // 创建语法错误的文件
       const invalidFile = join(testProjectDir, 'src/invalid.vue');
       await fs.mkdir(join(testProjectDir, 'src'), { recursive: true });
-      await fs.writeFile(invalidFile, `
+      await fs.writeFile(
+        invalidFile,
+        `
 <template>
   <h1>{{ $tsl('有效文本') }}</h1>
   <p>{{ $tsl('未闭合的引号) }}</p>
 </template>
-      `);
+      `
+      );
 
       const result = await runCLICommand('extract', testProjectDir);
-      
+
       // CLI 应该能够处理部分有效的内容
       expect(result.success).toBe(true);
-      
+
       const zhCNFile = join(localesDir, 'zh-CN.json');
       const content = JSON.parse(await fs.readFile(zhCNFile, 'utf-8'));
       expect(Object.values(content)).toContain('有效文本');
@@ -171,15 +191,18 @@ export default {
     it('应该处理缺失的配置文件', async () => {
       const sourceFile = join(testProjectDir, 'src/App.vue');
       await fs.mkdir(join(testProjectDir, 'src'), { recursive: true });
-      await fs.writeFile(sourceFile, `
+      await fs.writeFile(
+        sourceFile,
+        `
 <template>
   <h1>{{ $tsl('测试文本') }}</h1>
 </template>
-      `);
+      `
+      );
 
       // 不创建配置文件，使用默认配置
       const result = await runCLICommand('extract', testProjectDir);
-      
+
       expect(result.success).toBe(true);
     });
   });
@@ -200,7 +223,7 @@ export default {
   </div>
 </template>
         `.replace(/\$\{i\}/g, i.toString());
-        
+
         await fs.writeFile(join(srcDir, `Component${i}.vue`), fileContent);
       }
 
@@ -224,36 +247,48 @@ export default {
       await fs.mkdir(srcDir, { recursive: true });
 
       // Vue 文件
-      await fs.writeFile(join(srcDir, 'App.vue'), `
+      await fs.writeFile(
+        join(srcDir, 'App.vue'),
+        `
 <template>
   <h1>{{ $tsl('Vue 组件') }}</h1>
 </template>
-      `);
+      `
+      );
 
       // React TSX 文件
-      await fs.writeFile(join(srcDir, 'Component.tsx'), `
+      await fs.writeFile(
+        join(srcDir, 'Component.tsx'),
+        `
 import React from 'react';
 export const Component = () => <h1>{$tsl('React 组件')}</h1>;
-      `);
+      `
+      );
 
       // TypeScript 文件
-      await fs.writeFile(join(srcDir, 'utils.ts'), `
+      await fs.writeFile(
+        join(srcDir, 'utils.ts'),
+        `
 export const message = $tsl('工具函数');
-      `);
+      `
+      );
 
       // JavaScript 文件
-      await fs.writeFile(join(srcDir, 'helper.js'), `
+      await fs.writeFile(
+        join(srcDir, 'helper.js'),
+        `
 const helper = {
   message: $tsl('帮助信息')
 };
-      `);
+      `
+      );
 
       const result = await runCLICommand('extract', testProjectDir);
       expect(result.success).toBe(true);
 
       const zhCNFile = join(localesDir, 'zh-CN.json');
       const content = JSON.parse(await fs.readFile(zhCNFile, 'utf-8'));
-      
+
       expect(Object.values(content)).toContain('Vue 组件');
       expect(Object.values(content)).toContain('React 组件');
       expect(Object.values(content)).toContain('工具函数');
@@ -263,40 +298,44 @@ const helper = {
 });
 
 // 辅助函数：运行 CLI 命令
-async function runCLICommand(command: string, cwd: string): Promise<{ success: boolean; output: string; error: string }> {
-  return new Promise((resolve) => {
-    const child = spawn('node', [
-      join(process.cwd(), 'packages/cli/dist/cli.js'),
-      command
-    ], {
-      cwd,
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
+async function runCLICommand(
+  command: string,
+  cwd: string
+): Promise<{ success: boolean; output: string; error: string }> {
+  return new Promise(resolve => {
+    const child = spawn(
+      'node',
+      [join(process.cwd(), 'packages/cli/dist/cli.js'), command],
+      {
+        cwd,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }
+    );
 
     let output = '';
     let error = '';
 
-    child.stdout?.on('data', (data) => {
+    child.stdout?.on('data', data => {
       output += data.toString();
     });
 
-    child.stderr?.on('data', (data) => {
+    child.stderr?.on('data', data => {
       error += data.toString();
     });
 
-    child.on('close', (code) => {
+    child.on('close', code => {
       resolve({
         success: code === 0,
         output,
-        error
+        error,
       });
     });
 
-    child.on('error', (err) => {
+    child.on('error', err => {
       resolve({
         success: false,
         output,
-        error: err.message
+        error: err.message,
       });
     });
   });

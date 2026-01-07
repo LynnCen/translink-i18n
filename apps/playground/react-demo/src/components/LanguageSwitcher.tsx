@@ -8,7 +8,7 @@ const LanguageSwitcher: React.FC = () => {
   const languageNames: Record<string, { name: string; flag: string }> = {
     'zh-CN': { name: '中文', flag: '🇨🇳' },
     'en-US': { name: 'English', flag: '🇺🇸' },
-    'ja-JP': { name: '日本語', flag: '🇯🇵' }
+    'ja-JP': { name: '日本語', flag: '🇯🇵' },
   };
 
   const handleLanguageChange = async (newLocale: string) => {
@@ -16,7 +16,7 @@ const LanguageSwitcher: React.FC = () => {
       try {
         await setLocale(newLocale);
         setIsOpen(false);
-        
+
         // 显示切换成功提示
         showNotification($tsl('语言切换成功！'));
       } catch (error) {
@@ -26,12 +26,15 @@ const LanguageSwitcher: React.FC = () => {
     }
   };
 
-  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+  const showNotification = (
+    message: string,
+    type: 'success' | 'error' = 'success'
+  ) => {
     // 简单的通知实现
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
-    
+
     Object.assign(notification.style, {
       position: 'fixed',
       top: '20px',
@@ -45,15 +48,15 @@ const LanguageSwitcher: React.FC = () => {
       fontSize: '14px',
       fontWeight: '500',
       transform: 'translateX(100%)',
-      transition: 'transform 0.3s ease'
+      transition: 'transform 0.3s ease',
     });
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
       notification.style.transform = 'translateX(0)';
     }, 10);
-    
+
     setTimeout(() => {
       notification.style.transform = 'translateX(100%)';
       setTimeout(() => {
@@ -84,8 +87,11 @@ const LanguageSwitcher: React.FC = () => {
 
       {isOpen && (
         <div className="language-dropdown" role="listbox">
-          {availableLocales.map((langCode) => {
-            const lang = languageNames[langCode] || { name: langCode, flag: '🌐' };
+          {availableLocales.map(langCode => {
+            const lang = languageNames[langCode] || {
+              name: langCode,
+              flag: '🌐',
+            };
             return (
               <button
                 key={langCode}
@@ -105,8 +111,8 @@ const LanguageSwitcher: React.FC = () => {
 
       {/* 点击外部关闭下拉菜单 */}
       {isOpen && (
-        <div 
-          className="language-overlay" 
+        <div
+          className="language-overlay"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />

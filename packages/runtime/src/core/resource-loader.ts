@@ -36,7 +36,10 @@ export class ResourceLoader extends EventEmitter {
   /**
    * 加载语言资源
    */
-  async load(language: string, namespace: string = 'translation'): Promise<TranslationResource> {
+  async load(
+    language: string,
+    namespace: string = 'translation'
+  ): Promise<TranslationResource> {
     const resourceKey = this.getResourceKey(language, namespace);
 
     // 如果已经在加载中，返回现有的 Promise
@@ -59,16 +62,16 @@ export class ResourceLoader extends EventEmitter {
 
     try {
       const result = await loadingPromise;
-      
+
       if (result.status === 'success') {
         this.loadedResources.set(resourceKey, result.data);
         this.emit('resourceLoaded', language, namespace);
-        
+
         // 设置自动重新加载
         if (this.options.reloadInterval && this.options.reloadInterval > 0) {
           this.scheduleReload(language, namespace);
         }
-        
+
         return result.data;
       } else {
         this.emit('resourceLoadFailed', language, namespace, result.error!);
@@ -89,33 +92,44 @@ export class ResourceLoader extends EventEmitter {
       throw new Error('Multi-loading is not enabled');
     }
 
-    const loadPromises = requests.map(async ({ language, namespace = 'translation' }) => {
-      try {
-        const resource = await this.load(language, namespace);
-        return { key: this.getResourceKey(language, namespace), resource };
-      } catch (error) {
-        console.warn(`Failed to load ${language}/${namespace}:`, error);
-        return { key: this.getResourceKey(language, namespace), resource: {} };
+    const loadPromises = requests.map(
+      async ({ language, namespace = 'translation' }) => {
+        try {
+          const resource = await this.load(language, namespace);
+          return { key: this.getResourceKey(language, namespace), resource };
+        } catch (error) {
+          console.warn(`Failed to load ${language}/${namespace}:`, error);
+          return {
+            key: this.getResourceKey(language, namespace),
+            resource: {},
+          };
+        }
       }
-    });
+    );
 
     const results = await Promise.all(loadPromises);
-    
-    return results.reduce((acc, { key, resource }) => {
-      acc[key] = resource;
-      return acc;
-    }, {} as Record<string, TranslationResource>);
+
+    return results.reduce(
+      (acc, { key, resource }) => {
+        acc[key] = resource;
+        return acc;
+      },
+      {} as Record<string, TranslationResource>
+    );
   }
 
   /**
    * 重新加载资源
    */
-  async reload(language: string, namespace: string = 'translation'): Promise<TranslationResource> {
+  async reload(
+    language: string,
+    namespace: string = 'translation'
+  ): Promise<TranslationResource> {
     const resourceKey = this.getResourceKey(language, namespace);
-    
+
     // 清除已加载的资源
     this.loadedResources.delete(resourceKey);
-    
+
     // 取消重新加载计时器
     const timer = this.reloadTimers.get(resourceKey);
     if (timer) {
@@ -129,8 +143,11 @@ export class ResourceLoader extends EventEmitter {
   /**
    * 预加载资源
    */
-  async preload(languages: string[], namespace: string = 'translation'): Promise<void> {
-    const preloadPromises = languages.map(async (language) => {
+  async preload(
+    languages: string[],
+    namespace: string = 'translation'
+  ): Promise<void> {
+    const preloadPromises = languages.map(async language => {
       try {
         await this.load(language, namespace);
       } catch (error) {
@@ -152,7 +169,10 @@ export class ResourceLoader extends EventEmitter {
   /**
    * 获取已加载的资源
    */
-  getLoadedResource(language: string, namespace: string = 'translation'): TranslationResource | null {
+  getLoadedResource(
+    language: string,
+    namespace: string = 'translation'
+  ): TranslationResource | null {
     const resourceKey = this.getResourceKey(language, namespace);
     return this.loadedResources.get(resourceKey) || null;
   }
@@ -162,7 +182,7 @@ export class ResourceLoader extends EventEmitter {
    */
   clearResources(): void {
     this.loadedResources.clear();
-    
+
     // 清除所有重新加载计时器
     for (const timer of this.reloadTimers.values()) {
       clearTimeout(timer);
@@ -173,7 +193,10 @@ export class ResourceLoader extends EventEmitter {
   /**
    * 执行实际的加载操作
    */
-  private async performLoad(language: string, namespace: string): Promise<LoaderResult> {
+  private async performLoad(
+    language: string,
+    namespace: string
+  ): Promise<LoaderResult> {
     let lastError: Error | null = null;
 
     for (let attempt = 0; attempt <= this.options.retries!; attempt++) {
@@ -182,7 +205,7 @@ export class ResourceLoader extends EventEmitter {
         return { data, status: 'success' };
       } catch (error) {
         lastError = error as Error;
-        
+
         if (attempt < this.options.retries!) {
           // 等待后重试
           await this.delay(this.options.retryDelay! * (attempt + 1));
@@ -200,14 +223,17 @@ export class ResourceLoader extends EventEmitter {
   /**
    * 带超时的加载
    */
-  private async loadWithTimeout(language: string, namespace: string): Promise<TranslationResource> {
+  private async loadWithTimeout(
+    language: string,
+    namespace: string
+  ): Promise<TranslationResource> {
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
         reject(new Error(`Loading timeout for ${language}/${namespace}`));
       }, this.options.timeout);
     });
 
-    const loadPromise = this.options.loadFunction 
+    const loadPromise = this.options.loadFunction
       ? this.options.loadFunction(language, namespace)
       : this.loadFromPath(language, namespace);
 
@@ -217,7 +243,10 @@ export class ResourceLoader extends EventEmitter {
   /**
    * 从路径加载资源
    */
-  private async loadFromPath(language: string, namespace: string): Promise<TranslationResource> {
+  private async loadFromPath(
+    language: string,
+    namespace: string
+  ): Promise<TranslationResource> {
     const url = this.options.loadPath
       .replace('{{lng}}', language)
       .replace('{{ns}}', namespace);
@@ -249,13 +278,13 @@ export class ResourceLoader extends EventEmitter {
   private async loadByFetch(url: string): Promise<TranslationResource> {
     try {
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const contentType = response.headers.get('content-type') || '';
-      
+
       if (contentType.includes('application/json')) {
         return await response.json();
       } else {
@@ -279,7 +308,7 @@ export class ResourceLoader extends EventEmitter {
    */
   private scheduleReload(language: string, namespace: string): void {
     const resourceKey = this.getResourceKey(language, namespace);
-    
+
     // 清除现有的计时器
     const existingTimer = this.reloadTimers.get(resourceKey);
     if (existingTimer) {
@@ -288,7 +317,7 @@ export class ResourceLoader extends EventEmitter {
 
     // 设置新的计时器
     const timer = setTimeout(() => {
-      this.reload(language, namespace).catch((error) => {
+      this.reload(language, namespace).catch(error => {
         console.warn(`Auto-reload failed for ${resourceKey}:`, error);
       });
     }, this.options.reloadInterval);

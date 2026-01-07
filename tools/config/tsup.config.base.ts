@@ -14,4 +14,3 @@ export const createBaseConfig = (options: Options = {}): Options => {
     ...options,
   });
 };
-

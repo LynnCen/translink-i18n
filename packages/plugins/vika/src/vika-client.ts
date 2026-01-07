@@ -58,7 +58,7 @@ export class VikaClient {
     // 分批处理
     for (let i = 0; i < translations.length; i += batchSize) {
       const batch = translations.slice(i, i + batchSize);
-      
+
       const recordsToCreate: VikaRecord[] = [];
       const recordsToUpdate: VikaRecord[] = [];
 
@@ -120,8 +120,9 @@ export class VikaClient {
 
     for (const record of records) {
       const key = record.fields.key || record.fields['翻译键'] || '';
-      const translation = record.fields[language] || record.fields[`${language}_翻译`] || '';
-      
+      const translation =
+        record.fields[language] || record.fields[`${language}_翻译`] || '';
+
       if (key && translation) {
         translations[key] = translation;
       }
@@ -141,7 +142,7 @@ export class VikaClient {
     languages: Record<string, number>;
   }> {
     const records = await this.getAllRecords();
-    
+
     let pending = 0;
     let translated = 0;
     let reviewed = 0;
@@ -149,7 +150,7 @@ export class VikaClient {
 
     for (const record of records) {
       const status = record.fields.status || record.fields['状态'] || 'pending';
-      
+
       if (status === 'pending') pending++;
       else if (status === 'translated') translated++;
       else if (status === 'reviewed') reviewed++;
@@ -178,10 +179,13 @@ export class VikaClient {
    */
   async testConnection(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseURL}/datasheets/${this.datasheetId}`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
+      const response = await fetch(
+        `${this.baseURL}/datasheets/${this.datasheetId}`,
+        {
+          method: 'GET',
+          headers: this.getHeaders(),
+        }
+      );
 
       return response.ok;
     } catch (error) {
@@ -214,7 +218,10 @@ export class VikaClient {
   /**
    * 获取记录
    */
-  private async getRecords(pageNum: number, pageSize: number): Promise<VikaListResponse> {
+  private async getRecords(
+    pageNum: number,
+    pageSize: number
+  ): Promise<VikaListResponse> {
     const response = await fetch(
       `${this.baseURL}/datasheets/${this.datasheetId}/records?pageNum=${pageNum}&pageSize=${pageSize}`,
       {
@@ -289,4 +296,3 @@ export class VikaClient {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
-

@@ -3,17 +3,16 @@
  * 提供 Composition API 和全局属性支持
  */
 
-import { 
-  App, 
-  computed, 
-  ref, 
-  inject, 
-  provide, 
+import {
+  App,
+  computed,
+  ref,
+  inject,
   watch,
   onUnmounted,
   ComputedRef,
   Ref,
-  h
+  h,
 } from 'vue';
 import { I18nEngine } from '../core/i18n-engine.js';
 import type { I18nOptions, TranslationParams } from '../types/index.js';
@@ -37,10 +36,14 @@ export interface VueI18nInstance {
 }
 
 export interface UseI18nReturn {
-  t: (key: string, params?: TranslationParams, options?: { 
-    lng?: string; 
-    defaultValue?: string 
-  }) => string;
+  t: (
+    key: string,
+    params?: TranslationParams,
+    options?: {
+      lng?: string;
+      defaultValue?: string;
+    }
+  ) => string;
   locale: ComputedRef<string>;
   setLocale: (locale: string) => Promise<void>;
   availableLocales: ComputedRef<string[]>;
@@ -83,7 +86,7 @@ export function createI18n(options: VueI18nOptions): VueI18nInstance {
           isLoading.value = false;
         }
       }
-    }
+    },
   });
 
   // 可用语言列表
@@ -96,13 +99,16 @@ export function createI18n(options: VueI18nOptions): VueI18nInstance {
       availableLocales,
       engine,
     },
-    
+
     install(app: App) {
       // 提供全局实例
       app.provide(I18N_SYMBOL, i18n);
 
       // 全局属性注入
-      if (options.globalInjection !== false && options.globalProperties !== false) {
+      if (
+        options.globalInjection !== false &&
+        options.globalProperties !== false
+      ) {
         app.config.globalProperties.$t = globalT;
         app.config.globalProperties.$i18n = i18n.global;
         app.config.globalProperties.$locale = locale;
@@ -115,11 +121,11 @@ export function createI18n(options: VueI18nOptions): VueI18nInstance {
 
       // 应用卸载时清理
       const originalUnmount = app.unmount;
-      app.unmount = function() {
+      app.unmount = function () {
         engine.destroy();
         return originalUnmount.call(this);
       };
-    }
+    },
   };
 
   return i18n;
@@ -128,16 +134,16 @@ export function createI18n(options: VueI18nOptions): VueI18nInstance {
 /**
  * Composition API Hook
  */
-export function useI18n(options?: {
+export function useI18n(_options?: {
   useScope?: 'global' | 'local';
   inheritLocale?: boolean;
 }): UseI18nReturn {
   const i18n = inject<VueI18nInstance>(I18N_SYMBOL);
-  
+
   if (!i18n) {
     throw new Error(
       'useI18n must be used within i18n context. ' +
-      'Make sure to install the i18n plugin: app.use(i18n)'
+        'Make sure to install the i18n plugin: app.use(i18n)'
     );
   }
 
@@ -152,7 +158,7 @@ export function useI18n(options?: {
 
   // 本地翻译函数
   const t = (
-    key: string, 
+    key: string,
     params?: TranslationParams,
     localOptions?: { lng?: string; defaultValue?: string }
   ) => {
@@ -196,7 +202,7 @@ export const vT = {
   mounted(el: HTMLElement, binding: any) {
     const { value, arg, modifiers } = binding;
     const i18n = inject<VueI18nInstance>(I18N_SYMBOL);
-    
+
     if (!i18n) {
       console.warn('v-t directive requires i18n context');
       return;
@@ -216,7 +222,7 @@ export const vT = {
     }
 
     const translation = i18n.global.t(translationKey, params);
-    
+
     if (modifiers.html) {
       el.innerHTML = translation;
     } else {
@@ -243,7 +249,7 @@ export const vT = {
       unwatch();
       delete (el as any).__i18n_unwatch;
     }
-  }
+  },
 };
 
 /**
@@ -269,11 +275,11 @@ export const Translation = {
     },
     locale: {
       type: String,
-    }
+    },
   },
   setup(props: any, { slots }: any) {
     const i18n = inject<VueI18nInstance>(I18N_SYMBOL);
-    
+
     if (!i18n) {
       throw new Error('Translation component requires i18n context');
     }
@@ -293,15 +299,17 @@ export const Translation = {
     });
 
     return () => {
-      const children = slots.default ? slots.default({ translation: translation.value }) : translation.value;
-      
+      const children = slots.default
+        ? slots.default({ translation: translation.value })
+        : translation.value;
+
       if (props.tag === 'template') {
         return children;
       }
-      
+
       return h(props.tag, {}, children);
     };
-  }
+  },
 };
 
 /**
@@ -316,25 +324,27 @@ export function withTranslation<T extends Record<string, any>>(
   const wrappedComponent = {
     ...component,
     setup(props: any, ctx: any) {
-      const { t, locale, setLocale, availableLocales, isReady, isLoading } = useI18n();
-      
+      const { t, locale, setLocale, availableLocales, isReady, isLoading } =
+        useI18n();
+
       // 如果原组件有 setup 函数，调用它
       if (component.setup) {
         const result = component.setup(props, ctx);
-        
+
         // 如果返回函数（render function），包装它
         if (typeof result === 'function') {
-          return (renderProps: any) => result({
-            ...renderProps,
-            $t: t,
-            $locale: locale,
-            $setLocale: setLocale,
-            $availableLocales: availableLocales,
-            $i18nReady: isReady,
-            $i18nLoading: isLoading,
-          });
+          return (renderProps: any) =>
+            result({
+              ...renderProps,
+              $t: t,
+              $locale: locale,
+              $setLocale: setLocale,
+              $availableLocales: availableLocales,
+              $i18nReady: isReady,
+              $i18nLoading: isLoading,
+            });
         }
-        
+
         // 如果返回对象，扩展它
         if (result && typeof result === 'object') {
           return {
@@ -347,10 +357,10 @@ export function withTranslation<T extends Record<string, any>>(
             $i18nLoading: isLoading,
           };
         }
-        
+
         return result;
       }
-      
+
       // 如果没有 setup 函数，提供默认的
       return {
         $t: t,
@@ -360,7 +370,7 @@ export function withTranslation<T extends Record<string, any>>(
         $i18nReady: isReady,
         $i18nLoading: isLoading,
       };
-    }
+    },
   };
 
   if (options?.name) {

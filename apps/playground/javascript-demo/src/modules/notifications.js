@@ -12,23 +12,23 @@ export function createNotificationSystem(i18n) {
     success: {
       icon: '✅',
       color: '\x1b[32m', // 绿色
-      priority: 1
+      priority: 1,
     },
     error: {
       icon: '❌',
       color: '\x1b[31m', // 红色
-      priority: 4
+      priority: 4,
     },
     warning: {
       icon: '⚠️',
       color: '\x1b[33m', // 黄色
-      priority: 3
+      priority: 3,
     },
     info: {
       icon: 'ℹ️',
       color: '\x1b[36m', // 青色
-      priority: 2
-    }
+      priority: 2,
+    },
   };
 
   const resetColor = '\x1b[0m';
@@ -75,7 +75,7 @@ export function createNotificationSystem(i18n) {
         persistent: options.persistent || false,
         duration: options.duration || (type === 'error' ? 10000 : 5000),
         category: options.category || 'general',
-        metadata: options.metadata || {}
+        metadata: options.metadata || {},
       };
 
       notifications.push(notification);
@@ -99,14 +99,16 @@ export function createNotificationSystem(i18n) {
     displayNotification(notification) {
       const config = notificationTypes[notification.type];
       const timestamp = notification.timestamp.toLocaleTimeString();
-      
+
       console.log(
         `${config.color}${config.icon} [${timestamp}] ${notification.message}${resetColor}`
       );
 
       // 如果有元数据，显示额外信息
       if (Object.keys(notification.metadata).length > 0) {
-        console.log(`   ${$tsl('详细信息')}: ${JSON.stringify(notification.metadata)}`);
+        console.log(
+          `   ${$tsl('详细信息')}: ${JSON.stringify(notification.metadata)}`
+        );
       }
     },
 
@@ -136,8 +138,10 @@ export function createNotificationSystem(i18n) {
      */
     markAllAsRead() {
       const unreadCount = notifications.filter(n => !n.read).length;
-      notifications.forEach(n => n.read = true);
-      console.log($tsl('已将 {{count}} 条通知标记为已读'), { count: unreadCount });
+      notifications.forEach(n => (n.read = true));
+      console.log($tsl('已将 {{count}} 条通知标记为已读'), {
+        count: unreadCount,
+      });
     },
 
     /**
@@ -155,13 +159,13 @@ export function createNotificationSystem(i18n) {
     clearRead() {
       const readNotifications = notifications.filter(n => n.read);
       const count = readNotifications.length;
-      
+
       for (let i = notifications.length - 1; i >= 0; i--) {
         if (notifications[i].read) {
           notifications.splice(i, 1);
         }
       }
-      
+
       console.log($tsl('已清除 {{count}} 条已读通知'), { count });
     },
 
@@ -209,10 +213,10 @@ export function createNotificationSystem(i18n) {
      */
     showHistory(filter = {}) {
       const filteredNotifications = this.getNotifications(filter);
-      
+
       console.log('\n' + i18n.t('notification.history.title'));
       console.log('='.repeat(60));
-      
+
       if (filteredNotifications.length === 0) {
         console.log(i18n.t('notification.history.empty'));
         return;
@@ -221,19 +225,27 @@ export function createNotificationSystem(i18n) {
       filteredNotifications.forEach((notification, index) => {
         const config = notificationTypes[notification.type];
         const timestamp = notification.timestamp.toLocaleString();
-        const readStatus = notification.read ? 
-          i18n.t('notification.status.read') : 
-          i18n.t('notification.status.unread');
-        
-        console.log(`${index + 1}. ${config.icon} [${timestamp}] ${notification.message}`);
-        console.log(`   ${i18n.t('notification.type')}: ${i18n.t(`notification.type.${notification.type}`)}`);
+        const readStatus = notification.read
+          ? i18n.t('notification.status.read')
+          : i18n.t('notification.status.unread');
+
+        console.log(
+          `${index + 1}. ${config.icon} [${timestamp}] ${notification.message}`
+        );
+        console.log(
+          `   ${i18n.t('notification.type')}: ${i18n.t(`notification.type.${notification.type}`)}`
+        );
         console.log(`   ${i18n.t('notification.status')}: ${readStatus}`);
-        console.log(`   ${i18n.t('notification.category')}: ${notification.category}`);
-        
+        console.log(
+          `   ${i18n.t('notification.category')}: ${notification.category}`
+        );
+
         if (notification.persistent) {
-          console.log(`   ${i18n.t('notification.persistent')}: ${i18n.t('common.yes')}`);
+          console.log(
+            `   ${i18n.t('notification.persistent')}: ${i18n.t('common.yes')}`
+          );
         }
-        
+
         console.log('');
       });
     },
@@ -247,9 +259,9 @@ export function createNotificationSystem(i18n) {
         unread: notifications.filter(n => !n.read).length,
         byType: {},
         byCategory: {},
-        recent: notifications.filter(n => 
-          Date.now() - n.timestamp.getTime() < 24 * 60 * 60 * 1000
-        ).length
+        recent: notifications.filter(
+          n => Date.now() - n.timestamp.getTime() < 24 * 60 * 60 * 1000
+        ).length,
       };
 
       // 按类型统计
@@ -260,7 +272,9 @@ export function createNotificationSystem(i18n) {
       // 按分类统计
       const categories = [...new Set(notifications.map(n => n.category))];
       categories.forEach(category => {
-        stats.byCategory[category] = notifications.filter(n => n.category === category).length;
+        stats.byCategory[category] = notifications.filter(
+          n => n.category === category
+        ).length;
       });
 
       return stats;
@@ -271,19 +285,25 @@ export function createNotificationSystem(i18n) {
      */
     showStatistics() {
       const stats = this.getStatistics();
-      
+
       console.log('\n' + i18n.t('notification.statistics.title'));
       console.log('-'.repeat(40));
       console.log(`${i18n.t('notification.statistics.total')}: ${stats.total}`);
-      console.log(`${i18n.t('notification.statistics.unread')}: ${stats.unread}`);
-      console.log(`${i18n.t('notification.statistics.recent')}: ${stats.recent}`);
-      
+      console.log(
+        `${i18n.t('notification.statistics.unread')}: ${stats.unread}`
+      );
+      console.log(
+        `${i18n.t('notification.statistics.recent')}: ${stats.recent}`
+      );
+
       console.log('\n' + i18n.t('notification.statistics.byType') + ':');
       Object.entries(stats.byType).forEach(([type, count]) => {
         const config = notificationTypes[type];
-        console.log(`  ${config.icon} ${i18n.t(`notification.type.${type}`)}: ${count}`);
+        console.log(
+          `  ${config.icon} ${i18n.t(`notification.type.${type}`)}: ${count}`
+        );
       });
-      
+
       if (Object.keys(stats.byCategory).length > 0) {
         console.log('\n' + i18n.t('notification.statistics.byCategory') + ':');
         Object.entries(stats.byCategory).forEach(([category, count]) => {
@@ -297,13 +317,15 @@ export function createNotificationSystem(i18n) {
      */
     batch(notifications) {
       const results = [];
-      
+
       notifications.forEach(({ type, message, options }) => {
         const result = this.notify(type, message, options);
         results.push(result);
       });
-      
-      console.log($tsl('批量发送了 {{count}} 条通知'), { count: results.length });
+
+      console.log($tsl('批量发送了 {{count}} 条通知'), {
+        count: results.length,
+      });
       return results;
     },
 
@@ -314,7 +336,7 @@ export function createNotificationSystem(i18n) {
       if (!this.templates) {
         this.templates = new Map();
       }
-      
+
       this.templates.set(name, template);
       console.log($tsl('通知模板已创建: {{name}}'), { name });
     },
@@ -324,15 +346,17 @@ export function createNotificationSystem(i18n) {
      */
     notifyFromTemplate(templateName, data = {}) {
       if (!this.templates || !this.templates.has(templateName)) {
-        throw new Error($tsl('通知模板不存在: {{name}}'), { name: templateName });
+        throw new Error($tsl('通知模板不存在: {{name}}'), {
+          name: templateName,
+        });
       }
-      
+
       const template = this.templates.get(templateName);
       const message = this.interpolateTemplate(template.message, data);
-      
+
       return this.notify(template.type, message, {
         ...template.options,
-        metadata: { ...template.options?.metadata, templateName, data }
+        metadata: { ...template.options?.metadata, templateName, data },
       });
     },
 
@@ -362,6 +386,6 @@ export function createNotificationSystem(i18n) {
         this.templates.clear();
       }
       console.log($tsl('通知系统已重置'));
-    }
+    },
   };
 }

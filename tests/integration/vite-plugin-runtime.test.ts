@@ -21,7 +21,7 @@ describe('Vite 插件与 Runtime 集成测试', () => {
     if (viteServer) {
       await viteServer.close();
     }
-    
+
     // 清理测试项目
     await fs.rm(testProjectDir, { recursive: true, force: true });
   });
@@ -30,17 +30,17 @@ describe('Vite 插件与 Runtime 集成测试', () => {
     it('应该在开发模式下保持原文并添加映射', async () => {
       // 创建语言文件
       await createLanguageFiles();
-      
+
       // 创建 Vite 配置
       const viteConfig = {
         root: testProjectDir,
         plugins: [
           createI18nPlugin({
             localesDir: 'src/locales',
-            defaultLanguage: 'zh-CN'
-          })
+            defaultLanguage: 'zh-CN',
+          }),
         ],
-        server: { port: 0 } // 使用随机端口
+        server: { port: 0 }, // 使用随机端口
       };
 
       viteServer = await createServer(viteConfig);
@@ -60,7 +60,7 @@ export const component = {
 
       // 通过 Vite 转换代码
       const result = await viteServer.transformRequest('/src/test.js');
-      
+
       expect(result).toBeDefined();
       if (result) {
         // 开发模式应该保持原文
@@ -79,16 +79,18 @@ export const component = {
         plugins: [
           createI18nPlugin({
             localesDir: 'src/locales',
-            defaultLanguage: 'zh-CN'
-          })
-        ]
+            defaultLanguage: 'zh-CN',
+          }),
+        ],
       };
 
       viteServer = await createServer(viteConfig);
 
       // 请求虚拟语言模块
-      const result = await viteServer.transformRequest('virtual:i18n-language-zh-CN');
-      
+      const result = await viteServer.transformRequest(
+        'virtual:i18n-language-zh-CN'
+      );
+
       expect(result).toBeDefined();
       if (result) {
         expect(result.code).toContain('export default');
@@ -108,9 +110,9 @@ export const component = {
           createI18nPlugin({
             localesDir: 'src/locales',
             defaultLanguage: 'zh-CN',
-            hotReload: true
-          })
-        ]
+            hotReload: true,
+          }),
+        ],
       };
 
       viteServer = await createServer(viteConfig);
@@ -126,10 +128,10 @@ export const component = {
         greeting: '你好，{{name}}！',
         user: {
           profile: '用户资料',
-          settings: '设置'
-        }
+          settings: '设置',
+        },
       };
-      
+
       await fs.writeFile(zhCNFile, JSON.stringify(updatedContent, null, 2));
 
       // 等待文件系统事件
@@ -137,9 +139,10 @@ export const component = {
 
       // 验证 HMR 更新被发送
       expect(wsSendSpy).toHaveBeenCalled();
-      
-      const updateCall = wsSendSpy.mock.calls.find(call => 
-        call[0] && typeof call[0] === 'object' && call[0].type === 'update'
+
+      const updateCall = wsSendSpy.mock.calls.find(
+        call =>
+          call[0] && typeof call[0] === 'object' && call[0].type === 'update'
       );
       expect(updateCall).toBeDefined();
     });
@@ -152,31 +155,37 @@ export const component = {
         plugins: [
           createI18nPlugin({
             localesDir: 'src/locales',
-            defaultLanguage: 'zh-CN'
-          })
-        ]
+            defaultLanguage: 'zh-CN',
+          }),
+        ],
       };
 
       viteServer = await createServer(viteConfig);
 
       // 创建源文件
       const sourceFile = join(testProjectDir, 'src/App.vue');
-      await fs.writeFile(sourceFile, `
+      await fs.writeFile(
+        sourceFile,
+        `
 <template>
   <h1>{{ $tsl('原始标题') }}</h1>
 </template>
-      `);
+      `
+      );
 
       // 首次转换
       const result1 = await viteServer.transformRequest('/src/App.vue');
       expect(result1?.code).toContain('原始标题');
 
       // 修改源文件
-      await fs.writeFile(sourceFile, `
+      await fs.writeFile(
+        sourceFile,
+        `
 <template>
   <h1>{{ $tsl('更新后的标题') }}</h1>
 </template>
-      `);
+      `
+      );
 
       // 再次转换
       const result2 = await viteServer.transformRequest('/src/App.vue');
@@ -197,9 +206,9 @@ export const component = {
         plugins: [
           createI18nPlugin({
             localesDir: 'src/locales',
-            defaultLanguage: 'zh-CN'
-          })
-        ]
+            defaultLanguage: 'zh-CN',
+          }),
+        ],
       };
 
       viteServer = await createServer(buildConfig);
@@ -213,11 +222,11 @@ const greeting = t('你好，世界');
       const plugin = buildConfig.plugins[0] as any;
       plugin.configResolved({
         ...buildConfig,
-        isProduction: true
+        isProduction: true,
       });
 
       const result = await plugin.transform(sourceCode, '/src/test.js');
-      
+
       expect(result).toBeDefined();
       if (result && typeof result === 'object' && 'code' in result) {
         // 生产模式应该转换为哈希
@@ -237,16 +246,20 @@ const greeting = t('你好，世界');
         plugins: [
           createI18nPlugin({
             localesDir: 'src/locales',
-            defaultLanguage: 'zh-CN'
-          })
-        ]
+            defaultLanguage: 'zh-CN',
+          }),
+        ],
       };
 
       viteServer = await createServer(viteConfig);
 
       // 获取虚拟模块内容
-      const zhCNModule = await viteServer.transformRequest('virtual:i18n-language-zh-CN');
-      const enUSModule = await viteServer.transformRequest('virtual:i18n-language-en-US');
+      const zhCNModule = await viteServer.transformRequest(
+        'virtual:i18n-language-zh-CN'
+      );
+      const enUSModule = await viteServer.transformRequest(
+        'virtual:i18n-language-en-US'
+      );
 
       expect(zhCNModule?.code).toBeDefined();
       expect(enUSModule?.code).toBeDefined();
@@ -261,8 +274,8 @@ const greeting = t('你好，世界');
         supportedLanguages: ['zh-CN', 'en-US'],
         resources: {
           'zh-CN': zhCNData,
-          'en-US': enUSData
-        }
+          'en-US': enUSData,
+        },
       });
 
       await i18nEngine.init();
@@ -278,17 +291,17 @@ const greeting = t('你好，世界');
 
     it('应该支持懒加载语言包', async () => {
       await createLanguageFiles();
-      
+
       // 添加更多语言文件
       const jaJPContent = {
         welcome: 'いらっしゃいませ',
         greeting: 'こんにちは、{{name}}さん！',
         user: {
           profile: 'ユーザープロフィール',
-          settings: '設定'
-        }
+          settings: '設定',
+        },
       };
-      
+
       await fs.writeFile(
         join(testProjectDir, 'src/locales/ja-JP.json'),
         JSON.stringify(jaJPContent, null, 2)
@@ -300,16 +313,18 @@ const greeting = t('你好，世界');
           createI18nPlugin({
             localesDir: 'src/locales',
             defaultLanguage: 'zh-CN',
-            lazyLoad: true
-          })
-        ]
+            lazyLoad: true,
+          }),
+        ],
       };
 
       viteServer = await createServer(viteConfig);
 
       // 模拟懒加载场景
       const loadLanguageModule = async (lang: string) => {
-        const result = await viteServer.transformRequest(`virtual:i18n-language-${lang}`);
+        const result = await viteServer.transformRequest(
+          `virtual:i18n-language-${lang}`
+        );
         return result ? extractModuleData(result.code) : null;
       };
 
@@ -321,11 +336,11 @@ const greeting = t('你好，世界');
         defaultLanguage: 'zh-CN',
         supportedLanguages: ['zh-CN', 'en-US', 'ja-JP'],
         resources: {
-          'zh-CN': zhCNData!
+          'zh-CN': zhCNData!,
         },
-        loadFunction: async (lang) => {
+        loadFunction: async lang => {
           return await loadLanguageModule(lang);
-        }
+        },
       });
 
       await i18nEngine.init();
@@ -342,9 +357,9 @@ const greeting = t('你好，世界');
       // 只创建中文文件，不创建英文文件
       const zhCNContent = {
         welcome: '欢迎使用',
-        greeting: '你好，{{name}}！'
+        greeting: '你好，{{name}}！',
       };
-      
+
       await fs.writeFile(
         join(testProjectDir, 'src/locales/zh-CN.json'),
         JSON.stringify(zhCNContent, null, 2)
@@ -355,19 +370,23 @@ const greeting = t('你好，世界');
         plugins: [
           createI18nPlugin({
             localesDir: 'src/locales',
-            defaultLanguage: 'zh-CN'
-          })
-        ]
+            defaultLanguage: 'zh-CN',
+          }),
+        ],
       };
 
       viteServer = await createServer(viteConfig);
 
       // 请求存在的语言文件
-      const zhResult = await viteServer.transformRequest('virtual:i18n-language-zh-CN');
+      const zhResult = await viteServer.transformRequest(
+        'virtual:i18n-language-zh-CN'
+      );
       expect(zhResult).toBeDefined();
 
       // 请求不存在的语言文件
-      const enResult = await viteServer.transformRequest('virtual:i18n-language-en-US');
+      const enResult = await viteServer.transformRequest(
+        'virtual:i18n-language-en-US'
+      );
       expect(enResult).toBeNull();
     });
 
@@ -383,15 +402,17 @@ const greeting = t('你好，世界');
         plugins: [
           createI18nPlugin({
             localesDir: 'src/locales',
-            defaultLanguage: 'zh-CN'
-          })
-        ]
+            defaultLanguage: 'zh-CN',
+          }),
+        ],
       };
 
       viteServer = await createServer(viteConfig);
 
       // 请求无效的语言文件应该返回 null 而不是抛出错误
-      const result = await viteServer.transformRequest('virtual:i18n-language-invalid');
+      const result = await viteServer.transformRequest(
+        'virtual:i18n-language-invalid'
+      );
       expect(result).toBeNull();
     });
   });
@@ -403,8 +424,8 @@ const greeting = t('你好，世界');
       greeting: '你好，{{name}}！',
       user: {
         profile: '用户资料',
-        settings: '设置'
-      }
+        settings: '设置',
+      },
     };
 
     const enUSContent = {
@@ -412,8 +433,8 @@ const greeting = t('你好，世界');
       greeting: 'Hello, {{name}}!',
       user: {
         profile: 'User Profile',
-        settings: 'Settings'
-      }
+        settings: 'Settings',
+      },
     };
 
     await fs.writeFile(

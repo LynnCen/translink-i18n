@@ -1,24 +1,25 @@
 <template>
   <div class="language-switcher">
     <label for="language-select">{{ $tsl('选择语言') }}:</label>
-    <select 
+    <select
       id="language-select"
-      :value="currentLanguage" 
-      @change="handleLanguageChange"
+      :value="currentLanguage"
       :disabled="isLoading"
       class="language-select"
+      @change="handleLanguageChange"
     >
-      <option 
-        v-for="lang in availableLanguages" 
-        :key="lang.code" 
+      <option
+        v-for="lang in availableLanguages"
+        :key="lang.code"
         :value="lang.code"
       >
         {{ lang.flag }} {{ lang.name }}
       </option>
     </select>
-    
-    <div v-if="isLoading" class="loading-indicator">
-      <span class="spinner"></span>
+
+    <div v-if="isLoading"
+class="loading-indicator">
+      <span class="spinner" />
       {{ $tsl('切换中...') }}
     </div>
   </div>
@@ -35,7 +36,7 @@ const { locale, setLocale, availableLocales, isLoading } = useI18n();
 const languageOptions = {
   'zh-CN': { name: '中文', flag: '🇨🇳' },
   'en-US': { name: 'English', flag: '🇺🇸' },
-  'ja-JP': { name: '日本語', flag: '🇯🇵' }
+  'ja-JP': { name: '日本語', flag: '🇯🇵' },
 };
 
 // 计算属性
@@ -45,7 +46,7 @@ const availableLanguages = computed(() => {
   return availableLocales.value.map(code => ({
     code,
     name: languageOptions[code as keyof typeof languageOptions]?.name || code,
-    flag: languageOptions[code as keyof typeof languageOptions]?.flag || '🌐'
+    flag: languageOptions[code as keyof typeof languageOptions]?.flag || '🌐',
   }));
 });
 
@@ -53,11 +54,11 @@ const availableLanguages = computed(() => {
 const handleLanguageChange = async (event: Event) => {
   const target = event.target as HTMLSelectElement;
   const newLanguage = target.value;
-  
+
   if (newLanguage !== currentLanguage.value) {
     try {
       await setLocale(newLanguage);
-      
+
       // 显示切换成功提示
       showNotification($tsl('语言切换成功！'));
     } catch (error) {
@@ -68,12 +69,15 @@ const handleLanguageChange = async (event: Event) => {
 };
 
 // 通知函数（简单实现）
-const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+const showNotification = (
+  message: string,
+  type: 'success' | 'error' = 'success'
+) => {
   // 创建通知元素
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.textContent = message;
-  
+
   // 添加样式
   Object.assign(notification.style, {
     position: 'fixed',
@@ -88,16 +92,16 @@ const showNotification = (message: string, type: 'success' | 'error' = 'success'
     fontSize: '14px',
     fontWeight: '500',
     transform: 'translateX(100%)',
-    transition: 'transform 0.3s ease'
+    transition: 'transform 0.3s ease',
   });
-  
+
   document.body.appendChild(notification);
-  
+
   // 动画显示
   setTimeout(() => {
     notification.style.transform = 'translateX(0)';
   }, 10);
-  
+
   // 自动移除
   setTimeout(() => {
     notification.style.transform = 'translateX(100%)';
@@ -180,8 +184,12 @@ const showNotification = (message: string, type: 'success' | 'error' = 'success'
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 响应式设计 */
@@ -191,12 +199,12 @@ const showNotification = (message: string, type: 'success' | 'error' = 'success'
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .language-select {
     min-width: 100px;
     font-size: 0.8rem;
   }
-  
+
   .loading-indicator {
     position: static;
     margin-top: 0;

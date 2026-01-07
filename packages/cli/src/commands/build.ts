@@ -37,7 +37,7 @@ async function buildCommand(options: BuildOptions) {
     let config;
     try {
       config = await configManager.loadConfig();
-    } catch (error) {
+    } catch {
       logger.error('无法加载配置文件');
       logger.info('请先运行 translink init 初始化配置');
       process.exit(1);
@@ -259,14 +259,15 @@ function parseLanguageFile(content: string, format: string): LanguageData {
     case 'json':
       return JSON.parse(content);
     case 'js':
-    case 'ts':
+    case 'ts': {
       // 简单的 ES 模块解析（生产环境建议使用更健壮的解析器）
       const match = content.match(/export\s+default\s+(.+);?\s*$/s);
       if (match) {
         return JSON.parse(match[1].replace(/as\s+const/, ''));
       }
       throw new Error('无法解析 ES 模块格式');
-    case 'yaml':
+    }
+    case 'yaml': {
       // 简单的 YAML 解析（生产环境建议使用 yaml 库）
       const data: LanguageData = {};
       content.split('\n').forEach(line => {
@@ -276,6 +277,7 @@ function parseLanguageFile(content: string, format: string): LanguageData {
         }
       });
       return data;
+    }
     default:
       throw new Error(`不支持的文件格式: ${format}`);
   }

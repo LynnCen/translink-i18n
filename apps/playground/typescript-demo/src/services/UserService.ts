@@ -44,20 +44,22 @@ export class UserService {
     // 验证输入数据
     const validation = this.validateCreateUserData(userData);
     if (!validation.isValid) {
-      throw new Error($tsl('用户数据验证失败: {{errors}}', { 
-        errors: validation.errors.join(', ') 
-      }));
+      throw new Error(
+        $tsl('用户数据验证失败: {{errors}}', {
+          errors: validation.errors.join(', '),
+        })
+      );
     }
 
     const user: User = {
       id: this.generateId(),
       ...userData,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.users.set(user.id, user);
-    
+
     console.log($tsl('用户 {{name}} 创建成功'), { name: user.name });
     return user;
   }
@@ -82,11 +84,11 @@ export class UserService {
     const updatedUser: User = {
       ...user,
       ...updateData,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.users.set(id, updatedUser);
-    
+
     console.log($tsl('用户 {{name}} 更新成功'), { name: updatedUser.name });
     return updatedUser;
   }
@@ -130,9 +132,13 @@ export class UserService {
     if (!user.name || user.name.trim().length === 0) {
       errors.push(this.i18n.t('validation.required', { field: $tsl('姓名') }));
     } else if (user.name.length < 2) {
-      errors.push(this.i18n.t('validation.minLength', { field: $tsl('姓名'), min: 2 }));
+      errors.push(
+        this.i18n.t('validation.minLength', { field: $tsl('姓名'), min: 2 })
+      );
     } else if (user.name.length > 50) {
-      errors.push(this.i18n.t('validation.maxLength', { field: $tsl('姓名'), max: 50 }));
+      errors.push(
+        this.i18n.t('validation.maxLength', { field: $tsl('姓名'), max: 50 })
+      );
     }
 
     // 验证邮箱
@@ -148,7 +154,7 @@ export class UserService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -180,7 +186,7 @@ export class UserService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -189,17 +195,17 @@ export class UserService {
    */
   private validateEmail(email: string): ValidationResult {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (!emailRegex.test(email)) {
       return {
         isValid: false,
-        errors: [this.i18n.t('validation.email')]
+        errors: [this.i18n.t('validation.email')],
       };
     }
 
     return {
       isValid: true,
-      errors: []
+      errors: [],
     };
   }
 
@@ -220,17 +226,17 @@ export class UserService {
   } {
     const users = this.getAllUsers();
     const total = users.length;
-    
+
     if (total === 0) {
       return {
         total: 0,
         averageAge: 0,
-        domains: {}
+        domains: {},
       };
     }
 
     const averageAge = users.reduce((sum, user) => sum + user.age, 0) / total;
-    
+
     const domains: Record<string, number> = {};
     users.forEach(user => {
       const domain = user.email.split('@')[1];
@@ -240,12 +246,14 @@ export class UserService {
     console.log($tsl('用户统计信息:'));
     console.log(`- ${$tsl('总用户数')}: ${total}`);
     console.log(`- ${$tsl('平均年龄')}: ${averageAge.toFixed(1)}`);
-    console.log(`- ${$tsl('邮箱域名分布')}: ${JSON.stringify(domains, null, 2)}`);
+    console.log(
+      `- ${$tsl('邮箱域名分布')}: ${JSON.stringify(domains, null, 2)}`
+    );
 
     return {
       total,
       averageAge,
-      domains
+      domains,
     };
   }
 }

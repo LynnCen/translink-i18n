@@ -8,7 +8,7 @@ describe('ASTExtractor', () => {
     patterns: ['**/*.{vue,ts,js,tsx,jsx}'],
     exclude: ['node_modules/**', 'dist/**'],
     functions: ['t', '$tsl', 'i18n.t'],
-    extensions: ['.vue', '.ts', '.js', '.tsx', '.jsx']
+    extensions: ['.vue', '.ts', '.js', '.tsx', '.jsx'],
   };
 
   beforeEach(() => {
@@ -34,7 +34,7 @@ const handleClick = () => {
       `;
 
       createMockDirectory({
-        'App.vue': vueContent
+        'App.vue': vueContent,
       });
 
       const results = await extractor.extractFromFile('App.vue');
@@ -66,13 +66,13 @@ const saveProfile = () => {
       `;
 
       createMockDirectory({
-        'UserProfile.vue': vueContent
+        'UserProfile.vue': vueContent,
       });
 
       const results = await extractor.extractFromFile('UserProfile.vue');
 
       expect(results).toHaveLength(2);
-      
+
       const profileResult = results.find(r => r.text === '用户资料');
       expect(profileResult).toBeDefined();
       expect(profileResult?.context.componentName).toBe('UserProfile');
@@ -104,7 +104,7 @@ class UserService {
       `;
 
       createMockDirectory({
-        'messages.ts': tsContent
+        'messages.ts': tsContent,
       });
 
       const results = await extractor.extractFromFile('messages.ts');
@@ -135,7 +135,7 @@ showNotification($tsl('操作成功'), 'success');
       `;
 
       createMockDirectory({
-        'complex.js': jsContent
+        'complex.js': jsContent,
       });
 
       const results = await extractor.extractFromFile('complex.js');
@@ -174,7 +174,7 @@ export default MyComponent;
       `;
 
       createMockDirectory({
-        'MyComponent.tsx': reactContent
+        'MyComponent.tsx': reactContent,
       });
 
       const results = await extractor.extractFromFile('MyComponent.tsx');
@@ -200,7 +200,7 @@ const messages = {
       `;
 
       createMockDirectory({
-        'mixed.ts': mixedContent
+        'mixed.ts': mixedContent,
       });
 
       const results = await extractor.extractFromFile('mixed.ts');
@@ -227,7 +227,7 @@ const another = t('这也应该被提取');
       `;
 
       createMockDirectory({
-        'comments.ts': contentWithComments
+        'comments.ts': contentWithComments,
       });
 
       const results = await extractor.extractFromFile('comments.ts');
@@ -235,25 +235,29 @@ const another = t('这也应该被提取');
       expect(results).toHaveLength(2);
       expect(results.map(r => r.text)).toContain('这应该被提取');
       expect(results.map(r => r.text)).toContain('这也应该被提取');
-      expect(results.map(r => r.text)).not.toContain('这是注释中的中文，不应该被提取');
+      expect(results.map(r => r.text)).not.toContain(
+        '这是注释中的中文，不应该被提取'
+      );
     });
   });
 
   describe('项目级别提取', () => {
     it('应该从多个文件中提取文本', async () => {
       // Mock glob 返回多个文件
-      const mockGlob = vi.fn().mockResolvedValue([
-        'src/App.vue',
-        'src/components/Button.vue',
-        'src/utils/messages.ts'
-      ]);
-      
+      const mockGlob = vi
+        .fn()
+        .mockResolvedValue([
+          'src/App.vue',
+          'src/components/Button.vue',
+          'src/utils/messages.ts',
+        ]);
+
       vi.doMock('fast-glob', () => ({ default: mockGlob }));
 
       createMockDirectory({
         'App.vue': `<template><h1>{{ $tsl('首页标题') }}</h1></template>`,
         'Button.vue': `<template><button>{{ $tsl('按钮文本') }}</button></template>`,
-        'messages.ts': `export const msg = $tsl('工具消息');`
+        'messages.ts': `export const msg = $tsl('工具消息');`,
       });
 
       const results = await extractor.extractFromProject();
@@ -265,16 +269,13 @@ const another = t('这也应该被提取');
     });
 
     it('应该去重相同的文本', async () => {
-      const mockGlob = vi.fn().mockResolvedValue([
-        'file1.vue',
-        'file2.vue'
-      ]);
-      
+      const mockGlob = vi.fn().mockResolvedValue(['file1.vue', 'file2.vue']);
+
       vi.doMock('fast-glob', () => ({ default: mockGlob }));
 
       createMockDirectory({
         'file1.vue': `<template>{{ $tsl('重复文本') }}</template>`,
-        'file2.vue': `<template>{{ $tsl('重复文本') }}</template>`
+        'file2.vue': `<template>{{ $tsl('重复文本') }}</template>`,
       });
 
       const results = await extractor.extractFromProject();
@@ -290,11 +291,12 @@ const another = t('这也应该被提取');
     it('应该优雅处理文件读取错误', async () => {
       // Mock 文件读取失败
       vi.doMock('node:fs/promises', () => ({
-        readFile: vi.fn().mockRejectedValue(new Error('File not found'))
+        readFile: vi.fn().mockRejectedValue(new Error('File not found')),
       }));
 
-      await expect(extractor.extractFromFile('nonexistent.vue'))
-        .rejects.toThrow('File not found');
+      await expect(
+        extractor.extractFromFile('nonexistent.vue')
+      ).rejects.toThrow('File not found');
     });
 
     it('应该处理无效的 JavaScript 语法', async () => {
@@ -307,12 +309,12 @@ const invalid = {
       `;
 
       createMockDirectory({
-        'invalid.js': invalidContent
+        'invalid.js': invalidContent,
       });
 
       // 应该能够提取有效部分，跳过无效语法
       const results = await extractor.extractFromFile('invalid.js');
-      
+
       // 至少应该提取到一些文本，即使有语法错误
       expect(results.length).toBeGreaterThanOrEqual(0);
     });
@@ -321,12 +323,13 @@ const invalid = {
   describe('性能测试', () => {
     it('应该高效处理大文件', async () => {
       // 生成大文件内容
-      const largeContent = Array.from({ length: 1000 }, (_, i) => 
-        `const msg${i} = $tsl('消息${i}');`
+      const largeContent = Array.from(
+        { length: 1000 },
+        (_, i) => `const msg${i} = $tsl('消息${i}');`
       ).join('\n');
 
       createMockDirectory({
-        'large.ts': largeContent
+        'large.ts': largeContent,
       });
 
       const startTime = Date.now();

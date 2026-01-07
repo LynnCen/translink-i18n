@@ -6,7 +6,7 @@ describe('CacheManager', () => {
   const mockOptions = {
     maxSize: 5,
     ttl: 1000,
-    storage: 'memory' as const
+    storage: 'memory' as const,
   };
 
   beforeEach(() => {
@@ -32,7 +32,7 @@ describe('CacheManager', () => {
     it('应该删除值', () => {
       cacheManager.set('key1', 'value1');
       expect(cacheManager.has('key1')).toBe(true);
-      
+
       cacheManager.delete('key1');
       expect(cacheManager.has('key1')).toBe(false);
     });
@@ -41,17 +41,17 @@ describe('CacheManager', () => {
       cacheManager.set('key1', 'value1');
       cacheManager.set('key2', 'value2');
       expect(cacheManager.size()).toBe(2);
-      
+
       cacheManager.clear();
       expect(cacheManager.size()).toBe(0);
     });
 
     it('应该返回正确的大小', () => {
       expect(cacheManager.size()).toBe(0);
-      
+
       cacheManager.set('key1', 'value1');
       expect(cacheManager.size()).toBe(1);
-      
+
       cacheManager.set('key2', 'value2');
       expect(cacheManager.size()).toBe(2);
     });
@@ -62,7 +62,7 @@ describe('CacheManager', () => {
       const shortTTLManager = new CacheManager<string>({
         maxSize: 10,
         ttl: 50, // 50ms
-        storage: 'memory'
+        storage: 'memory',
       });
 
       shortTTLManager.set('key1', 'value1');
@@ -76,10 +76,10 @@ describe('CacheManager', () => {
 
     it('应该在获取时更新访问时间', () => {
       cacheManager.set('key1', 'value1');
-      
+
       const entry = (cacheManager as any).memoryCache.get('key1');
       const originalAccessTime = entry.lastAccessed;
-      
+
       // 小延迟确保不同的时间戳
       setTimeout(() => {
         cacheManager.get('key1');
@@ -90,10 +90,10 @@ describe('CacheManager', () => {
 
     it('应该增加访问计数', () => {
       cacheManager.set('key1', 'value1');
-      
+
       cacheManager.get('key1');
       cacheManager.get('key1');
-      
+
       const entry = (cacheManager as any).memoryCache.get('key1');
       expect(entry.accessCount).toBe(2);
     });
@@ -102,20 +102,20 @@ describe('CacheManager', () => {
       const shortTTLManager = new CacheManager<string>({
         maxSize: 10,
         ttl: 100, // 100ms
-        storage: 'memory'
+        storage: 'memory',
       });
 
       shortTTLManager.set('key1', 'value1');
-      
+
       // 等待一半时间
       await new Promise(resolve => setTimeout(resolve, 50));
-      
+
       // 重新设置值，应该重置 TTL
       shortTTLManager.set('key1', 'newValue');
-      
+
       // 再等待一半时间，应该仍然存在
       await new Promise(resolve => setTimeout(resolve, 60));
-      
+
       expect(shortTTLManager.get('key1')).toBe('newValue');
     });
   });
@@ -131,7 +131,7 @@ describe('CacheManager', () => {
       // 添加一个更多项目，应该淘汰最旧的
       cacheManager.set('key5', 'value5');
       expect(cacheManager.size()).toBe(5);
-      
+
       // key0 应该被淘汰（最旧的）
       expect(cacheManager.has('key0')).toBe(false);
       expect(cacheManager.has('key5')).toBe(true);
@@ -148,7 +148,7 @@ describe('CacheManager', () => {
 
       // 添加新项目，应该淘汰 key1（现在是最旧的）
       cacheManager.set('key5', 'value5');
-      
+
       expect(cacheManager.has('key0')).toBe(true); // 应该仍然存在
       expect(cacheManager.has('key1')).toBe(false); // 应该被淘汰
     });
@@ -164,7 +164,7 @@ describe('CacheManager', () => {
 
       // 添加新项目
       cacheManager.set('key5', 'value5');
-      
+
       expect(cacheManager.has('key0')).toBe(true);
       expect(cacheManager.get('key0')).toBe('newValue0');
       expect(cacheManager.has('key1')).toBe(false); // 应该被淘汰
@@ -176,12 +176,12 @@ describe('CacheManager', () => {
       const localStorageManager = new CacheManager<string>({
         maxSize: 10,
         ttl: 5000,
-        storage: 'localStorage'
+        storage: 'localStorage',
       });
 
       localStorageManager.set('test', 'value');
       expect(window.localStorage.setItem).toHaveBeenCalled();
-      
+
       localStorageManager.get('test');
       expect(window.localStorage.getItem).toHaveBeenCalled();
     });
@@ -190,12 +190,12 @@ describe('CacheManager', () => {
       const sessionStorageManager = new CacheManager<string>({
         maxSize: 10,
         ttl: 5000,
-        storage: 'sessionStorage'
+        storage: 'sessionStorage',
       });
 
       sessionStorageManager.set('test', 'value');
       expect(window.sessionStorage.setItem).toHaveBeenCalled();
-      
+
       sessionStorageManager.get('test');
       expect(window.sessionStorage.getItem).toHaveBeenCalled();
     });
@@ -209,7 +209,7 @@ describe('CacheManager', () => {
       const fallbackManager = new CacheManager<string>({
         maxSize: 10,
         ttl: 5000,
-        storage: 'localStorage'
+        storage: 'localStorage',
       });
 
       // 应该不抛出错误并使用内存存储工作
@@ -224,14 +224,14 @@ describe('CacheManager', () => {
     it('应该提供缓存统计信息', () => {
       cacheManager.set('key1', 'value1');
       cacheManager.set('key2', 'value2');
-      
+
       cacheManager.get('key1');
       cacheManager.get('key1');
       cacheManager.get('key2');
       cacheManager.get('nonexistent'); // 未命中
 
       const stats = cacheManager.getStats();
-      
+
       expect(stats.size).toBe(2);
       expect(stats.hits).toBe(3);
       expect(stats.misses).toBe(1);
@@ -256,17 +256,17 @@ describe('CacheManager', () => {
     it('应该正确计算命中率', () => {
       // 没有操作时命中率应该为 0
       expect(cacheManager.getStats().hitRate).toBe(0);
-      
+
       cacheManager.set('key1', 'value1');
-      
+
       // 只有命中，没有未命中
       cacheManager.get('key1');
       expect(cacheManager.getStats().hitRate).toBe(1);
-      
+
       // 添加一些未命中
       cacheManager.get('nonexistent1');
       cacheManager.get('nonexistent2');
-      
+
       // 命中率应该是 1/3
       expect(cacheManager.getStats().hitRate).toBeCloseTo(0.33, 2);
     });
@@ -277,7 +277,7 @@ describe('CacheManager', () => {
       const shortTTLManager = new CacheManager<string>({
         maxSize: 10,
         ttl: 50,
-        storage: 'memory'
+        storage: 'memory',
       });
 
       shortTTLManager.set('key1', 'value1');
@@ -305,24 +305,24 @@ describe('CacheManager', () => {
       const mixedTTLManager = new CacheManager<string>({
         maxSize: 10,
         ttl: 100,
-        storage: 'memory'
+        storage: 'memory',
       });
 
       mixedTTLManager.set('key1', 'value1');
-      
+
       // 等待一半时间
       await new Promise(resolve => setTimeout(resolve, 50));
-      
+
       mixedTTLManager.set('key2', 'value2'); // 这个应该有更长的剩余时间
-      
+
       // 等待第一个过期
       await new Promise(resolve => setTimeout(resolve, 60));
-      
+
       // 触发清理
       mixedTTLManager.get('key2');
-      
+
       expect(mixedTTLManager.has('key1')).toBe(false); // 应该过期
-      expect(mixedTTLManager.has('key2')).toBe(true);  // 应该仍然存在
+      expect(mixedTTLManager.has('key2')).toBe(true); // 应该仍然存在
     });
   });
 
@@ -350,11 +350,11 @@ describe('CacheManager', () => {
       const zeroTTLManager = new CacheManager<string>({
         maxSize: 10,
         ttl: 0,
-        storage: 'memory'
+        storage: 'memory',
       });
 
       zeroTTLManager.set('key1', 'value1');
-      
+
       // 零 TTL 意味着立即过期
       expect(zeroTTLManager.get('key1')).toBeNull();
     });
@@ -363,11 +363,11 @@ describe('CacheManager', () => {
       const zeroSizeManager = new CacheManager<string>({
         maxSize: 0,
         ttl: 1000,
-        storage: 'memory'
+        storage: 'memory',
       });
 
       zeroSizeManager.set('key1', 'value1');
-      
+
       // 零大小意味着不能存储任何东西
       expect(zeroSizeManager.get('key1')).toBeNull();
       expect(zeroSizeManager.size()).toBe(0);
@@ -389,21 +389,21 @@ describe('CacheManager', () => {
 
       const results = await Promise.all(promises);
       expect(results).toHaveLength(100);
-      
+
       // 由于 LRU 淘汰，只有最后 5 个应该保留
       expect(cacheManager.size()).toBe(5);
     });
 
     it('应该在并发操作中保持数据一致性', async () => {
       const key = 'concurrent-key';
-      
+
       // 并发设置相同键
-      const setPromises = Array.from({ length: 10 }, (_, i) => 
+      const setPromises = Array.from({ length: 10 }, (_, i) =>
         Promise.resolve().then(() => cacheManager.set(key, `value${i}`))
       );
-      
+
       await Promise.all(setPromises);
-      
+
       // 应该有一个值（最后一个获胜）
       expect(cacheManager.has(key)).toBe(true);
       expect(cacheManager.get(key)).toMatch(/^value\d$/);

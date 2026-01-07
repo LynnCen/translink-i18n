@@ -34,7 +34,9 @@ export class VikaPlugin implements I18nPlugin {
     const datasheetId = config.datasheetId || process.env.VIKA_DATASHEET_ID;
 
     if (!apiKey || !datasheetId) {
-      throw new Error('Vika plugin requires apiKey and datasheetId in config or environment variables');
+      throw new Error(
+        'Vika plugin requires apiKey and datasheetId in config or environment variables'
+      );
     }
 
     this.client = new VikaClient(apiKey, datasheetId);
@@ -47,7 +49,7 @@ export class VikaPlugin implements I18nPlugin {
 
     try {
       const result = await this.client.pushTranslations(data.translations);
-      
+
       return {
         success: true,
         created: result.created,
@@ -70,7 +72,7 @@ export class VikaPlugin implements I18nPlugin {
 
     try {
       const translations = await this.client.pullTranslations(data.language);
-      
+
       return {
         success: true,
         translations,
@@ -141,4 +143,3 @@ export class VikaPlugin implements I18nPlugin {
 // 导出插件实例
 const plugin = new VikaPlugin();
 export default plugin;
-

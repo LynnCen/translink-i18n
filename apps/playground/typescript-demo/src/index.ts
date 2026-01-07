@@ -22,59 +22,61 @@ class Application {
           app: {
             title: '应用程序标题',
             welcome: '欢迎使用 TypeScript 示例',
-            description: '这是一个展示 TransLink I18n 在 TypeScript 中使用的示例程序。'
+            description:
+              '这是一个展示 TransLink I18n 在 TypeScript 中使用的示例程序。',
           },
           user: {
             login: '用户登录',
             logout: '用户退出',
             profile: '用户资料',
-            settings: '用户设置'
+            settings: '用户设置',
           },
           message: {
             success: '操作成功',
             error: '操作失败',
             warning: '警告信息',
-            info: '提示信息'
+            info: '提示信息',
           },
           validation: {
             required: '{{field}} 是必填项',
             email: '请输入有效的邮箱地址',
             minLength: '{{field}} 至少需要 {{min}} 个字符',
-            maxLength: '{{field}} 不能超过 {{max}} 个字符'
-          }
+            maxLength: '{{field}} 不能超过 {{max}} 个字符',
+          },
         },
         'en-US': {
           app: {
             title: 'Application Title',
             welcome: 'Welcome to TypeScript Demo',
-            description: 'This is a demo program showing how to use TransLink I18n in TypeScript.'
+            description:
+              'This is a demo program showing how to use TransLink I18n in TypeScript.',
           },
           user: {
             login: 'User Login',
             logout: 'User Logout',
             profile: 'User Profile',
-            settings: 'User Settings'
+            settings: 'User Settings',
           },
           message: {
             success: 'Operation Successful',
             error: 'Operation Failed',
             warning: 'Warning Message',
-            info: 'Information Message'
+            info: 'Information Message',
           },
           validation: {
             required: '{{field}} is required',
             email: 'Please enter a valid email address',
             minLength: '{{field}} must be at least {{min}} characters',
-            maxLength: '{{field}} cannot exceed {{max}} characters'
-          }
-        }
+            maxLength: '{{field}} cannot exceed {{max}} characters',
+          },
+        },
       },
       cache: {
         enabled: true,
         maxSize: 1000,
         ttl: 5 * 60 * 1000,
-        storage: 'memory'
-      }
+        storage: 'memory',
+      },
     });
 
     this.logger = new Logger(this.i18n);
@@ -89,13 +91,12 @@ class Application {
     try {
       await this.i18n.init();
       this.logger.info($tsl('应用程序初始化成功'));
-      
+
       // 设置事件监听器
       this.setupEventListeners();
-      
+
       // 显示欢迎信息
       this.showWelcomeMessage();
-      
     } catch (error) {
       this.logger.error($tsl('应用程序初始化失败'), error);
       throw error;
@@ -112,7 +113,10 @@ class Application {
     });
 
     this.i18n.on('translationMissing', (key: string, language: string) => {
-      this.logger.warn($tsl('缺失翻译: {{key}} ({{language}})'), { key, language });
+      this.logger.warn($tsl('缺失翻译: {{key}} ({{language}})'), {
+        key,
+        language,
+      });
     });
   }
 
@@ -133,12 +137,12 @@ class Application {
    */
   async demoUserService(): Promise<void> {
     console.log('\n--- ' + $tsl('用户服务演示') + ' ---');
-    
+
     // 创建用户
     const user = await this.userService.createUser({
       name: '张三',
       email: 'zhangsan@example.com',
-      age: 25
+      age: 25,
     });
 
     console.log($tsl('用户创建成功:'), user);
@@ -153,7 +157,7 @@ class Application {
 
     // 更新用户
     const updatedUser = await this.userService.updateUser(user.id, {
-      name: '李四'
+      name: '李四',
     });
     console.log($tsl('用户更新成功:'), updatedUser);
   }
@@ -163,7 +167,7 @@ class Application {
    */
   demoMessageService(): void {
     console.log('\n--- ' + $tsl('消息服务演示') + ' ---');
-    
+
     this.messageService.showSuccess($tsl('这是一条成功消息'));
     this.messageService.showError($tsl('这是一条错误消息'));
     this.messageService.showWarning($tsl('这是一条警告消息'));
@@ -175,18 +179,20 @@ class Application {
    */
   async demoLanguageSwitching(): Promise<void> {
     console.log('\n--- ' + $tsl('语言切换演示') + ' ---');
-    
+
     const languages = this.i18n.getSupportedLanguages();
-    
+
     for (const lang of languages) {
       await this.i18n.changeLanguage(lang);
       console.log(`\n[${lang}] ${this.i18n.t('app.welcome')}`);
-      
+
       // 演示插值功能
-      const greeting = this.i18n.t('validation.required', { field: 'Username' });
+      const greeting = this.i18n.t('validation.required', {
+        field: 'Username',
+      });
       console.log(`[${lang}] ${greeting}`);
     }
-    
+
     // 切换回中文
     await this.i18n.changeLanguage('zh-CN');
   }
@@ -196,15 +202,20 @@ class Application {
    */
   demoCaching(): void {
     console.log('\n--- ' + $tsl('缓存功能演示') + ' ---');
-    
+
     // 执行一些翻译操作
-    const keys = ['app.title', 'user.login', 'message.success', 'validation.required'];
-    
+    const keys = [
+      'app.title',
+      'user.login',
+      'message.success',
+      'validation.required',
+    ];
+
     console.log($tsl('执行翻译操作...'));
     keys.forEach(key => {
       this.i18n.t(key, { field: 'test', min: 3, max: 20 });
     });
-    
+
     // 显示缓存统计
     const stats = this.i18n.getCacheStats();
     console.log($tsl('缓存统计:'));
@@ -224,9 +235,8 @@ class Application {
       this.demoMessageService();
       await this.demoLanguageSwitching();
       this.demoCaching();
-      
+
       console.log('\n' + $tsl('演示完成！'));
-      
     } catch (error) {
       this.logger.error($tsl('演示运行失败'), error);
     }

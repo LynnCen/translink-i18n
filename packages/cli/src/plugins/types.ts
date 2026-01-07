@@ -2,7 +2,7 @@
  * TransLink I18n 插件系统类型定义
  */
 
-import type { ExtractResult, TranslationItem } from '../types/config.js';
+import type { TranslationItem } from '../types/config.js';
 
 /**
  * 插件元数据
@@ -140,4 +140,3 @@ export interface PluginLoaderOptions {
   config?: any;
   logger?: any;
 }
-

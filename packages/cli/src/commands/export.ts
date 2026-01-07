@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
-import { resolve, extname } from 'path';
+import { resolve } from 'path';
 import { configManager } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 import type { ExtractResult } from '../types/config.js';
@@ -184,7 +184,6 @@ function determineStatus(
   translations: Record<string, string>,
   defaultLanguage: string
 ): 'pending' | 'translated' | 'reviewed' {
-  const defaultText = translations[defaultLanguage] || '';
   const otherLanguages = Object.entries(translations).filter(
     ([lang]) => lang !== defaultLanguage
   );

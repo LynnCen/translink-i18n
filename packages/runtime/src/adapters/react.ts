@@ -3,15 +3,15 @@
  * 提供 Hooks 和 Context 支持
  */
 
-import React, { 
-  createContext, 
-  useContext, 
-  useState, 
-  useEffect, 
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
   useCallback,
   useMemo,
   ReactNode,
-  ComponentType
+  ComponentType,
 } from 'react';
 import { I18nEngine } from '../core/i18n-engine.js';
 import type { I18nOptions, TranslationParams } from '../types/index.js';
@@ -23,10 +23,14 @@ export interface ReactI18nOptions extends I18nOptions {
 
 export interface I18nContextValue {
   engine: I18nEngine;
-  t: (key: string, params?: TranslationParams, options?: { 
-    lng?: string; 
-    defaultValue?: string 
-  }) => string;
+  t: (
+    key: string,
+    params?: TranslationParams,
+    options?: {
+      lng?: string;
+      defaultValue?: string;
+    }
+  ) => string;
   locale: string;
   setLocale: (locale: string) => Promise<void>;
   availableLocales: string[];
@@ -36,10 +40,14 @@ export interface I18nContextValue {
 }
 
 export interface UseTranslationReturn {
-  t: (key: string, params?: TranslationParams, options?: { 
-    lng?: string; 
-    defaultValue?: string 
-  }) => string;
+  t: (
+    key: string,
+    params?: TranslationParams,
+    options?: {
+      lng?: string;
+      defaultValue?: string;
+    }
+  ) => string;
   i18n: I18nContextValue;
   ready: boolean;
 }
@@ -67,11 +75,11 @@ export interface I18nProviderProps {
   errorFallback?: ComponentType<{ error: Error; retry: () => void }>;
 }
 
-export function I18nProvider({ 
-  i18n, 
-  children, 
+export function I18nProvider({
+  i18n,
+  children,
   fallback = null,
-  errorFallback: ErrorFallback
+  errorFallback: ErrorFallback,
 }: I18nProviderProps) {
   const [locale, setLocaleState] = useState(i18n.getCurrentLanguage());
   const [isReady, setIsReady] = useState(false);
@@ -79,36 +87,43 @@ export function I18nProvider({
   const [error, setError] = useState<Error | null>(null);
 
   // 翻译函数
-  const t = useCallback((
-    key: string, 
-    params?: TranslationParams,
-    options?: { lng?: string; defaultValue?: string }
-  ) => {
-    return i18n.t(key, params, options);
-  }, [i18n]);
+  const t = useCallback(
+    (
+      key: string,
+      params?: TranslationParams,
+      options?: { lng?: string; defaultValue?: string }
+    ) => {
+      return i18n.t(key, params, options);
+    },
+    [i18n]
+  );
 
   // 语言切换函数
-  const setLocale = useCallback(async (newLocale: string) => {
-    if (newLocale === locale) return;
+  const setLocale = useCallback(
+    async (newLocale: string) => {
+      if (newLocale === locale) return;
 
-    setIsLoading(true);
-    setError(null);
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      await i18n.changeLanguage(newLocale);
-      setLocaleState(newLocale);
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [i18n, locale]);
+      try {
+        await i18n.changeLanguage(newLocale);
+        setLocaleState(newLocale);
+      } catch (err) {
+        setError(err as Error);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [i18n, locale]
+  );
 
   // 监听引擎事件
   useEffect(() => {
     const handleReady = () => setIsReady(true);
-    const handleLanguageChanged = (language: string) => setLocaleState(language);
+    const handleLanguageChanged = (language: string) =>
+      setLocaleState(language);
     const handleError = (error: Error) => setError(error);
 
     i18n.on('ready', handleReady);
@@ -126,16 +141,19 @@ export function I18nProvider({
   }, [i18n]);
 
   // Context 值
-  const contextValue: I18nContextValue = useMemo(() => ({
-    engine: i18n,
-    t,
-    locale,
-    setLocale,
-    availableLocales: i18n.getSupportedLanguages(),
-    isReady,
-    isLoading,
-    error,
-  }), [i18n, t, locale, setLocale, isReady, isLoading, error]);
+  const contextValue: I18nContextValue = useMemo(
+    () => ({
+      engine: i18n,
+      t,
+      locale,
+      setLocale,
+      availableLocales: i18n.getSupportedLanguages(),
+      isReady,
+      isLoading,
+      error,
+    }),
+    [i18n, t, locale, setLocale, isReady, isLoading, error]
+  );
 
   // 错误处理
   if (error && ErrorFallback) {
@@ -144,7 +162,7 @@ export function I18nProvider({
       retry: () => {
         setError(null);
         i18n.init().catch(setError);
-      }
+      },
     });
   }
 
@@ -165,25 +183,28 @@ export function I18nProvider({
  */
 export function useTranslation(ns?: string): UseTranslationReturn {
   const context = useContext(I18nContext);
-  
+
   if (!context) {
     throw new Error(
       'useTranslation must be used within I18nProvider. ' +
-      'Make sure to wrap your app with <I18nProvider>.'
+        'Make sure to wrap your app with <I18nProvider>.'
     );
   }
 
-  const { engine, ...rest } = context;
+  const { engine } = context;
 
   // 带命名空间的翻译函数
-  const t = useCallback((
-    key: string, 
-    params?: TranslationParams,
-    options?: { lng?: string; defaultValue?: string }
-  ) => {
-    const fullKey = ns ? `${ns}:${key}` : key;
-    return engine.t(fullKey, params, options);
-  }, [engine, ns]);
+  const t = useCallback(
+    (
+      key: string,
+      params?: TranslationParams,
+      options?: { lng?: string; defaultValue?: string }
+    ) => {
+      const fullKey = ns ? `${ns}:${key}` : key;
+      return engine.t(fullKey, params, options);
+    },
+    [engine, ns]
+  );
 
   return {
     t,
@@ -197,11 +218,11 @@ export function useTranslation(ns?: string): UseTranslationReturn {
  */
 export function useI18n(): I18nContextValue {
   const context = useContext(I18nContext);
-  
+
   if (!context) {
     throw new Error(
       'useI18n must be used within I18nProvider. ' +
-      'Make sure to wrap your app with <I18nProvider>.'
+        'Make sure to wrap your app with <I18nProvider>.'
     );
   }
 
@@ -218,20 +239,21 @@ export function Translation({
   defaults,
   ns,
   lng,
-  children
+  children,
 }: TranslationProps) {
   const { t } = useTranslation(ns);
-  
+
   const translation = useMemo(() => {
     return t(i18nKey, values, { lng, defaultValue: defaults });
   }, [t, i18nKey, values, lng, defaults]);
 
   // 如果有组件替换，处理富文本
   if (Object.keys(components).length > 0) {
-    return React.createElement(
-      InterpolatedComponent,
-      { translation, components, children }
-    );
+    return React.createElement(InterpolatedComponent, {
+      translation,
+      components,
+      children,
+    });
   }
 
   // 如果有子组件，作为 render prop
@@ -245,14 +267,14 @@ export function Translation({
 /**
  * 支持组件插值的内部组件
  */
-function InterpolatedComponent({ 
-  translation, 
-  components, 
-  children 
+function InterpolatedComponent({
+  translation,
+  components,
+  _children,
 }: {
   translation: string;
   components: Record<string, ComponentType<any>>;
-  children?: ReactNode;
+  _children?: ReactNode;
 }) {
   // 解析包含组件标签的翻译文本
   const parsed = useMemo(() => {
@@ -322,12 +344,14 @@ function parseTranslationWithComponents(
  * withTranslation HOC
  */
 export function withTranslation<P extends object>(
-  Component: ComponentType<P & { t: UseTranslationReturn['t']; i18n: I18nContextValue }>,
+  Component: ComponentType<
+    P & { t: UseTranslationReturn['t']; i18n: I18nContextValue }
+  >,
   options?: { withRef?: boolean }
 ) {
   const WrappedComponent = React.forwardRef<any, P>((props, ref) => {
     const { t, i18n } = useTranslation();
-    
+
     const enhancedProps = {
       ...props,
       t,
@@ -342,7 +366,7 @@ export function withTranslation<P extends object>(
   });
 
   WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 }
 
@@ -354,20 +378,21 @@ export async function createI18nWithInit(options: ReactI18nOptions): Promise<{
   Provider: ComponentType<{ children: ReactNode }>;
 }> {
   const engine = new I18nEngine(options);
-  
+
   // 初始化引擎
   await engine.init();
 
   const Provider = ({ children }: { children: ReactNode }) => {
-    return React.createElement(
-      I18nProvider,
-      { i18n: engine },
-      children
-    );
+    return React.createElement(I18nProvider, { i18n: engine }, children);
   };
 
   return { i18n: engine, Provider };
 }
 
 // 导出类型
-export type { ReactI18nOptions, I18nContextValue, UseTranslationReturn, TranslationProps };
+export type {
+  ReactI18nOptions,
+  I18nContextValue,
+  UseTranslationReturn,
+  TranslationProps,
+};

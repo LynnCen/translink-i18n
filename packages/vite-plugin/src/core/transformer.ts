@@ -2,11 +2,11 @@ import type { ResolvedConfig } from 'vite';
 import MagicString from 'magic-string';
 import $ from 'gogocode';
 import { createHash } from 'node:crypto';
-import type { 
-  I18nPluginOptions, 
-  TransformContext, 
+import type {
+  I18nPluginOptions,
+  TransformContext,
   TransformResult,
-  TransformRule 
+  TransformRule,
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 
@@ -27,9 +27,12 @@ export class I18nTransformer {
   /**
    * 转换代码
    */
-  async transform(code: string, context: TransformContext): Promise<TransformResult> {
+  async transform(
+    code: string,
+    context: TransformContext
+  ): Promise<TransformResult> {
     const { filename, isDev } = context;
-    
+
     try {
       // 创建 MagicString 实例用于代码修改
       const s = new MagicString(code);
@@ -38,23 +41,23 @@ export class I18nTransformer {
       const stats = {
         tslCount: 0,
         transformedCount: 0,
-        skippedCount: 0
+        skippedCount: 0,
       };
 
       // 检测文件类型
       const fileType = this.detectFileType(filename);
-      
+
       if (fileType === 'unknown') {
         return {
           code,
           hasChanged: false,
-          stats
+          stats,
         };
       }
 
       // 使用 gogocode 解析 AST
       let ast: any;
-      
+
       try {
         if (fileType === 'vue') {
           ast = $(code, { parseOptions: { language: 'vue' } });
@@ -82,7 +85,10 @@ export class I18nTransformer {
       extractedKeys.push(...tResult.extractedKeys);
 
       // 3. 应用自定义转换规则
-      if (this.options.transformRules && this.options.transformRules.length > 0) {
+      if (
+        this.options.transformRules &&
+        this.options.transformRules.length > 0
+      ) {
         const customResult = this.applyCustomRules(code, s, context);
         hasChanged = hasChanged || customResult.hasChanged;
         stats.transformedCount += customResult.transformed;
@@ -103,15 +109,14 @@ export class I18nTransformer {
         map: hasChanged ? s.generateMap({ hires: true }) : undefined,
         hasChanged,
         extractedKeys,
-        stats
+        stats,
       };
-
     } catch (error) {
       logger.error(`Transform error in ${filename}:`, error);
       return {
         code,
         hasChanged: false,
-        stats: { tslCount: 0, transformedCount: 0, skippedCount: 0 }
+        stats: { tslCount: 0, transformedCount: 0, skippedCount: 0 },
       };
     }
   }
@@ -128,36 +133,44 @@ export class I18nTransformer {
       // 查找所有 $tsl 调用
       ast.find('$_$($$$)').each((path: any) => {
         const node = path.node;
-        
+
         // 检查是否为 $tsl 调用
-        if (node.callee?.name === '$tsl' || 
-            (node.callee?.type === 'MemberExpression' && 
-             node.callee?.property?.name === '$tsl')) {
-          
+        if (
+          node.callee?.name === '$tsl' ||
+          (node.callee?.type === 'MemberExpression' &&
+            node.callee?.property?.name === '$tsl')
+        ) {
           count++;
-          
+
           const firstArg = node.arguments?.[0];
-          if (firstArg?.type === 'Literal' && typeof firstArg.value === 'string') {
+          if (
+            firstArg?.type === 'Literal' &&
+            typeof firstArg.value === 'string'
+          ) {
             const text = firstArg.value;
             const hash = this.generateHash(text);
-            
+
             // 记录映射关系
             this.keyMappings.set(hash, text);
             this.extractedTexts.add(text);
             extractedKeys.push(hash);
-            
+
             // 替换为 t(hash) 形式
             const start = node.start;
             const end = node.end;
-            
+
             if (isDev) {
               // 开发模式保留原文本作为默认值
-              s.overwrite(start, end, `t('${hash}', undefined, { defaultValue: '${text}' })`);
+              s.overwrite(
+                start,
+                end,
+                `t('${hash}', undefined, { defaultValue: '${text}' })`
+              );
             } else {
               // 生产模式只使用 hash
               s.overwrite(start, end, `t('${hash}')`);
             }
-            
+
             transformed++;
           }
         }
@@ -170,7 +183,7 @@ export class I18nTransformer {
       hasChanged: transformed > 0,
       count,
       transformed,
-      extractedKeys
+      extractedKeys,
     };
   }
 
@@ -186,23 +199,26 @@ export class I18nTransformer {
       ast.find('t($$$)').each((path: any) => {
         const node = path.node;
         const firstArg = node.arguments?.[0];
-        
-        if (firstArg?.type === 'Literal' && typeof firstArg.value === 'string') {
+
+        if (
+          firstArg?.type === 'Literal' &&
+          typeof firstArg.value === 'string'
+        ) {
           const text = firstArg.value;
-          
+
           // 检查是否包含中文
           if (this.containsChinese(text) && !this.isHashKey(text)) {
             const hash = this.generateHash(text);
-            
+
             // 记录映射关系
             this.keyMappings.set(hash, text);
             this.extractedTexts.add(text);
             extractedKeys.push(hash);
-            
+
             // 替换文本为 hash
             const start = firstArg.start;
             const end = firstArg.end;
-            
+
             s.overwrite(start, end, `'${hash}'`);
             transformed++;
           }
@@ -215,16 +231,20 @@ export class I18nTransformer {
     return {
       hasChanged: transformed > 0,
       transformed,
-      extractedKeys
+      extractedKeys,
     };
   }
 
   /**
    * 应用自定义转换规则
    */
-  private applyCustomRules(code: string, s: MagicString, context: TransformContext) {
+  private applyCustomRules(
+    code: string,
+    s: MagicString,
+    context: TransformContext
+  ) {
     let transformed = 0;
-    
+
     if (!this.options.transformRules) {
       return { hasChanged: false, transformed };
     }
@@ -241,7 +261,7 @@ export class I18nTransformer {
           const replacement = rule.transform(match[0], ...match.slice(1));
           const start = match.index;
           const end = start + match[0].length;
-          
+
           s.overwrite(start, end, replacement);
           transformed++;
         } catch (error) {
@@ -252,7 +272,7 @@ export class I18nTransformer {
 
     return {
       hasChanged: transformed > 0,
-      transformed
+      transformed,
     };
   }
 
@@ -261,7 +281,7 @@ export class I18nTransformer {
    */
   private injectRuntimeImports(s: MagicString, fileType: string) {
     const imports = this.generateImportStatements(fileType);
-    
+
     if (imports) {
       // 在文件开头添加导入
       s.prepend(imports + '\n');
@@ -271,11 +291,15 @@ export class I18nTransformer {
   /**
    * 注入懒加载代码
    */
-  private injectLazyLoadingCode(s: MagicString, extractedKeys: string[], fileType: string) {
+  private injectLazyLoadingCode(
+    s: MagicString,
+    extractedKeys: string[],
+    fileType: string
+  ) {
     if (extractedKeys.length === 0) return;
 
     const lazyLoadCode = this.generateLazyLoadCode(extractedKeys, fileType);
-    
+
     if (lazyLoadCode) {
       s.append('\n' + lazyLoadCode);
     }
@@ -288,14 +312,14 @@ export class I18nTransformer {
     switch (fileType) {
       case 'vue':
         return `import { useI18n } from '@translink/i18n-runtime/vue';\nconst { t } = useI18n();`;
-      
+
       case 'react':
         return `import { useTranslation } from '@translink/i18n-runtime/react';\nconst { t } = useTranslation();`;
-      
+
       case 'typescript':
       case 'javascript':
         return `import { createI18n } from '@translink/i18n-runtime';\nconst i18n = createI18n(); const t = i18n.t.bind(i18n);`;
-      
+
       default:
         return null;
     }
@@ -304,9 +328,12 @@ export class I18nTransformer {
   /**
    * 生成懒加载代码
    */
-  private generateLazyLoadCode(extractedKeys: string[], fileType: string): string | null {
+  private generateLazyLoadCode(
+    extractedKeys: string[],
+    fileType: string
+  ): string | null {
     const languages = this.options.supportedLanguages || ['zh-CN', 'en-US'];
-    
+
     const preloadCode = `
 // Auto-generated lazy loading code
 if (typeof window !== 'undefined') {
@@ -338,9 +365,11 @@ if (typeof window !== 'undefined') {
    */
   private shouldInjectImports(code: string, fileType: string): boolean {
     // 检查是否已经有相关导入
-    const hasI18nImport = /import.*from.*['"]@translink\/i18n-runtime/.test(code);
+    const hasI18nImport = /import.*from.*['"]@translink\/i18n-runtime/.test(
+      code
+    );
     const hasUseI18n = /useI18n|useTranslation/.test(code);
-    
+
     return !hasI18nImport && !hasUseI18n;
   }
 
@@ -348,10 +377,7 @@ if (typeof window !== 'undefined') {
    * 生成文本的哈希值
    */
   private generateHash(text: string): string {
-    return createHash('md5')
-      .update(text)
-      .digest('hex')
-      .substring(0, 8);
+    return createHash('md5').update(text).digest('hex').substring(0, 8);
   }
 
   /**

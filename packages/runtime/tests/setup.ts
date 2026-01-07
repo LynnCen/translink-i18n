@@ -8,9 +8,9 @@ Object.defineProperty(window, 'localStorage', {
     removeItem: vi.fn(),
     clear: vi.fn(),
     length: 0,
-    key: vi.fn()
+    key: vi.fn(),
   },
-  writable: true
+  writable: true,
 });
 
 Object.defineProperty(window, 'sessionStorage', {
@@ -20,9 +20,9 @@ Object.defineProperty(window, 'sessionStorage', {
     removeItem: vi.fn(),
     clear: vi.fn(),
     length: 0,
-    key: vi.fn()
+    key: vi.fn(),
   },
-  writable: true
+  writable: true,
 });
 
 // Mock fetch API
@@ -31,35 +31,37 @@ global.fetch = vi.fn();
 // Mock performance API
 Object.defineProperty(global, 'performance', {
   value: {
-    now: vi.fn(() => Date.now())
+    now: vi.fn(() => Date.now()),
   },
-  writable: true
+  writable: true,
 });
 
 // Reset all mocks before each test
 beforeEach(() => {
   vi.clearAllMocks();
-  
+
   // Reset localStorage mock
   const localStorage = window.localStorage;
   localStorage.getItem.mockClear();
   localStorage.setItem.mockClear();
   localStorage.removeItem.mockClear();
   localStorage.clear.mockClear();
-  
+
   // Reset sessionStorage mock
   const sessionStorage = window.sessionStorage;
   sessionStorage.getItem.mockClear();
   sessionStorage.setItem.mockClear();
   sessionStorage.removeItem.mockClear();
   sessionStorage.clear.mockClear();
-  
+
   // Reset fetch mock
   global.fetch.mockClear();
 });
 
 // Test utilities
-export const createMockTranslationResource = (translations: Record<string, string>) => {
+export const createMockTranslationResource = (
+  translations: Record<string, string>
+) => {
   return translations;
 };
 
@@ -74,26 +76,27 @@ export const createMockI18nOptions = (overrides = {}) => {
         greeting: '你好，{{name}}！',
         user: {
           profile: '用户资料',
-          settings: '设置'
-        }
+          settings: '设置',
+        },
       },
       'en-US': {
         welcome: 'Welcome',
         greeting: 'Hello, {{name}}!',
         user: {
           profile: 'User Profile',
-          settings: 'Settings'
-        }
-      }
+          settings: 'Settings',
+        },
+      },
     },
     cache: {
       enabled: true,
       maxSize: 100,
       ttl: 5000,
-      storage: 'memory'
+      storage: 'memory',
     },
-    ...overrides
+    ...overrides,
   };
 };
 
-export const waitForNextTick = () => new Promise(resolve => setTimeout(resolve, 0));
+export const waitForNextTick = () =>
+  new Promise(resolve => setTimeout(resolve, 0));

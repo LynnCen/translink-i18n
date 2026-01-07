@@ -14,7 +14,7 @@ export class EventEmitter {
     if (!this.events.has(event)) {
       this.events.set(event, new Set());
     }
-    
+
     this.events.get(event)!.add(listener);
     return this;
   }
@@ -27,7 +27,7 @@ export class EventEmitter {
       listener(data);
       this.off(event, onceWrapper);
     };
-    
+
     return this.on(event, onceWrapper);
   }
 
@@ -40,7 +40,7 @@ export class EventEmitter {
     }
 
     const listeners = this.events.get(event)!;
-    
+
     if (listener) {
       listeners.delete(listener);
     } else {
@@ -63,7 +63,7 @@ export class EventEmitter {
     }
 
     const listeners = this.events.get(event)!;
-    
+
     for (const listener of listeners) {
       try {
         listener(data);

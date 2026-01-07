@@ -66,9 +66,13 @@ export class CacheManager<T = any> {
     }
 
     // 如果内存中没有，从持久化缓存获取
-    if (!entry && this.options.storage !== 'memory' && this.isStorageAvailable()) {
+    if (
+      !entry &&
+      this.options.storage !== 'memory' &&
+      this.isStorageAvailable()
+    ) {
       entry = this.getStorageCache(key);
-      
+
       // 将持久化缓存的数据加载到内存中
       if (entry && this.isMemoryFallback()) {
         this.setMemoryCache(key, entry);
@@ -108,7 +112,7 @@ export class CacheManager<T = any> {
     if (this.options.storage !== 'memory' && this.isStorageAvailable()) {
       const storage = this.getStorage();
       const storageKey = this.getStorageKey(key);
-      
+
       if (storage.getItem(storageKey)) {
         storage.removeItem(storageKey);
         deleted = true;
@@ -216,7 +220,7 @@ export class CacheManager<T = any> {
       const storage = this.getStorage();
       const storageKey = this.getStorageKey(key);
       const item = storage.getItem(storageKey);
-      
+
       if (item) {
         return JSON.parse(item) as CacheEntry<T>;
       }
@@ -235,7 +239,9 @@ export class CacheManager<T = any> {
       throw new Error('Storage is not available in non-browser environment');
     }
 
-    return this.options.storage === 'localStorage' ? window.localStorage : window.sessionStorage;
+    return this.options.storage === 'localStorage'
+      ? window.localStorage
+      : window.sessionStorage;
   }
 
   /**
@@ -348,7 +354,7 @@ export class CacheManager<T = any> {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = undefined;
     }
-    
+
     this.memoryCache.clear();
   }
 }

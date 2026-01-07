@@ -3,12 +3,12 @@
  * 整合资源加载、缓存管理、插值处理等功能
  */
 
-import type { 
-  I18nOptions, 
-  TranslationResource, 
+import type {
+  I18nOptions,
+  TranslationResource,
   TranslationParams,
   I18nEventType,
-  I18nEventHandler
+  I18nEventHandler,
 } from '../types/index.js';
 import { EventEmitter } from '../utils/event-emitter.js';
 import { CacheManager } from '../cache/cache-manager.js';
@@ -26,10 +26,10 @@ export class I18nEngine extends EventEmitter {
 
   constructor(options: I18nOptions) {
     super();
-    
+
     this.options = this.mergeDefaultOptions(options);
     this.currentLanguage = this.options.defaultLanguage;
-    
+
     // 初始化各个组件
     this.cache = new CacheManager({
       maxSize: this.options.cache?.maxSize || 1000,
@@ -76,11 +76,15 @@ export class I18nEngine extends EventEmitter {
   /**
    * 翻译函数
    */
-  t(key: string, params?: TranslationParams, options?: {
-    lng?: string;
-    ns?: string;
-    defaultValue?: string;
-  }): string {
+  t(
+    key: string,
+    params?: TranslationParams,
+    options?: {
+      lng?: string;
+      ns?: string;
+      defaultValue?: string;
+    }
+  ): string {
     if (!this.isInitialized) {
       this.logWarning('I18n engine not initialized, call init() first');
       return options?.defaultValue || key;
@@ -93,7 +97,7 @@ export class I18nEngine extends EventEmitter {
     try {
       // 生成缓存键
       const cacheKey = this.generateCacheKey(key, language, namespace, params);
-      
+
       // 检查缓存
       if (this.options.cache?.enabled !== false) {
         const cached = this.cache.get(cacheKey);
@@ -104,14 +108,14 @@ export class I18nEngine extends EventEmitter {
 
       // 获取翻译文本
       const translation = this.getTranslation(key, language, namespace);
-      
+
       if (!translation) {
         this.emit('translationMissing', key, language);
         return defaultValue;
       }
 
       // 处理插值
-      const result = params 
+      const result = params
         ? this.interpolator.interpolate(translation, params, language)
         : translation;
 
@@ -142,14 +146,14 @@ export class I18nEngine extends EventEmitter {
     try {
       // 加载新语言资源
       await this.resourceLoader.load(language);
-      
+
       // 更新当前语言
       const previousLanguage = this.currentLanguage;
       this.currentLanguage = language;
-      
+
       // 清除缓存（因为语言变了）
       this.cache.clear();
-      
+
       this.emit('languageChanged', language);
       this.log(`Language changed from ${previousLanguage} to ${language}`);
     } catch (error) {
@@ -162,7 +166,7 @@ export class I18nEngine extends EventEmitter {
    * 预加载语言资源
    */
   async preloadLanguages(languages: string[]): Promise<void> {
-    const validLanguages = languages.filter(lang => 
+    const validLanguages = languages.filter(lang =>
       this.options.supportedLanguages.includes(lang)
     );
 
@@ -181,14 +185,18 @@ export class I18nEngine extends EventEmitter {
   /**
    * 添加资源
    */
-  addResource(language: string, namespace: string, resource: TranslationResource): void {
+  addResource(
+    language: string,
+    namespace: string,
+    resource: TranslationResource
+  ): void {
     const resourceKey = `${language}/${namespace}`;
     this.resourceLoader.getLoadedResource(language, namespace);
-    
+
     // 这里需要扩展 ResourceLoader 来支持动态添加资源
     // 暂时通过事件通知
     this.emit('resourceLoaded', language, namespace);
-    
+
     // 清除相关缓存
     this.clearCacheForLanguage(language);
   }
@@ -199,7 +207,7 @@ export class I18nEngine extends EventEmitter {
   exists(key: string, options?: { lng?: string; ns?: string }): boolean {
     const language = options?.lng || this.currentLanguage;
     const namespace = options?.ns || 'translation';
-    
+
     return this.getTranslation(key, language, namespace) !== null;
   }
 
@@ -257,7 +265,7 @@ export class I18nEngine extends EventEmitter {
       const otherLanguages = this.options.supportedLanguages.filter(
         lang => lang !== this.currentLanguage
       );
-      
+
       if (otherLanguages.length > 0) {
         // 异步预加载，不阻塞初始化
         this.resourceLoader.preload(otherLanguages).catch(error => {
@@ -277,13 +285,21 @@ export class I18nEngine extends EventEmitter {
   /**
    * 获取翻译文本
    */
-  private getTranslation(key: string, language: string, namespace: string): string | null {
+  private getTranslation(
+    key: string,
+    language: string,
+    namespace: string
+  ): string | null {
     const resource = this.resourceLoader.getLoadedResource(language, namespace);
-    
+
     if (!resource) {
       // 尝试使用回退语言
       if (language !== this.options.fallbackLanguage) {
-        return this.getTranslation(key, this.options.fallbackLanguage, namespace);
+        return this.getTranslation(
+          key,
+          this.options.fallbackLanguage,
+          namespace
+        );
       }
       return null;
     }
@@ -294,7 +310,10 @@ export class I18nEngine extends EventEmitter {
   /**
    * 获取嵌套对象的值
    */
-  private getNestedValue(obj: TranslationResource, path: string): string | null {
+  private getNestedValue(
+    obj: TranslationResource,
+    path: string
+  ): string | null {
     const keys = path.split('.');
     let current: any = obj;
 
@@ -313,9 +332,9 @@ export class I18nEngine extends EventEmitter {
    * 生成缓存键
    */
   private generateCacheKey(
-    key: string, 
-    language: string, 
-    namespace: string, 
+    key: string,
+    language: string,
+    namespace: string,
     params?: TranslationParams
   ): string {
     const paramsStr = params ? JSON.stringify(params) : '';
@@ -335,14 +354,20 @@ export class I18nEngine extends EventEmitter {
    * 绑定资源加载器事件
    */
   private bindResourceLoaderEvents(): void {
-    this.resourceLoader.on('resourceLoaded', (language: string, namespace: string) => {
-      this.emit('resourceLoaded', language, namespace);
-      this.clearCacheForLanguage(language);
-    });
+    this.resourceLoader.on(
+      'resourceLoaded',
+      (language: string, namespace: string) => {
+        this.emit('resourceLoaded', language, namespace);
+        this.clearCacheForLanguage(language);
+      }
+    );
 
-    this.resourceLoader.on('resourceLoadFailed', (language: string, namespace: string, error: Error) => {
-      this.emit('resourceLoadFailed', language, namespace, error);
-    });
+    this.resourceLoader.on(
+      'resourceLoadFailed',
+      (language: string, namespace: string, error: Error) => {
+        this.emit('resourceLoadFailed', language, namespace, error);
+      }
+    );
   }
 
   /**

@@ -17,7 +17,10 @@ export class PluginManager {
   /**
    * 初始化插件管理器
    */
-  async initialize(context: PluginContext, pluginConfigs: Array<string | [string, PluginConfig]>): Promise<void> {
+  async initialize(
+    context: PluginContext,
+    pluginConfigs: Array<string | [string, PluginConfig]>
+  ): Promise<void> {
     this.context = context;
     this.loader.setContext(context);
 
@@ -37,7 +40,7 @@ export class PluginManager {
       const loadedPlugins = this.loader.getAllPlugins();
       if (loadedPlugins.size > 0) {
         logger.success(`Loaded ${loadedPlugins.size} plugin(s):`);
-        for (const [name, plugin] of loadedPlugins) {
+        for (const plugin of loadedPlugins.values()) {
           logger.info(`  - ${plugin.metadata.name}@${plugin.metadata.version}`);
         }
       }
@@ -112,7 +115,9 @@ export class PluginManager {
     }
 
     if (!plugin.getStats) {
-      throw new Error(`Plugin "${pluginName}" does not support stats operation`);
+      throw new Error(
+        `Plugin "${pluginName}" does not support stats operation`
+      );
     }
 
     try {
@@ -149,14 +154,16 @@ export class PluginManager {
    */
   registerPluginCommands(program: any): void {
     const plugins = this.getAllPlugins();
-    
+
     for (const [name, plugin] of plugins) {
       if (plugin.registerCommands) {
         try {
           plugin.registerCommands(program);
           logger.debug(`Registered commands from plugin "${name}"`);
         } catch (error) {
-          logger.warn(`Failed to register commands from plugin "${name}": ${error}`);
+          logger.warn(
+            `Failed to register commands from plugin "${name}": ${error}`
+          );
         }
       }
     }
@@ -169,4 +176,3 @@ export class PluginManager {
     await this.loader.unloadAll();
   }
 }
-

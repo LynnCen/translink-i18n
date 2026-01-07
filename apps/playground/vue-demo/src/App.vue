@@ -5,7 +5,7 @@
       <div class="nav-brand">
         <h1>{{ $tsl('TransLink I18n 演示') }}</h1>
       </div>
-      
+
       <div class="nav-controls">
         <LanguageSwitcher />
       </div>
@@ -16,25 +16,33 @@
       <!-- 欢迎区域 -->
       <section class="welcome-section">
         <h2>{{ $tsl('欢迎使用 TransLink I18n') }}</h2>
-        <p>{{ $tsl('这是一个功能完整的国际化解决方案，支持 Vue 3、React 和原生 JavaScript。') }}</p>
-        
+        <p>
+          {{
+            $tsl(
+              '这是一个功能完整的国际化解决方案，支持 Vue 3、React 和原生 JavaScript。'
+            )
+          }}
+        </p>
+
         <div class="feature-grid">
-          <FeatureCard 
+          <FeatureCard
             :title="$tsl('智能代码转换')"
-            :description="$tsl('自动将 $tsl 函数转换为哈希键，提升运行时性能。')"
+            :description="
+              $tsl('自动将 $tsl 函数转换为哈希键，提升运行时性能。')
+            "
             icon="🔄"
           />
-          <FeatureCard 
+          <FeatureCard
             :title="$tsl('热更新支持')"
             :description="$tsl('语言文件变更时实时更新界面，无需刷新页面。')"
             icon="⚡"
           />
-          <FeatureCard 
+          <FeatureCard
             :title="$tsl('懒加载机制')"
             :description="$tsl('按需加载语言包，优化首屏加载性能。')"
             icon="📦"
           />
-          <FeatureCard 
+          <FeatureCard
             :title="$tsl('多级缓存')"
             :description="$tsl('内存、本地存储、网络三级缓存策略。')"
             icon="💾"
@@ -45,7 +53,7 @@
       <!-- 交互演示区域 -->
       <section class="demo-section">
         <h3>{{ $tsl('交互演示') }}</h3>
-        
+
         <div class="demo-grid">
           <!-- 用户信息演示 -->
           <div class="demo-card">
@@ -84,9 +92,8 @@
     <footer class="footer">
       <p>{{ $tsl('© 2024 TransLink I18n. 保留所有权利。') }}</p>
       <p>
-        {{ $tsl('当前语言') }}: {{ currentLanguage }} | 
-        {{ $tsl('加载时间') }}: {{ loadTime }}ms |
-        {{ $tsl('缓存命中率') }}: {{ cacheHitRate }}%
+        {{ $tsl('当前语言') }}: {{ currentLanguage }} | {{ $tsl('加载时间') }}:
+        {{ loadTime }}ms | {{ $tsl('缓存命中率') }}: {{ cacheHitRate }}%
       </p>
     </footer>
   </div>
@@ -115,7 +122,7 @@ const currentLanguage = computed(() => {
   const langNames: Record<string, string> = {
     'zh-CN': '中文',
     'en-US': 'English',
-    'ja-JP': '日本語'
+    'ja-JP': '日本語',
   };
   return langNames[locale.value] || locale.value;
 });
@@ -124,10 +131,10 @@ const currentLanguage = computed(() => {
 onMounted(() => {
   // 模拟加载时间
   loadTime.value = Math.floor(Math.random() * 100) + 50;
-  
+
   // 模拟缓存命中率
   cacheHitRate.value = Math.floor(Math.random() * 20) + 80;
-  
+
   // 定期更新统计信息
   setInterval(() => {
     cacheHitRate.value = Math.floor(Math.random() * 20) + 80;
@@ -152,7 +159,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .nav-brand h1 {
@@ -215,7 +222,7 @@ onMounted(() => {
   background: white;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid #e1e8ed;
 }
 

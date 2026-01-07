@@ -3,10 +3,10 @@ import type { FSWatcher } from 'chokidar';
 import chokidar from 'chokidar';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import type { 
-  I18nPluginOptions, 
+import type {
+  I18nPluginOptions,
   HMRUpdateInfo,
-  LanguageResource 
+  LanguageResource,
 } from '../types/index.js';
 import type { LanguageLoader } from './language-loader.js';
 import { logger } from '../utils/logger.js';
@@ -48,18 +48,22 @@ export class HMRHandler {
    */
   private setupLanguageFileWatcher(): void {
     const localesPath = path.resolve(this.config.root, 'locales');
-    
+
     this.watcher = chokidar.watch(`${localesPath}/**/*.json`, {
       ignored: /node_modules/,
       persistent: true,
-      ignoreInitial: false
+      ignoreInitial: false,
     });
 
     this.watcher
-      .on('add', (filePath) => this.handleLanguageFileChange(filePath, 'add'))
-      .on('change', (filePath) => this.handleLanguageFileChange(filePath, 'change'))
-      .on('unlink', (filePath) => this.handleLanguageFileChange(filePath, 'unlink'))
-      .on('error', (error) => {
+      .on('add', filePath => this.handleLanguageFileChange(filePath, 'add'))
+      .on('change', filePath =>
+        this.handleLanguageFileChange(filePath, 'change')
+      )
+      .on('unlink', filePath =>
+        this.handleLanguageFileChange(filePath, 'unlink')
+      )
+      .on('error', error => {
         logger.error('Language file watcher error:', error);
       });
 
@@ -72,8 +76,11 @@ export class HMRHandler {
    * 设置配置文件监听
    */
   private setupConfigFileWatcher(): void {
-    const configPath = path.resolve(this.config.root, this.options.configFile || 'i18n.config.ts');
-    
+    const configPath = path.resolve(
+      this.config.root,
+      this.options.configFile || 'i18n.config.ts'
+    );
+
     if (this.watcher) {
       this.watcher.add(configPath);
     }
@@ -121,7 +128,7 @@ if (import.meta.hot) {
     this.server.ws.send({
       type: 'custom',
       event: 'i18n:client-inject',
-      data: { code: clientCode }
+      data: { code: clientCode },
     });
   }
 
@@ -129,7 +136,7 @@ if (import.meta.hot) {
    * 处理语言文件变更
    */
   private async handleLanguageFileChange(
-    filePath: string, 
+    filePath: string,
     changeType: 'add' | 'change' | 'unlink'
   ): Promise<void> {
     try {
@@ -146,7 +153,10 @@ if (import.meta.hot) {
         case 'add':
         case 'change':
           // 重新加载语言资源
-          const resource = await this.languageLoader.loadLanguageResource(language, namespace);
+          const resource = await this.languageLoader.loadLanguageResource(
+            language,
+            namespace
+          );
           this.languageFiles.set(`${language}:${namespace}`, resource);
 
           updateInfo = {
@@ -154,7 +164,7 @@ if (import.meta.hot) {
             languages: [language],
             namespaces: [namespace],
             files: [relativePath],
-            timestamp: Date.now()
+            timestamp: Date.now(),
           };
 
           if (this.options.debug) {
@@ -164,13 +174,13 @@ if (import.meta.hot) {
 
         case 'unlink':
           this.languageFiles.delete(`${language}:${namespace}`);
-          
+
           updateInfo = {
             type: 'resource-updated',
             languages: [language],
             namespaces: [namespace],
             files: [relativePath],
-            timestamp: Date.now()
+            timestamp: Date.now(),
           };
 
           if (this.options.debug) {
@@ -181,7 +191,6 @@ if (import.meta.hot) {
 
       // 发送 HMR 更新
       this.sendHMRUpdate(updateInfo);
-
     } catch (error) {
       logger.error(`Error handling language file change (${filePath}):`, error);
     }
@@ -192,23 +201,26 @@ if (import.meta.hot) {
    */
   async handleLanguageFileUpdate(ctx: HmrContext): Promise<void> {
     const { file, server } = ctx;
-    
+
     try {
       const { language, namespace } = this.parseLanguageFilePath(file);
-      
+
       if (!language) {
         return;
       }
 
       // 重新加载资源
-      const resource = await this.languageLoader.loadLanguageResource(language, namespace);
-      
+      const resource = await this.languageLoader.loadLanguageResource(
+        language,
+        namespace
+      );
+
       const updateInfo: HMRUpdateInfo = {
         type: 'resource-updated',
         languages: [language],
         namespaces: [namespace],
         files: [path.relative(this.config.root, file)],
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // 发送自定义 HMR 事件
@@ -217,14 +229,13 @@ if (import.meta.hot) {
         event: 'i18n:language-updated',
         data: {
           ...updateInfo,
-          resource: resource.content
-        }
+          resource: resource.content,
+        },
       });
 
       if (this.options.debug) {
         logger.info('HMR: Language file updated', updateInfo);
       }
-
     } catch (error) {
       logger.error('HMR: Error updating language file:', error);
     }
@@ -235,11 +246,11 @@ if (import.meta.hot) {
    */
   async handleConfigFileUpdate(ctx: HmrContext): Promise<void> {
     const { server } = ctx;
-    
+
     try {
       const updateInfo: HMRUpdateInfo = {
         type: 'config-changed',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // 配置文件变更通常需要重新加载
@@ -248,14 +259,13 @@ if (import.meta.hot) {
         event: 'i18n:config-updated',
         data: {
           ...updateInfo,
-          forceReload: true
-        }
+          forceReload: true,
+        },
       });
 
       if (this.options.debug) {
         logger.info('HMR: Config file updated, reloading...');
       }
-
     } catch (error) {
       logger.error('HMR: Error updating config file:', error);
     }
@@ -268,34 +278,37 @@ if (import.meta.hot) {
     this.server.ws.send({
       type: 'custom',
       event: 'i18n:language-updated',
-      data: updateInfo
+      data: updateInfo,
     });
   }
 
   /**
    * 解析语言文件路径
    */
-  private parseLanguageFilePath(filePath: string): { language: string | null; namespace: string } {
+  private parseLanguageFilePath(filePath: string): {
+    language: string | null;
+    namespace: string;
+  } {
     const fileName = path.basename(filePath, '.json');
     const parts = fileName.split('.');
-    
+
     if (parts.length === 1) {
       // 简单格式: zh-CN.json
       return {
         language: parts[0],
-        namespace: 'translation'
+        namespace: 'translation',
       };
     } else if (parts.length === 2) {
       // 命名空间格式: zh-CN.common.json
       return {
         language: parts[0],
-        namespace: parts[1]
+        namespace: parts[1],
       };
     }
-    
+
     return {
       language: null,
-      namespace: 'translation'
+      namespace: 'translation',
     };
   }
 
@@ -309,19 +322,25 @@ if (import.meta.hot) {
   /**
    * 手动触发语言更新
    */
-  async triggerLanguageUpdate(language: string, namespace: string = 'translation'): Promise<void> {
+  async triggerLanguageUpdate(
+    language: string,
+    namespace: string = 'translation'
+  ): Promise<void> {
     try {
-      const resource = await this.languageLoader.loadLanguageResource(language, namespace);
-      
+      const resource = await this.languageLoader.loadLanguageResource(
+        language,
+        namespace
+      );
+
       const updateInfo: HMRUpdateInfo = {
         type: 'language-changed',
         languages: [language],
         namespaces: [namespace],
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       this.sendHMRUpdate(updateInfo);
-      
+
       if (this.options.debug) {
         logger.info('Manual language update triggered:', updateInfo);
       }
@@ -338,9 +357,9 @@ if (import.meta.hot) {
       this.watcher.close();
       this.watcher = null;
     }
-    
+
     this.languageFiles.clear();
-    
+
     if (this.options.debug) {
       logger.info('HMR handler disposed');
     }

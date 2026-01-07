@@ -1,7 +1,6 @@
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite';
 import { createFilter } from 'vite';
 import path from 'node:path';
-import fs from 'node:fs';
 import { I18nTransformer } from './transformer.js';
 import { LanguageLoader } from './language-loader.js';
 import { HMRHandler } from './hmr-handler.js';
@@ -37,39 +36,36 @@ export function createI18nPlugin(options: I18nPluginOptions = {}): Plugin {
     preload: {
       languages: [],
       timing: 'immediate',
-      namespaces: ['translation']
+      namespaces: ['translation'],
     },
-    ...options
+    ...options,
   };
 
   return {
     name: 'translink-i18n',
-    
+
     configResolved(resolvedConfig) {
       config = resolvedConfig;
-      
+
       // 创建文件过滤器
-      filter = createFilter(
-        resolvedOptions.include,
-        resolvedOptions.exclude
-      );
+      filter = createFilter(resolvedOptions.include, resolvedOptions.exclude);
 
       // 初始化核心组件
       configManager = new ConfigManager(resolvedOptions, config);
       transformer = new I18nTransformer(resolvedOptions, config);
       languageLoader = new LanguageLoader(resolvedOptions, config);
-      
+
       if (resolvedOptions.debug) {
         logger.info('TransLink I18n plugin initialized', {
           mode: config.command,
-          options: resolvedOptions
+          options: resolvedOptions,
         });
       }
     },
 
     configureServer(devServer) {
       server = devServer;
-      
+
       if (resolvedOptions.hmr) {
         hmrHandler = new HMRHandler(
           resolvedOptions,
@@ -88,7 +84,8 @@ export function createI18nPlugin(options: I18nPluginOptions = {}): Plugin {
           const namespace = url.searchParams.get('ns') || 'translation';
 
           if (language) {
-            languageLoader.loadLanguageResource(language, namespace)
+            languageLoader
+              .loadLanguageResource(language, namespace)
               .then(resource => {
                 res.setHeader('Content-Type', 'application/json');
                 res.setHeader('Cache-Control', 'no-cache');
@@ -109,12 +106,13 @@ export function createI18nPlugin(options: I18nPluginOptions = {}): Plugin {
       // 预加载语言资源
       if (resolvedOptions.preload.languages.length > 0) {
         const preloadPromises = resolvedOptions.preload.languages.map(lang =>
-          languageLoader.loadLanguageResource(lang, 'translation')
+          languageLoader
+            .loadLanguageResource(lang, 'translation')
             .catch(error => {
               logger.warn(`Failed to preload language ${lang}:`, error);
             })
         );
-        
+
         return Promise.all(preloadPromises);
       }
     },
@@ -135,22 +133,22 @@ export function createI18nPlugin(options: I18nPluginOptions = {}): Plugin {
           filename: id,
           isDev: config.command === 'serve',
           isSSR: config.build?.ssr === true,
-          options: resolvedOptions
+          options: resolvedOptions,
         };
 
         const result = await transformer.transform(code, context);
-        
+
         if (result.hasChanged) {
           if (resolvedOptions.debug) {
             logger.info(`Transformed ${path.relative(config.root, id)}`, {
               stats: result.stats,
-              extractedKeys: result.extractedKeys?.length || 0
+              extractedKeys: result.extractedKeys?.length || 0,
             });
           }
 
           return {
             code: result.code,
-            map: result.map
+            map: result.map,
           };
         }
 
@@ -165,12 +163,12 @@ export function createI18nPlugin(options: I18nPluginOptions = {}): Plugin {
       // 在构建时注入语言资源
       if (config.command === 'build' && resolvedOptions.lazyLoading) {
         const languageChunks = languageLoader.generateLanguageChunks();
-        
+
         for (const [chunkName, chunkContent] of languageChunks) {
           this.emitFile({
             type: 'asset',
             fileName: `locales/${chunkName}.json`,
-            source: JSON.stringify(chunkContent, null, 2)
+            source: JSON.stringify(chunkContent, null, 2),
           });
         }
       }
@@ -213,7 +211,7 @@ export function createI18nPlugin(options: I18nPluginOptions = {}): Plugin {
       }
 
       return null;
-    }
+    },
   };
 }
 

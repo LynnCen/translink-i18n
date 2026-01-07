@@ -11,12 +11,12 @@ export interface I18nOptions {
   defaultLanguage: string;
   fallbackLanguage: string;
   supportedLanguages: string[];
-  
+
   // 资源配置
   resources?: Record<string, TranslationResource>;
   loadPath?: string;
   loadFunction?: (lng: string, ns: string) => Promise<TranslationResource>;
-  
+
   // 缓存配置
   cache?: {
     enabled: boolean;
@@ -24,7 +24,7 @@ export interface I18nOptions {
     ttl: number;
     storage: 'memory' | 'localStorage' | 'sessionStorage';
   };
-  
+
   // 插值配置
   interpolation?: {
     prefix: string;
@@ -32,13 +32,13 @@ export interface I18nOptions {
     escapeValue: boolean;
     format?: (value: any, format: string, lng: string) => string;
   };
-  
+
   // 复数配置
   pluralization?: {
     enabled: boolean;
     rules?: Record<string, (count: number) => number>;
   };
-  
+
   // 调试配置
   debug?: boolean;
   logLevel?: 'error' | 'warn' | 'info' | 'debug';
@@ -63,11 +63,15 @@ export interface CacheEntry<T = any> {
 }
 
 export interface I18nEventMap {
-  'languageChanged': (language: string) => void;
-  'resourceLoaded': (language: string, namespace: string) => void;
-  'resourceLoadFailed': (language: string, namespace: string, error: Error) => void;
-  'translationMissing': (key: string, language: string) => void;
-  'ready': () => void;
+  languageChanged: (language: string) => void;
+  resourceLoaded: (language: string, namespace: string) => void;
+  resourceLoadFailed: (
+    language: string,
+    namespace: string,
+    error: Error
+  ) => void;
+  translationMissing: (key: string, language: string) => void;
+  ready: () => void;
 }
 
 export type I18nEventType = keyof I18nEventMap;

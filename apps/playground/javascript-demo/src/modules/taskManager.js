@@ -12,7 +12,7 @@ export function createTaskManager(i18n) {
     low: { value: 1, color: '\x1b[32m', icon: '🟢' },
     medium: { value: 2, color: '\x1b[33m', icon: '🟡' },
     high: { value: 3, color: '\x1b[31m', icon: '🔴' },
-    urgent: { value: 4, color: '\x1b[35m', icon: '🟣' }
+    urgent: { value: 4, color: '\x1b[35m', icon: '🟣' },
   };
 
   const resetColor = '\x1b[0m';
@@ -22,8 +22,14 @@ export function createTaskManager(i18n) {
      * 创建新任务
      */
     createTask(taskData) {
-      const { title, description, priority = 'medium', dueDate, category = 'general' } = taskData;
-      
+      const {
+        title,
+        description,
+        priority = 'medium',
+        dueDate,
+        category = 'general',
+      } = taskData;
+
       // 验证输入
       const validation = this.validateTaskData(taskData);
       if (!validation.isValid) {
@@ -46,11 +52,11 @@ export function createTaskManager(i18n) {
         estimatedHours: taskData.estimatedHours || null,
         actualHours: null,
         subtasks: [],
-        comments: []
+        comments: [],
       };
 
       tasks.set(task.id, task);
-      
+
       console.log($tsl('任务创建成功: {{title}}'), { title });
       return task;
     },
@@ -72,7 +78,7 @@ export function createTaskManager(i18n) {
 
       // 更新任务
       Object.assign(task, updates, { updatedAt: new Date() });
-      
+
       console.log($tsl('任务更新成功: {{title}}'), { title: task.title });
       return task;
     },
@@ -125,10 +131,10 @@ export function createTaskManager(i18n) {
      */
     listTasks(filter = {}) {
       const filteredTasks = this.filterTasks(filter);
-      
+
       console.log('\n' + i18n.t('task.list.title'));
       console.log('='.repeat(80));
-      
+
       if (filteredTasks.length === 0) {
         console.log(i18n.t('task.list.empty'));
         return;
@@ -153,42 +159,54 @@ export function createTaskManager(i18n) {
     displayTask(task) {
       const priorityConfig = priorities[task.priority];
       const statusText = i18n.t(`task.status.${task.status}`);
-      const dueDateText = task.dueDate ? 
-        i18n.t('task.dueDate.value', { date: task.dueDate.toLocaleDateString() }) :
-        i18n.t('task.dueDate.none');
+      const dueDateText = task.dueDate
+        ? i18n.t('task.dueDate.value', {
+            date: task.dueDate.toLocaleDateString(),
+          })
+        : i18n.t('task.dueDate.none');
 
-      console.log(`${priorityConfig.color}${priorityConfig.icon} [${task.id}] ${task.title}${resetColor}`);
+      console.log(
+        `${priorityConfig.color}${priorityConfig.icon} [${task.id}] ${task.title}${resetColor}`
+      );
       console.log(`   ${i18n.t('task.status')}: ${statusText}`);
-      console.log(`   ${i18n.t('task.priority')}: ${i18n.t(`task.priority.${task.priority}`)}`);
+      console.log(
+        `   ${i18n.t('task.priority')}: ${i18n.t(`task.priority.${task.priority}`)}`
+      );
       console.log(`   ${i18n.t('task.category')}: ${task.category}`);
       console.log(`   ${dueDateText}`);
-      
+
       if (task.description) {
         console.log(`   ${i18n.t('task.description')}: ${task.description}`);
       }
-      
+
       if (task.assignee) {
         console.log(`   ${i18n.t('task.assignee')}: ${task.assignee}`);
       }
-      
+
       if (task.tags.length > 0) {
         console.log(`   ${i18n.t('task.tags')}: ${task.tags.join(', ')}`);
       }
-      
+
       if (task.estimatedHours) {
-        console.log(`   ${i18n.t('task.estimatedHours')}: ${task.estimatedHours}h`);
+        console.log(
+          `   ${i18n.t('task.estimatedHours')}: ${task.estimatedHours}h`
+        );
       }
-      
+
       if (task.actualHours) {
         console.log(`   ${i18n.t('task.actualHours')}: ${task.actualHours}h`);
       }
-      
-      console.log(`   ${i18n.t('task.createdAt')}: ${task.createdAt.toLocaleString()}`);
-      
+
+      console.log(
+        `   ${i18n.t('task.createdAt')}: ${task.createdAt.toLocaleString()}`
+      );
+
       if (task.completedAt) {
-        console.log(`   ${i18n.t('task.completedAt')}: ${task.completedAt.toLocaleString()}`);
+        console.log(
+          `   ${i18n.t('task.completedAt')}: ${task.completedAt.toLocaleString()}`
+        );
       }
-      
+
       console.log('');
     },
 
@@ -230,9 +248,10 @@ export function createTaskManager(i18n) {
 
       if (filter.search) {
         const query = filter.search.toLowerCase();
-        result = result.filter(task => 
-          task.title.toLowerCase().includes(query) ||
-          (task.description && task.description.toLowerCase().includes(query))
+        result = result.filter(
+          task =>
+            task.title.toLowerCase().includes(query) ||
+            (task.description && task.description.toLowerCase().includes(query))
         );
       }
 
@@ -244,15 +263,19 @@ export function createTaskManager(i18n) {
      */
     searchTasks(query) {
       const results = this.filterTasks({ search: query });
-      
-      console.log(i18n.t('task.search.results', { query, count: results.length }));
-      
+
+      console.log(
+        i18n.t('task.search.results', { query, count: results.length })
+      );
+
       if (results.length > 0) {
         results.forEach(task => {
-          console.log(`- [${task.id}] ${task.title} (${i18n.t(`task.status.${task.status}`)})`);
+          console.log(
+            `- [${task.id}] ${task.title} (${i18n.t(`task.status.${task.status}`)})`
+          );
         });
       }
-      
+
       return results;
     },
 
@@ -261,43 +284,53 @@ export function createTaskManager(i18n) {
      */
     getStatistics() {
       const allTasks = Array.from(tasks.values());
-      
+
       const stats = {
         total: allTasks.length,
         pending: allTasks.filter(t => t.status === 'pending').length,
         completed: allTasks.filter(t => t.status === 'completed').length,
-        overdue: allTasks.filter(t => 
-          t.status === 'pending' && t.dueDate && t.dueDate < new Date()
+        overdue: allTasks.filter(
+          t => t.status === 'pending' && t.dueDate && t.dueDate < new Date()
         ).length,
         byPriority: {},
         byCategory: {},
         completionRate: 0,
-        averageCompletionTime: 0
+        averageCompletionTime: 0,
       };
 
       // 按优先级统计
       Object.keys(priorities).forEach(priority => {
-        stats.byPriority[priority] = allTasks.filter(t => t.priority === priority).length;
+        stats.byPriority[priority] = allTasks.filter(
+          t => t.priority === priority
+        ).length;
       });
 
       // 按分类统计
       const categories = [...new Set(allTasks.map(t => t.category))];
       categories.forEach(category => {
-        stats.byCategory[category] = allTasks.filter(t => t.category === category).length;
+        stats.byCategory[category] = allTasks.filter(
+          t => t.category === category
+        ).length;
       });
 
       // 完成率
       if (stats.total > 0) {
-        stats.completionRate = (stats.completed / stats.total * 100).toFixed(2);
+        stats.completionRate = ((stats.completed / stats.total) * 100).toFixed(
+          2
+        );
       }
 
       // 平均完成时间
-      const completedTasks = allTasks.filter(t => t.status === 'completed' && t.completedAt);
+      const completedTasks = allTasks.filter(
+        t => t.status === 'completed' && t.completedAt
+      );
       if (completedTasks.length > 0) {
         const totalTime = completedTasks.reduce((sum, task) => {
           return sum + (task.completedAt.getTime() - task.createdAt.getTime());
         }, 0);
-        stats.averageCompletionTime = Math.round(totalTime / completedTasks.length / (1000 * 60 * 60)); // 小时
+        stats.averageCompletionTime = Math.round(
+          totalTime / completedTasks.length / (1000 * 60 * 60)
+        ); // 小时
       }
 
       return stats;
@@ -308,25 +341,31 @@ export function createTaskManager(i18n) {
      */
     showStatistics() {
       const stats = this.getStatistics();
-      
+
       console.log('\n' + i18n.t('task.statistics.title'));
       console.log('='.repeat(50));
       console.log(`${i18n.t('task.statistics.total')}: ${stats.total}`);
       console.log(`${i18n.t('task.statistics.pending')}: ${stats.pending}`);
       console.log(`${i18n.t('task.statistics.completed')}: ${stats.completed}`);
       console.log(`${i18n.t('task.statistics.overdue')}: ${stats.overdue}`);
-      console.log(`${i18n.t('task.statistics.completionRate')}: ${stats.completionRate}%`);
-      
+      console.log(
+        `${i18n.t('task.statistics.completionRate')}: ${stats.completionRate}%`
+      );
+
       if (stats.averageCompletionTime > 0) {
-        console.log(`${i18n.t('task.statistics.averageCompletionTime')}: ${stats.averageCompletionTime}h`);
+        console.log(
+          `${i18n.t('task.statistics.averageCompletionTime')}: ${stats.averageCompletionTime}h`
+        );
       }
-      
+
       console.log('\n' + i18n.t('task.statistics.byPriority') + ':');
       Object.entries(stats.byPriority).forEach(([priority, count]) => {
         const config = priorities[priority];
-        console.log(`  ${config.icon} ${i18n.t(`task.priority.${priority}`)}: ${count}`);
+        console.log(
+          `  ${config.icon} ${i18n.t(`task.priority.${priority}`)}: ${count}`
+        );
       });
-      
+
       if (Object.keys(stats.byCategory).length > 0) {
         console.log('\n' + i18n.t('task.statistics.byCategory') + ':');
         Object.entries(stats.byCategory).forEach(([category, count]) => {
@@ -350,7 +389,7 @@ export function createTaskManager(i18n) {
         description: subtaskData.description || '',
         status: 'pending',
         createdAt: new Date(),
-        completedAt: null
+        completedAt: null,
       };
 
       parentTask.subtasks.push(subtask);
@@ -371,7 +410,9 @@ export function createTaskManager(i18n) {
 
       const subtask = parentTask.subtasks.find(st => st.id === subtaskId);
       if (!subtask) {
-        throw new Error(i18n.t('task.subtask.error.notFound', { id: subtaskId }));
+        throw new Error(
+          i18n.t('task.subtask.error.notFound', { id: subtaskId })
+        );
       }
 
       subtask.status = 'completed';
@@ -395,7 +436,7 @@ export function createTaskManager(i18n) {
         id: task.comments.length + 1,
         text: comment,
         createdAt: new Date(),
-        author: 'current_user' // 在实际应用中应该是当前用户
+        author: 'current_user', // 在实际应用中应该是当前用户
       };
 
       task.comments.push(commentObj);
@@ -413,18 +454,32 @@ export function createTaskManager(i18n) {
 
       if (!isUpdate || data.title !== undefined) {
         if (!data.title || data.title.trim().length === 0) {
-          errors.push(i18n.t('validation.required', { field: i18n.t('task.title') }));
+          errors.push(
+            i18n.t('validation.required', { field: i18n.t('task.title') })
+          );
         } else if (data.title.length > 200) {
-          errors.push(i18n.t('validation.maxLength', { field: i18n.t('task.title'), max: 200 }));
+          errors.push(
+            i18n.t('validation.maxLength', {
+              field: i18n.t('task.title'),
+              max: 200,
+            })
+          );
         }
       }
 
       if (data.description && data.description.length > 1000) {
-        errors.push(i18n.t('validation.maxLength', { field: i18n.t('task.description'), max: 1000 }));
+        errors.push(
+          i18n.t('validation.maxLength', {
+            field: i18n.t('task.description'),
+            max: 1000,
+          })
+        );
       }
 
       if (data.priority && !Object.keys(priorities).includes(data.priority)) {
-        errors.push(i18n.t('task.validation.invalidPriority', { priority: data.priority }));
+        errors.push(
+          i18n.t('task.validation.invalidPriority', { priority: data.priority })
+        );
       }
 
       if (data.dueDate) {
@@ -436,13 +491,16 @@ export function createTaskManager(i18n) {
         }
       }
 
-      if (data.estimatedHours && (data.estimatedHours < 0 || data.estimatedHours > 1000)) {
+      if (
+        data.estimatedHours &&
+        (data.estimatedHours < 0 || data.estimatedHours > 1000)
+      ) {
         errors.push(i18n.t('task.validation.invalidHours'));
       }
 
       return {
         isValid: errors.length === 0,
-        errors
+        errors,
       };
     },
 
@@ -451,13 +509,21 @@ export function createTaskManager(i18n) {
      */
     exportTasks(format = 'json') {
       const allTasks = Array.from(tasks.values());
-      
+
       if (format === 'json') {
         const data = JSON.stringify(allTasks, null, 2);
         console.log($tsl('任务数据已导出 (JSON 格式)'));
         return data;
       } else if (format === 'csv') {
-        const headers = ['ID', 'Title', 'Status', 'Priority', 'Category', 'Due Date', 'Created At'];
+        const headers = [
+          'ID',
+          'Title',
+          'Status',
+          'Priority',
+          'Category',
+          'Due Date',
+          'Created At',
+        ];
         const rows = allTasks.map(task => [
           task.id,
           task.title,
@@ -465,14 +531,14 @@ export function createTaskManager(i18n) {
           task.priority,
           task.category,
           task.dueDate ? task.dueDate.toISOString() : '',
-          task.createdAt.toISOString()
+          task.createdAt.toISOString(),
         ]);
-        
+
         const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
         console.log($tsl('任务数据已导出 (CSV 格式)'));
         return csv;
       }
-      
+
       throw new Error(i18n.t('task.export.unsupportedFormat', { format }));
     },
 
@@ -483,6 +549,6 @@ export function createTaskManager(i18n) {
       tasks.clear();
       nextId = 1;
       console.log($tsl('任务管理器已重置'));
-    }
+    },
   };
 }

@@ -16,7 +16,10 @@ export class ConfigManager {
   constructor(options: I18nPluginOptions, config: ResolvedConfig) {
     this.options = options;
     this.config = config;
-    this.configPath = path.resolve(config.root, options.configFile || 'i18n.config.ts');
+    this.configPath = path.resolve(
+      config.root,
+      options.configFile || 'i18n.config.ts'
+    );
   }
 
   /**
@@ -26,15 +29,15 @@ export class ConfigManager {
     try {
       // 检查配置文件是否存在
       await fs.access(this.configPath);
-      
+
       // 动态导入配置文件
       const configModule = await import(this.configPath + '?t=' + Date.now());
       this.userConfig = configModule.default || configModule;
-      
+
       if (this.options.debug) {
         logger.info('Loaded user config:', {
           path: path.relative(this.config.root, this.configPath),
-          config: this.userConfig
+          config: this.userConfig,
         });
       }
 
@@ -43,7 +46,7 @@ export class ConfigManager {
       if (this.options.debug) {
         logger.warn('No user config found, using defaults:', error);
       }
-      
+
       // 返回默认配置
       this.userConfig = this.getDefaultConfig();
       return this.userConfig;
@@ -64,13 +67,13 @@ export class ConfigManager {
         enabled: true,
         maxSize: 1000,
         ttl: 5 * 60 * 1000, // 5 minutes
-        storage: 'memory'
+        storage: 'memory',
       },
       interpolation: {
         prefix: '{{',
         suffix: '}}',
-        escapeValue: true
-      }
+        escapeValue: true,
+      },
     };
   }
 
@@ -80,18 +83,18 @@ export class ConfigManager {
   getMergedConfig(): any {
     const defaultConfig = this.getDefaultConfig();
     const userConfig = this.userConfig || {};
-    
+
     return {
       ...defaultConfig,
       ...userConfig,
       cache: {
         ...defaultConfig.cache,
-        ...(userConfig.cache || {})
+        ...(userConfig.cache || {}),
       },
       interpolation: {
         ...defaultConfig.interpolation,
-        ...(userConfig.interpolation || {})
-      }
+        ...(userConfig.interpolation || {}),
+      },
     };
   }
 
@@ -100,7 +103,7 @@ export class ConfigManager {
    */
   generateConfigModule(): string {
     const mergedConfig = this.getMergedConfig();
-    
+
     return `
 // Auto-generated i18n config module
 export const i18nConfig = ${JSON.stringify(mergedConfig, null, 2)};
@@ -191,9 +194,9 @@ export default config;
 
     try {
       await fs.writeFile(this.configPath, defaultConfigContent, 'utf-8');
-      
+
       logger.info('Created default i18n config file:', {
-        path: path.relative(this.config.root, this.configPath)
+        path: path.relative(this.config.root, this.configPath),
       });
     } catch (error) {
       logger.error('Failed to create default config file:', error);
@@ -206,46 +209,59 @@ export default config;
    */
   validateConfig(config: any): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     // 检查必需字段
     if (!config.defaultLanguage) {
       errors.push('defaultLanguage is required');
     }
-    
-    if (!config.supportedLanguages || !Array.isArray(config.supportedLanguages)) {
+
+    if (
+      !config.supportedLanguages ||
+      !Array.isArray(config.supportedLanguages)
+    ) {
       errors.push('supportedLanguages must be an array');
     }
-    
-    if (config.supportedLanguages && !config.supportedLanguages.includes(config.defaultLanguage)) {
+
+    if (
+      config.supportedLanguages &&
+      !config.supportedLanguages.includes(config.defaultLanguage)
+    ) {
       errors.push('defaultLanguage must be included in supportedLanguages');
     }
-    
+
     if (!config.loadPath) {
       errors.push('loadPath is required');
     }
-    
+
     // 检查缓存配置
     if (config.cache) {
       if (typeof config.cache.enabled !== 'boolean') {
         errors.push('cache.enabled must be a boolean');
       }
-      
+
       if (config.cache.maxSize && typeof config.cache.maxSize !== 'number') {
         errors.push('cache.maxSize must be a number');
       }
-      
+
       if (config.cache.ttl && typeof config.cache.ttl !== 'number') {
         errors.push('cache.ttl must be a number');
       }
-      
-      if (config.cache.storage && !['memory', 'localStorage', 'sessionStorage'].includes(config.cache.storage)) {
-        errors.push('cache.storage must be one of: memory, localStorage, sessionStorage');
+
+      if (
+        config.cache.storage &&
+        !['memory', 'localStorage', 'sessionStorage'].includes(
+          config.cache.storage
+        )
+      ) {
+        errors.push(
+          'cache.storage must be one of: memory, localStorage, sessionStorage'
+        );
       }
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -276,7 +292,7 @@ export default config;
     if (require.cache[this.configPath]) {
       delete require.cache[this.configPath];
     }
-    
+
     return this.loadUserConfig();
   }
 

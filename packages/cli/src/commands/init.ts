@@ -91,7 +91,9 @@ async function initCommand(options: InitOptions) {
 
   const cwd = process.cwd();
   const useTypeScript = options.typescript ?? true;
-  const configFileName = useTypeScript ? 'translink.config.ts' : 'translink.config.js';
+  const configFileName = useTypeScript
+    ? 'translink.config.ts'
+    : 'translink.config.js';
   const configPath = resolve(cwd, configFileName);
 
   // 检查配置文件是否已存在
@@ -131,7 +133,7 @@ async function initCommand(options: InitOptions) {
         { name: '法文 (fr-FR)', value: 'fr-FR' },
         { name: '德文 (de-DE)', value: 'de-DE' },
       ],
-      validate: (input) => {
+      validate: input => {
         return input.length > 0 ? true : '请至少选择一种语言';
       },
     },
@@ -157,7 +159,7 @@ async function initCommand(options: InitOptions) {
 
   // 生成配置内容
   let configContent = useTypeScript ? CONFIG_TEMPLATE_TS : CONFIG_TEMPLATE_JS;
-  
+
   // 替换配置值
   configContent = configContent
     .replace("default: 'zh-CN',", `default: '${answers.defaultLanguage}',`)
@@ -166,7 +168,10 @@ async function initCommand(options: InitOptions) {
       `supported: [${answers.supportedLanguages.map((lang: string) => `'${lang}'`).join(', ')}],`
     )
     .replace("fallback: 'zh-CN',", `fallback: '${answers.defaultLanguage}',`)
-    .replace("directory: 'src/locales',", `directory: '${answers.outputDirectory}',`)
+    .replace(
+      "directory: 'src/locales',",
+      `directory: '${answers.outputDirectory}',`
+    )
     .replace("format: 'json',", `format: '${answers.outputFormat}',`);
 
   try {
@@ -209,7 +214,7 @@ export const init = new Command('init')
   .option('-f, --force', '强制覆盖已存在的配置文件')
   .option('--typescript', '使用 TypeScript 配置文件', true)
   .option('--javascript', '使用 JavaScript 配置文件')
-  .action(async (options) => {
+  .action(async options => {
     if (options.javascript) {
       options.typescript = false;
     }

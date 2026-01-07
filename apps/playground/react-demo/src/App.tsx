@@ -18,9 +18,9 @@ const i18nEngine = new I18nEngine({
     enabled: true,
     maxSize: 1000,
     ttl: 5 * 60 * 1000,
-    storage: 'localStorage'
+    storage: 'localStorage',
   },
-  debug: true
+  debug: true,
 });
 
 function App() {
@@ -29,11 +29,12 @@ function App() {
 
   useEffect(() => {
     // 初始化 i18n 引擎
-    i18nEngine.init()
+    i18nEngine
+      .init()
       .then(() => {
         setIsReady(true);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Failed to initialize i18n:', err);
         setError($tsl('国际化系统初始化失败'));
       });
@@ -62,7 +63,7 @@ function App() {
   }
 
   return (
-    <I18nProvider 
+    <I18nProvider
       i18n={i18nEngine}
       fallback={
         <div className="loading-container">
@@ -80,21 +81,19 @@ function App() {
     >
       <div className="app">
         <Header />
-        
+
         <main className="main-content">
           {/* 欢迎区域 */}
           <section className="hero-section">
             <div className="hero-content">
-              <h1 className="hero-title">
-                {$tsl('欢迎使用 TransLink I18n')}
-              </h1>
+              <h1 className="hero-title">{$tsl('欢迎使用 TransLink I18n')}</h1>
               <p className="hero-subtitle">
-                {$tsl('现代化的国际化解决方案，支持 React、Vue 和原生 JavaScript')}
+                {$tsl(
+                  '现代化的国际化解决方案，支持 React、Vue 和原生 JavaScript'
+                )}
               </p>
               <div className="hero-actions">
-                <button className="btn btn-primary">
-                  {$tsl('开始使用')}
-                </button>
+                <button className="btn btn-primary">{$tsl('开始使用')}</button>
                 <button className="btn btn-secondary">
                   {$tsl('查看文档')}
                 </button>

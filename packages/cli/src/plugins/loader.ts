@@ -36,7 +36,7 @@ export class PluginLoader {
       // 1. 尝试作为 npm 包加载
       try {
         pluginModule = await import(pluginName);
-      } catch (error) {
+      } catch {
         // 2. 尝试作为本地路径加载
         const localPath = resolve(options?.cwd || process.cwd(), pluginName);
         if (existsSync(localPath)) {

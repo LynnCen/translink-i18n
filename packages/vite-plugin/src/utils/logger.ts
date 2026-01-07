@@ -21,14 +21,14 @@ class Logger {
   private config: LoggerConfig = {
     level: 'info',
     prefix: '[TransLink I18n]',
-    colors: true
+    colors: true,
   };
 
   private levels: Record<LogLevel, number> = {
     error: 0,
     warn: 1,
     info: 2,
-    debug: 3
+    debug: 3,
   };
 
   /**
@@ -87,7 +87,7 @@ class Logger {
    */
   private colorizePrefix(level: LogLevel): string {
     const prefix = this.config.prefix;
-    
+
     switch (level) {
       case 'error':
         return pc.red(pc.bold(prefix));
@@ -143,11 +143,15 @@ class Logger {
    */
   success(message: string, data?: any): void {
     if (this.shouldLog('info')) {
-      const formattedMessage = this.config.colors 
+      const formattedMessage = this.config.colors
         ? `${pc.green(pc.bold(this.config.prefix))} ${message}`
         : `${this.config.prefix} ${message}`;
-      
-      console.log(data !== undefined ? `${formattedMessage}\n${JSON.stringify(data, null, 2)}` : formattedMessage);
+
+      console.log(
+        data !== undefined
+          ? `${formattedMessage}\n${JSON.stringify(data, null, 2)}`
+          : formattedMessage
+      );
     }
   }
 
@@ -158,7 +162,7 @@ class Logger {
     const childLogger = new Logger();
     childLogger.config = {
       ...this.config,
-      prefix: `${this.config.prefix}:${prefix}`
+      prefix: `${this.config.prefix}:${prefix}`,
     };
     return childLogger;
   }
@@ -168,7 +172,7 @@ class Logger {
    */
   time(label: string): () => void {
     const start = Date.now();
-    
+
     return () => {
       const duration = Date.now() - start;
       this.debug(`${label} took ${duration}ms`);
@@ -178,12 +182,15 @@ class Logger {
   /**
    * 创建进度日志器
    */
-  progress(total: number, label: string = 'Progress'): (current: number) => void {
+  progress(
+    total: number,
+    label: string = 'Progress'
+  ): (current: number) => void {
     let lastPercent = -1;
-    
+
     return (current: number) => {
       const percent = Math.floor((current / total) * 100);
-      
+
       if (percent !== lastPercent && percent % 10 === 0) {
         this.info(`${label}: ${percent}% (${current}/${total})`);
         lastPercent = percent;
@@ -197,10 +204,10 @@ class Logger {
   group(label: string, fn: () => void | Promise<void>): void | Promise<void> {
     this.info(`${label}:`);
     console.group();
-    
+
     try {
       const result = fn();
-      
+
       if (result instanceof Promise) {
         return result.finally(() => {
           console.groupEnd();

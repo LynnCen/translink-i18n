@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createI18nPlugin } from '../core/plugin.js';
-import { createMockResolvedConfig, createMockViteDevServer, createMockSourceFiles, createMockLanguageFiles } from './setup.js';
+import {
+  createMockResolvedConfig,
+  createMockViteDevServer,
+  createMockSourceFiles,
+  createMockLanguageFiles,
+} from './setup.js';
 import type { I18nPluginOptions } from '../types/index.js';
 
 describe('I18nPlugin', () => {
@@ -17,7 +22,7 @@ describe('I18nPlugin', () => {
       localesDir: 'src/locales',
       hotReload: true,
       lazyLoad: true,
-      virtualModulePrefix: 'virtual:i18n-language-'
+      virtualModulePrefix: 'virtual:i18n-language-',
     };
 
     mockConfig = createMockResolvedConfig();
@@ -27,7 +32,7 @@ describe('I18nPlugin', () => {
   describe('插件创建和配置', () => {
     it('应该创建插件实例', () => {
       const plugin = createI18nPlugin(pluginOptions);
-      
+
       expect(plugin).toBeDefined();
       expect(plugin.name).toBe('@translink/vite-plugin-i18n');
       expect(plugin.enforce).toBe('pre');
@@ -35,14 +40,14 @@ describe('I18nPlugin', () => {
 
     it('应该使用默认选项', () => {
       const plugin = createI18nPlugin();
-      
+
       expect(plugin).toBeDefined();
       expect(plugin.name).toBe('@translink/vite-plugin-i18n');
     });
 
     it('应该在 configResolved 时初始化组件', async () => {
       const plugin = createI18nPlugin(pluginOptions);
-      
+
       expect(() => {
         plugin.configResolved!(mockConfig);
       }).not.toThrow();
@@ -66,7 +71,7 @@ const message = $tsl('脚本消息');
       `;
 
       const result = await plugin.transform!(vueContent, 'src/App.vue');
-      
+
       expect(result).toBeDefined();
       if (result && typeof result === 'object' && 'code' in result) {
         // 在开发模式下，应该保持原文并添加默认值
@@ -95,7 +100,7 @@ export function Component() {
       `;
 
       const result = await plugin.transform!(tsxContent, 'src/Component.tsx');
-      
+
       expect(result).toBeDefined();
       if (result && typeof result === 'object' && 'code' in result) {
         expect(result.code).toContain('React 组件标题');
@@ -108,8 +113,11 @@ export function Component() {
       const plugin = createI18nPlugin(pluginOptions);
       plugin.configResolved!(mockConfig);
 
-      const result = await plugin.transform!('console.log("test");', 'node_modules/test.js');
-      
+      const result = await plugin.transform!(
+        'console.log("test");',
+        'node_modules/test.js'
+      );
+
       expect(result).toBeNull();
     });
 
@@ -117,7 +125,7 @@ export function Component() {
       const prodConfig = createMockResolvedConfig({
         command: 'build',
         mode: 'production',
-        isProduction: true
+        isProduction: true,
       });
 
       const plugin = createI18nPlugin(pluginOptions);
@@ -125,7 +133,7 @@ export function Component() {
 
       const content = `const message = $tsl('测试消息');`;
       const result = await plugin.transform!(content, 'src/test.ts');
-      
+
       expect(result).toBeDefined();
       if (result && typeof result === 'object' && 'code' in result) {
         // 生产模式应该转换为哈希，不包含原文
@@ -142,7 +150,7 @@ export function Component() {
 
       const virtualId = 'virtual:i18n-language-zh-CN';
       const result = plugin.resolveId!(virtualId, undefined);
-      
+
       expect(result).toBe(virtualId);
     });
 
@@ -152,7 +160,7 @@ export function Component() {
 
       const normalId = 'src/App.vue';
       const result = plugin.resolveId!(normalId, undefined);
-      
+
       expect(result).toBeNull();
     });
 
@@ -162,15 +170,17 @@ export function Component() {
 
       // Mock 语言文件存在
       const mockFs = vi.doMock('node:fs/promises', () => ({
-        readFile: vi.fn().mockResolvedValue(JSON.stringify({
-          welcome: '欢迎使用',
-          greeting: '你好，{{name}}！'
-        }))
+        readFile: vi.fn().mockResolvedValue(
+          JSON.stringify({
+            welcome: '欢迎使用',
+            greeting: '你好，{{name}}！',
+          })
+        ),
       }));
 
       const virtualId = 'virtual:i18n-language-zh-CN';
       const result = await plugin.load!(virtualId);
-      
+
       expect(result).toBeDefined();
       expect(result).toContain('export default');
       expect(result).toContain('welcome');
@@ -182,12 +192,12 @@ export function Component() {
 
       // Mock 文件不存在
       vi.doMock('node:fs/promises', () => ({
-        readFile: vi.fn().mockRejectedValue(new Error('File not found'))
+        readFile: vi.fn().mockRejectedValue(new Error('File not found')),
       }));
 
       const virtualId = 'virtual:i18n-language-nonexistent';
       const result = await plugin.load!(virtualId);
-      
+
       expect(result).toBeNull();
     });
   });
@@ -212,11 +222,11 @@ export function Component() {
         timestamp: Date.now(),
         modules: [],
         read: vi.fn(),
-        server: mockServer
+        server: mockServer,
       };
 
       const result = await plugin.handleHotUpdate!(hmrContext);
-      
+
       // 应该处理语言文件更新
       expect(mockServer.ws.send).toHaveBeenCalled();
     });
@@ -231,11 +241,11 @@ export function Component() {
         timestamp: Date.now(),
         modules: [],
         read: vi.fn(),
-        server: mockServer
+        server: mockServer,
       };
 
       const result = await plugin.handleHotUpdate!(hmrContext);
-      
+
       // 应该返回 undefined，让 Vite 处理
       expect(result).toBeUndefined();
     });
@@ -247,11 +257,11 @@ export function Component() {
       plugin.configResolved!(mockConfig);
 
       const originalOptions = {
-        manualChunks: undefined
+        manualChunks: undefined,
       };
 
       const result = plugin.outputOptions!(originalOptions);
-      
+
       expect(result).toBeDefined();
       expect(typeof result.manualChunks).toBe('function');
     });
@@ -264,11 +274,14 @@ export function Component() {
       plugin.outputOptions!(options);
 
       const manualChunks = options.manualChunks as Function;
-      
+
       // 测试虚拟语言模块
-      const languageChunk = manualChunks('virtual:i18n-language-zh-CN', {} as any);
+      const languageChunk = manualChunks(
+        'virtual:i18n-language-zh-CN',
+        {} as any
+      );
       expect(languageChunk).toBe('i18n-language-zh-CN');
-      
+
       // 测试普通模块
       const normalChunk = manualChunks('src/App.vue', {} as any);
       expect(normalChunk).toBeUndefined();
@@ -280,11 +293,11 @@ export function Component() {
 
       const existingManualChunks = vi.fn().mockReturnValue('existing-chunk');
       const options = { manualChunks: existingManualChunks };
-      
+
       plugin.outputOptions!(options);
 
       const manualChunks = options.manualChunks as Function;
-      
+
       // 测试现有配置仍然工作
       const result = manualChunks('src/utils.ts', {} as any);
       expect(existingManualChunks).toHaveBeenCalledWith('src/utils.ts', {});
@@ -295,11 +308,11 @@ export function Component() {
     it('应该处理无效的配置文件', async () => {
       const invalidOptions = {
         ...pluginOptions,
-        configFile: 'nonexistent.config.ts'
+        configFile: 'nonexistent.config.ts',
       };
 
       const plugin = createI18nPlugin(invalidOptions);
-      
+
       expect(() => {
         plugin.configResolved!(mockConfig);
       }).not.toThrow();
@@ -311,9 +324,9 @@ export function Component() {
 
       // 无效的 JavaScript 语法
       const invalidContent = `const invalid = $tsl('未闭合的字符串`;
-      
+
       const result = await plugin.transform!(invalidContent, 'src/invalid.js');
-      
+
       // 应该优雅处理错误，不崩溃
       expect(result).toBeDefined();
     });
@@ -324,12 +337,12 @@ export function Component() {
 
       // Mock 系统错误
       vi.doMock('node:fs/promises', () => ({
-        readFile: vi.fn().mockRejectedValue(new Error('System error'))
+        readFile: vi.fn().mockRejectedValue(new Error('System error')),
       }));
 
       const virtualId = 'virtual:i18n-language-zh-CN';
       const result = await plugin.load!(virtualId);
-      
+
       expect(result).toBeNull();
     });
   });
@@ -340,8 +353,9 @@ export function Component() {
       plugin.configResolved!(mockConfig);
 
       // 生成大文件内容
-      const largeContent = Array.from({ length: 1000 }, (_, i) => 
-        `const msg${i} = $tsl('消息${i}');`
+      const largeContent = Array.from(
+        { length: 1000 },
+        (_, i) => `const msg${i} = $tsl('消息${i}');`
       ).join('\n');
 
       const startTime = Date.now();
@@ -358,15 +372,15 @@ export function Component() {
 
       // Mock 多个语言文件
       const languages = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR', 'fr-FR'];
-      
+
       const startTime = Date.now();
-      
-      const promises = languages.map(lang => 
+
+      const promises = languages.map(lang =>
         plugin.load!(`virtual:i18n-language-${lang}`)
       );
-      
+
       await Promise.all(promises);
-      
+
       const duration = Date.now() - startTime;
       expect(duration).toBeLessThan(1000); // 应该在1秒内完成
     });
@@ -376,7 +390,7 @@ export function Component() {
     it('应该支持自定义虚拟模块前缀', () => {
       const customOptions = {
         ...pluginOptions,
-        virtualModulePrefix: 'custom:lang-'
+        virtualModulePrefix: 'custom:lang-',
       };
 
       const plugin = createI18nPlugin(customOptions);
@@ -384,7 +398,7 @@ export function Component() {
 
       const customId = 'custom:lang-zh-CN';
       const result = plugin.resolveId!(customId, undefined);
-      
+
       expect(result).toBe(customId);
     });
 
@@ -392,7 +406,7 @@ export function Component() {
       const customOptions = {
         ...pluginOptions,
         include: ['**/*.vue'],
-        exclude: ['**/*.test.*']
+        exclude: ['**/*.test.*'],
       };
 
       const plugin = createI18nPlugin(customOptions);
@@ -407,14 +421,17 @@ export function Component() {
       expect(tsResult).toBeNull();
 
       // 应该跳过测试文件
-      const testResult = await plugin.transform!('$tsl("测试")', 'src/App.test.vue');
+      const testResult = await plugin.transform!(
+        '$tsl("测试")',
+        'src/App.test.vue'
+      );
       expect(testResult).toBeNull();
     });
 
     it('应该支持禁用热更新', () => {
       const noHMROptions = {
         ...pluginOptions,
-        hotReload: false
+        hotReload: false,
       };
 
       const plugin = createI18nPlugin(noHMROptions);
@@ -429,7 +446,7 @@ export function Component() {
     it('应该支持禁用懒加载', () => {
       const noLazyOptions = {
         ...pluginOptions,
-        lazyLoad: false
+        lazyLoad: false,
       };
 
       const plugin = createI18nPlugin(noLazyOptions);
@@ -438,7 +455,7 @@ export function Component() {
       // 应该仍然处理虚拟模块，但可能有不同的行为
       const virtualId = 'virtual:i18n-language-zh-CN';
       const result = plugin.resolveId!(virtualId, undefined);
-      
+
       expect(result).toBe(virtualId);
     });
   });

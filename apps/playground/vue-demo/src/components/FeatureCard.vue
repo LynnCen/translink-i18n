@@ -1,9 +1,15 @@
 <template>
   <div class="feature-card">
-    <div class="feature-icon">{{ icon }}</div>
-    <h3 class="feature-title">{{ title }}</h3>
-    <p class="feature-description">{{ description }}</p>
-    <div class="feature-badge" v-if="badge">
+    <div class="feature-icon">
+      {{ icon }}
+    </div>
+    <h3 class="feature-title">
+      {{ title }}
+    </h3>
+    <p class="feature-description">
+      {{ description }}
+    </p>
+    <div v-if="badge" class="feature-badge">
       <span class="badge">{{ badge }}</span>
     </div>
   </div>
@@ -79,12 +85,12 @@ defineProps<Props>();
   .feature-card {
     padding: 1.5rem;
   }
-  
+
   .feature-icon {
     font-size: 2.5rem;
     margin-bottom: 1rem;
   }
-  
+
   .feature-title {
     font-size: 1.25rem;
   }

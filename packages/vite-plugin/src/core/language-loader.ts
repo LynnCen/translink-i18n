@@ -2,10 +2,7 @@ import type { ResolvedConfig } from 'vite';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { glob } from 'fast-glob';
-import type { 
-  I18nPluginOptions, 
-  LanguageResource 
-} from '../types/index.js';
+import type { I18nPluginOptions, LanguageResource } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -26,15 +23,15 @@ export class LanguageLoader {
    * 加载语言资源
    */
   async loadLanguageResource(
-    language: string, 
+    language: string,
     namespace: string = 'translation'
   ): Promise<LanguageResource> {
     const resourceKey = `${language}:${namespace}`;
-    
+
     // 检查缓存
     if (this.resourceCache.has(resourceKey)) {
       const cached = this.resourceCache.get(resourceKey)!;
-      
+
       // 检查文件是否有更新
       try {
         const stats = await fs.stat(cached.path);
@@ -69,47 +66,50 @@ export class LanguageLoader {
    * 执行实际的加载操作
    */
   private async performLoad(
-    language: string, 
+    language: string,
     namespace: string
   ): Promise<LanguageResource> {
     const filePath = this.resolveLanguageFilePath(language, namespace);
-    
+
     try {
       const [content, stats] = await Promise.all([
         fs.readFile(filePath, 'utf-8'),
-        fs.stat(filePath)
+        fs.stat(filePath),
       ]);
 
       const parsedContent = JSON.parse(content);
-      
+
       const resource: LanguageResource = {
         language,
         namespace,
         path: filePath,
         content: parsedContent,
-        mtime: stats.mtime.getTime()
+        mtime: stats.mtime.getTime(),
       };
 
       if (this.options.debug) {
         logger.info(`Loaded language resource: ${language}:${namespace}`, {
           path: path.relative(this.config.root, filePath),
-          keys: Object.keys(parsedContent).length
+          keys: Object.keys(parsedContent).length,
         });
       }
 
       return resource;
     } catch (error) {
       if (this.options.debug) {
-        logger.warn(`Failed to load language resource: ${language}:${namespace}`, error);
+        logger.warn(
+          `Failed to load language resource: ${language}:${namespace}`,
+          error
+        );
       }
-      
+
       // 返回空资源而不是抛出错误
       return {
         language,
         namespace,
         path: filePath,
         content: {},
-        mtime: 0
+        mtime: 0,
       };
     }
   }
@@ -119,7 +119,7 @@ export class LanguageLoader {
    */
   private resolveLanguageFilePath(language: string, namespace: string): string {
     const loadPath = this.options.loadPath || './locales/{{lng}}.json';
-    
+
     let filePath = loadPath
       .replace('{{lng}}', language)
       .replace('{{ns}}', namespace);
@@ -139,7 +139,7 @@ export class LanguageLoader {
    * 批量加载语言资源
    */
   async loadMultipleLanguages(
-    languages: string[], 
+    languages: string[],
     namespaces: string[] = ['translation']
   ): Promise<Map<string, LanguageResource>> {
     const results = new Map<string, LanguageResource>();
@@ -154,7 +154,7 @@ export class LanguageLoader {
           .catch(error => {
             logger.warn(`Failed to load ${language}:${namespace}:`, error);
           });
-        
+
         loadPromises.push(promise);
       }
     }
@@ -172,11 +172,11 @@ export class LanguageLoader {
     files: string[];
   }> {
     const localesDir = path.resolve(this.config.root, 'locales');
-    
+
     try {
       const files = await glob('**/*.json', {
         cwd: localesDir,
-        absolute: false
+        absolute: false,
       });
 
       const languages = new Set<string>();
@@ -193,14 +193,14 @@ export class LanguageLoader {
       return {
         languages: Array.from(languages).sort(),
         namespaces: Array.from(namespaces).sort(),
-        files: files.sort()
+        files: files.sort(),
       };
     } catch (error) {
       logger.warn('Failed to scan language files:', error);
       return {
         languages: this.options.supportedLanguages || [],
         namespaces: ['translation'],
-        files: []
+        files: [],
       };
     }
   }
@@ -214,22 +214,22 @@ export class LanguageLoader {
   } {
     const baseName = path.basename(fileName, '.json');
     const parts = baseName.split('.');
-    
+
     if (parts.length === 1) {
       return {
         language: parts[0],
-        namespace: 'translation'
+        namespace: 'translation',
       };
     } else if (parts.length === 2) {
       return {
         language: parts[0],
-        namespace: parts[1]
+        namespace: parts[1],
       };
     }
-    
+
     return {
       language: null,
-      namespace: 'translation'
+      namespace: 'translation',
     };
   }
 
@@ -237,17 +237,21 @@ export class LanguageLoader {
    * 生成语言模块代码（用于虚拟模块）
    */
   generateLanguageModule(language: string): string {
-    const resources = Array.from(this.resourceCache.values())
-      .filter(r => r.language === language);
+    const resources = Array.from(this.resourceCache.values()).filter(
+      r => r.language === language
+    );
 
     if (resources.length === 0) {
       return `export default {};`;
     }
 
-    const moduleContent = resources.reduce((acc, resource) => {
-      acc[resource.namespace] = resource.content;
-      return acc;
-    }, {} as Record<string, any>);
+    const moduleContent = resources.reduce(
+      (acc, resource) => {
+        acc[resource.namespace] = resource.content;
+        return acc;
+      },
+      {} as Record<string, any>
+    );
 
     return `export default ${JSON.stringify(moduleContent, null, 2)};`;
   }
@@ -257,12 +261,13 @@ export class LanguageLoader {
    */
   generateLanguageChunks(): Map<string, any> {
     const chunks = new Map<string, any>();
-    
+
     for (const resource of this.resourceCache.values()) {
-      const chunkName = resource.namespace === 'translation' 
-        ? resource.language 
-        : `${resource.language}.${resource.namespace}`;
-      
+      const chunkName =
+        resource.namespace === 'translation'
+          ? resource.language
+          : `${resource.language}.${resource.namespace}`;
+
       chunks.set(chunkName, resource.content);
     }
 
@@ -274,7 +279,9 @@ export class LanguageLoader {
    */
   async preloadLanguages(languages?: string[]): Promise<void> {
     const targetLanguages = languages || this.options.supportedLanguages || [];
-    const preloadNamespaces = this.options.preload?.namespaces || ['translation'];
+    const preloadNamespaces = this.options.preload?.namespaces || [
+      'translation',
+    ];
 
     if (targetLanguages.length === 0) {
       return;
@@ -282,11 +289,11 @@ export class LanguageLoader {
 
     try {
       await this.loadMultipleLanguages(targetLanguages, preloadNamespaces);
-      
+
       if (this.options.debug) {
         logger.info('Preloaded languages:', {
           languages: targetLanguages,
-          namespaces: preloadNamespaces
+          namespaces: preloadNamespaces,
         });
       }
     } catch (error) {
@@ -315,7 +322,7 @@ export class LanguageLoader {
       cachedResources: this.resourceCache.size,
       loadingPromises: this.loadingPromises.size,
       languages: Array.from(languages),
-      namespaces: Array.from(namespaces)
+      namespaces: Array.from(namespaces),
     };
   }
 
@@ -325,7 +332,7 @@ export class LanguageLoader {
   clearCache(): void {
     this.resourceCache.clear();
     this.loadingPromises.clear();
-    
+
     if (this.options.debug) {
       logger.info('Language loader cache cleared');
     }
@@ -334,14 +341,20 @@ export class LanguageLoader {
   /**
    * 获取特定语言的资源
    */
-  getLanguageResource(language: string, namespace: string = 'translation'): LanguageResource | null {
+  getLanguageResource(
+    language: string,
+    namespace: string = 'translation'
+  ): LanguageResource | null {
     return this.resourceCache.get(`${language}:${namespace}`) || null;
   }
 
   /**
    * 检查语言资源是否存在
    */
-  hasLanguageResource(language: string, namespace: string = 'translation'): boolean {
+  hasLanguageResource(
+    language: string,
+    namespace: string = 'translation'
+  ): boolean {
     return this.resourceCache.has(`${language}:${namespace}`);
   }
 }
