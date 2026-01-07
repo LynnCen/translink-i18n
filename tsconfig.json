@@ -9,6 +9,9 @@
     },
     {
       "path": "./packages/vite-plugin"
+    },
+    {
+      "path": "./packages/plugins/vika"
     }
   ]
 }
