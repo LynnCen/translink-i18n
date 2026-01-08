@@ -105,13 +105,9 @@ import { useI18n } from '@translink/i18n-runtime/vue';
 import LanguageSwitcher from './components/LanguageSwitcher.vue';
 import FeatureCard from './components/FeatureCard.vue';
 import UserProfile from './components/UserProfile.vue';
-import ContactForm from './components/ContactForm.vue';
-import DataDisplay from './components/DataDisplay.vue';
-import NotificationDemo from './components/NotificationDemo.vue';
-import TechFeatures from './components/TechFeatures.vue';
 
 // 使用 i18n
-const { locale, isReady } = useI18n();
+const { locale } = useI18n();
 
 // 响应式数据
 const loadTime = ref(0);
