@@ -97,7 +97,7 @@ async function importFromExcel(
   filePath: string
 ): Promise<ImportedTranslation[]> {
   try {
-    const ExcelJS = await import('exceljs');
+    const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
 

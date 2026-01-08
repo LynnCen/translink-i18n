@@ -216,7 +216,7 @@ async function exportToExcel(
 ) {
   try {
     // 动态导入 exceljs
-    const ExcelJS = await import('exceljs');
+    const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Translations');
 

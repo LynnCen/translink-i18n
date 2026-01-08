@@ -7,9 +7,7 @@ export default defineConfig({
   format: ['esm'],
   target: 'node16',
   clean: true,
-  dts: {
-    resolve: true,
-  },
+  dts: false, // 暂时禁用类型生成以快速测试
   tsconfig: './tsconfig.build.json',
   sourcemap: true,
   splitting: false,

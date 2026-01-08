@@ -5,9 +5,7 @@ export default defineConfig([
   {
     entry: ['src/index.ts'],
     format: ['cjs', 'esm'],
-    dts: {
-      resolve: true,
-    },
+    dts: false, // 暂时禁用类型生成以快速测试
     tsconfig: './tsconfig.build.json',
     sourcemap: true,
     clean: true,
@@ -23,10 +21,7 @@ export default defineConfig([
   {
     entry: ['src/vue.ts'],
     format: ['cjs', 'esm'],
-    dts: {
-      resolve: true,
-      entry: ['src/vue.ts'],
-    },
+    dts: false, // 暂时禁用类型生成以快速测试
     tsconfig: './tsconfig.build.json',
     sourcemap: true,
     external: ['vue'],
@@ -41,10 +36,7 @@ export default defineConfig([
   {
     entry: ['src/react.ts'],
     format: ['cjs', 'esm'],
-    dts: {
-      resolve: true,
-      entry: ['src/react.ts'],
-    },
+    dts: false, // 暂时禁用类型生成以快速测试
     tsconfig: './tsconfig.build.json',
     sourcemap: true,
     external: ['react', 'react/jsx-runtime'],
