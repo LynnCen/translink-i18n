@@ -1,23 +1,32 @@
 import { resolve } from 'path';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { pathToFileURL } from 'url';
 import type { I18nConfig } from '../types/config.js';
 import { logger } from './logger.js';
 
 export const DEFAULT_CONFIG: I18nConfig = {
+  project: {
+    name: 'my-app',
+    version: '1.0.0',
+  },
   extract: {
     patterns: ['src/**/*.{vue,tsx,ts,jsx,js}'],
     exclude: ['node_modules/**', 'dist/**', '**/*.d.ts'],
     functions: ['t', '$tsl', 'i18n.t'],
     extensions: ['.vue', '.tsx', '.ts', '.jsx', '.js'],
+    incremental: true,
+    createEmptyTranslations: true,
   },
   hash: {
+    enabled: true,
     algorithm: 'sha256',
     length: 8,
-    includeContext: true,
+    numericOnly: true,
+    includeContext: false,
     contextFields: ['componentName', 'functionName'],
   },
   languages: {
+    source: 'zh-CN',
     default: 'zh-CN',
     supported: ['zh-CN', 'en-US'],
     fallback: 'zh-CN',
@@ -25,8 +34,39 @@ export const DEFAULT_CONFIG: I18nConfig = {
   output: {
     directory: 'src/locales',
     format: 'json',
+    indent: 2,
+    sortKeys: true,
     splitByNamespace: false,
     flattenKeys: false,
+  },
+  importExport: {
+    format: 'excel',
+    directory: 'translations', // 默认存放在 translations 目录
+    outputFile: 'translations', // 默认文件名（会自动添加扩展名）
+    excel: {
+      sheetName: 'Translations',
+      includeMetadata: false,
+      freezeHeader: true,
+      autoWidth: true,
+    },
+    csv: {
+      delimiter: ',',
+      encoding: 'utf-8',
+      includeHeaders: true,
+    },
+  },
+  build: {
+    minify: true,
+    sourcemap: false,
+    outputDir: 'dist/locales',
+  },
+  cli: {
+    verbose: false,
+    table: {
+      enabled: true,
+      maxRows: 20,
+      showDiff: true,
+    },
   },
   plugins: [],
 };
@@ -66,15 +106,50 @@ export class ConfigManager {
     try {
       let config: any;
 
-      if (configPath.endsWith('.ts') || configPath.endsWith('.js')) {
-        // 动态导入配置文件
+      if (configPath.endsWith('.ts')) {
+        // TypeScript 配置文件 - 使用 jiti 动态加载（与 Vite/Nuxt 相同的方案）
+        try {
+          // 动态导入 jiti
+          const { createJiti } = await import('jiti');
+
+          // 创建 jiti 实例
+          const jiti = createJiti(process.cwd(), {
+            interopDefault: true,
+            esmResolve: true,
+          });
+
+          // 使用 jiti 加载 TypeScript 配置
+          config = jiti(configPath);
+
+          // 如果是 Promise，等待resolve
+          if (config && typeof config.then === 'function') {
+            config = await config;
+          }
+
+          // 处理 default export
+          config = config?.default || config;
+
+          logger.debug(`✓ 使用 jiti 加载 TypeScript 配置: ${configPath}`);
+        } catch (jitiError: any) {
+          logger.error(
+            `Failed to load TypeScript config with jiti: ${jitiError.message}`
+          );
+          throw new Error(
+            `无法加载 TypeScript 配置文件 ${configPath}。` +
+              `错误: ${jitiError.message}`
+          );
+        }
+      } else if (configPath.endsWith('.js') || configPath.endsWith('.mjs')) {
+        // JavaScript 配置文件
         const fileUrl = pathToFileURL(configPath).href;
         const module = await import(fileUrl);
         config = module.default || module;
-      } else {
+      } else if (configPath.endsWith('.json')) {
         // JSON 配置
         const content = readFileSync(configPath, 'utf-8');
         config = JSON.parse(content);
+      } else {
+        throw new Error(`不支持的配置文件格式: ${configPath}`);
       }
 
       // 合并默认配置
@@ -87,10 +162,29 @@ export class ConfigManager {
 
   private mergeConfig(defaultConfig: I18nConfig, userConfig: any): I18nConfig {
     return {
+      project: { ...defaultConfig.project, ...userConfig.project },
       extract: { ...defaultConfig.extract, ...userConfig.extract },
       hash: { ...defaultConfig.hash, ...userConfig.hash },
       languages: { ...defaultConfig.languages, ...userConfig.languages },
       output: { ...defaultConfig.output, ...userConfig.output },
+      importExport: {
+        ...defaultConfig.importExport,
+        ...userConfig.importExport,
+        excel: {
+          ...defaultConfig.importExport?.excel,
+          ...userConfig.importExport?.excel,
+        },
+        csv: {
+          ...defaultConfig.importExport?.csv,
+          ...userConfig.importExport?.csv,
+        },
+      },
+      build: { ...defaultConfig.build, ...userConfig.build },
+      cli: {
+        ...defaultConfig.cli,
+        ...userConfig.cli,
+        table: { ...defaultConfig.cli?.table, ...userConfig.cli?.table },
+      },
       plugins: userConfig.plugins || defaultConfig.plugins,
     };
   }

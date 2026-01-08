@@ -31,12 +31,28 @@ async function importCommand(options: ImportOptions) {
     // 加载配置
     const config = await configManager.loadConfig();
 
-    const inputFile = options.input;
     const outputDir = options.output || config.output.directory;
     const merge = options.merge ?? true;
     const force = options.force ?? false;
 
-    logger.info(`输入文件: ${inputFile}`);
+    // 解析输入文件路径
+    // 如果是相对路径且不包含 / 或 \，则在配置目录中查找
+    let inputPath: string;
+    if (options.input.includes('/') || options.input.includes('\\')) {
+      // 包含路径分隔符，直接使用
+      inputPath = resolve(process.cwd(), options.input);
+    } else {
+      // 只是文件名，在配置目录中查找
+      const importDir = config.importExport?.directory || 'translations';
+      inputPath = resolve(process.cwd(), importDir, options.input);
+      
+      // 如果不存在，回退到当前目录
+      if (!existsSync(inputPath)) {
+        inputPath = resolve(process.cwd(), options.input);
+      }
+    }
+
+    logger.info(`输入文件: ${inputPath}`);
     logger.info(`输出目录: ${outputDir}`);
     logger.info(
       `合并模式: ${merge ? '是（保留已有翻译）' : '否（覆盖已有翻译）'}`
@@ -44,14 +60,17 @@ async function importCommand(options: ImportOptions) {
     logger.br();
 
     // 检查输入文件
-    const inputPath = resolve(process.cwd(), inputFile);
     if (!existsSync(inputPath)) {
-      logger.error(`输入文件不存在: ${inputFile}`);
+      logger.error(`输入文件不存在: ${inputPath}`);
+      logger.info('💡 提示：');
+      logger.info(`   1. 检查文件路径是否正确`);
+      logger.info(`   2. 默认会在 ${config.importExport?.directory || 'translations'} 目录中查找`);
+      logger.info(`   3. 可以使用绝对路径或相对路径`);
       process.exit(1);
     }
 
     // 根据文件扩展名确定格式
-    const ext = extname(inputFile).toLowerCase();
+    const ext = extname(inputPath).toLowerCase();
     let translations: ImportedTranslation[] = [];
 
     switch (ext) {

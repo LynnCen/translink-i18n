@@ -19,7 +19,7 @@
     "translink": "./dist/cli.js",
     "tl": "./dist/cli.js"
   },
-  "exports": {                   
+  "exports": {
     ".": {
       "types": "./dist/cli.d.ts",
       "import": "./dist/cli.js"
@@ -39,22 +39,25 @@
   },
   "dependencies": {
     "commander": "^11.1.0",
-    "chalk": "^5.3.0",
-    "ora": "^8.0.0",
-    "gogocode": "^1.0.0",
-    "glob": "^10.3.0",
+    "exceljs": "^4.4.0",
     "fs-extra": "^11.2.0",
+    "glob": "^10.3.0",
+    "gogocode": "^1.0.0",
     "inquirer": "^9.2.0",
-    "exceljs": "^4.4.0"
+    "jiti": "^2.6.1",
+    "ora": "^8.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.0",
-    "tsup": "^8.0.0",
-    "vitest": "^1.2.0",
-    "@types/node": "^20.11.0",
     "@types/fs-extra": "^11.0.0",
     "@types/inquirer": "^9.0.0",
-    "rimraf": "^5.0.0"
+    "@types/node": "^20.11.0",
+    "chalk": "^5.6.2",
+    "cli-table3": "^0.6.5",
+    "rimraf": "^5.0.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
   },
   "engines": {
     "node": ">=16.0.0"

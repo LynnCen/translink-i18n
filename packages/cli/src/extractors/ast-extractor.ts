@@ -13,6 +13,8 @@ export interface ExtractionStats {
   totalExtractions: number;
   chineseTexts: number;
   errors: number;
+  processedFilesList: string[]; // 🆕 已处理的文件列表
+  filesWithExtractions: string[]; // 🆕 包含提取结果的文件列表
 }
 
 export class ASTExtractor {
@@ -24,6 +26,8 @@ export class ASTExtractor {
     totalExtractions: 0,
     chineseTexts: 0,
     errors: 0,
+    processedFilesList: [],
+    filesWithExtractions: [],
   };
 
   constructor(config: I18nConfig['extract'], hashGenerator: HashGenerator) {
@@ -52,8 +56,10 @@ export class ASTExtractor {
           const fileResults = await this.extractFromFile(filePath, cwd);
           results.push(...fileResults);
           this.stats.processedFiles++;
+          this.stats.processedFilesList.push(relative(cwd, filePath));
 
           if (fileResults.length > 0) {
+            this.stats.filesWithExtractions.push(relative(cwd, filePath));
             logger.updateSpinner(
               `已处理 ${this.stats.processedFiles}/${this.stats.totalFiles} 个文件，` +
                 `提取 ${this.stats.totalExtractions} 个文本`
@@ -75,6 +81,13 @@ export class ASTExtractor {
       logger.stopSpinner('✗ 文件扫描失败', false);
       throw error;
     }
+  }
+
+  /**
+   * 获取提取统计信息
+   */
+  getStats(): ExtractionStats {
+    return { ...this.stats };
   }
 
   /**
@@ -145,32 +158,33 @@ export class ASTExtractor {
     const results: ExtractResult[] = [];
 
     try {
-      const ast = $(content, { parseOptions: { language: 'vue' } });
-
-      // 处理 <script> 部分
-      ast.find('<script>').each(scriptNode => {
-        const scriptContent = scriptNode.attr('content') || '';
-        if (scriptContent.trim()) {
-          const scriptResults = this.extractFromJSContent(
-            scriptContent,
-            filePath
-          );
-          results.push(...scriptResults);
-        }
-      });
-
-      // 处理 <template> 部分
-      ast.find('<template>').each(templateNode => {
-        const templateResults = this.extractFromTemplate(
-          templateNode,
+      // 方法 1: 直接使用正则提取 <template> 内容（更可靠）
+      const templateMatch = content.match(
+        /<template[^>]*>([\s\S]*?)<\/template>/
+      );
+      if (templateMatch && templateMatch[1]) {
+        const templateContent = templateMatch[1];
+        const templateResults = this.extractFromTemplateContent(
+          templateContent,
           filePath
         );
         results.push(...templateResults);
-      });
+      }
+
+      // 方法 2: 使用正则提取 <script> 内容
+      const scriptMatch = content.match(/<script[^>]*>([\s\S]*?)<\/script>/);
+      if (scriptMatch && scriptMatch[1]) {
+        const scriptContent = scriptMatch[1];
+        const scriptResults = this.extractFromJSContent(
+          scriptContent,
+          filePath
+        );
+        results.push(...scriptResults);
+      }
     } catch (error) {
       logger.debug(`解析 Vue 文件 ${filePath} 失败: ${error}`);
-      // 降级到普通 JS 解析
-      return this.extractFromJSContent(content, filePath);
+      // 降级：直接在整个文件内容中搜索
+      return this.extractFromTemplateContent(content, filePath);
     }
 
     return results;
@@ -276,27 +290,32 @@ export class ASTExtractor {
   /**
    * 从 Vue 模板提取翻译文本
    */
-  private extractFromTemplate(
-    templateNode: any,
+  private extractFromTemplateContent(
+    templateContent: string,
     filePath: string
   ): ExtractResult[] {
     const results: ExtractResult[] = [];
 
-    // 查找模板中的翻译函数调用
-    // 这里可以扩展支持 {{ t('文本') }} 或 v-t 指令等
-    const templateContent = templateNode.attr('content') || '';
-
-    // 使用正则表达式匹配模板中的翻译调用
+    // 更强大的正则表达式匹配模板中的翻译调用
     const patterns = [
-      /\{\{\s*([tT]|i18n\.t|\$t|\$tsl)\s*\(\s*['"`]([^'"`]+)['"`]\s*\)\s*\}\}/g,
+      // {{ $tsl('文本') }} - 花括号内调用
+      /\{\{[^}]*?\$tsl\s*\(\s*['"`]([^'"`]+)['"`]\s*\)[^}]*?\}\}/g,
+      // {{ t('文本') }} - 短函数名
+      /\{\{[^}]*?([tT]|i18n\.t|\$t)\s*\(\s*['"`]([^'"`]+)['"`]\s*\)[^}]*?\}\}/g,
+      // :prop="$tsl('文本')" - 属性绑定
+      /[:@]\w+\s*=\s*["`]\s*\$tsl\s*\(\s*['"`]([^'"`]+)['"`]\s*\)\s*["`]/g,
+      // :prop="t('文本')" - 属性绑定（短函数名）
+      /[:@]\w+\s*=\s*["`]\s*([tT]|i18n\.t|\$t)\s*\(\s*['"`]([^'"`]+)['"`]\s*\)\s*["`]/g,
+      // v-t="文本" - v-t 指令
       /v-t\s*=\s*['"`]([^'"`]+)['"`]/g,
     ];
 
     patterns.forEach(pattern => {
       let match;
       while ((match = pattern.exec(templateContent)) !== null) {
+        // 获取文本内容（可能在不同的捕获组）
         const text = match[2] || match[1];
-        if (this.isChineseText(text)) {
+        if (text && this.isChineseText(text)) {
           const context: HashContext = {
             filePath,
             componentName: this.extractComponentName(filePath),
@@ -456,13 +475,6 @@ export class ASTExtractor {
     }
 
     return Array.from(seen.values());
-  }
-
-  /**
-   * 获取提取统计信息
-   */
-  getStats(): ExtractionStats {
-    return { ...this.stats };
   }
 
   /**

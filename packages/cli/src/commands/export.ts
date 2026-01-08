@@ -34,12 +34,25 @@ async function exportCommand(options: ExportOptions) {
     const config = await configManager.loadConfig();
 
     const inputDir = options.input || config.output.directory;
-    const outputFile =
-      options.output || `translations.${options.format || 'excel'}`;
-    const format = (options.format || 'excel') as 'excel' | 'csv' | 'json';
+    const format = (options.format || config.importExport?.format || 'excel') as 'excel' | 'csv' | 'json';
     const languages = options.languages
       ? options.languages.split(',').map(l => l.trim())
       : config.languages.supported;
+
+    // 生成输出路径 - 使用配置的目录和文件名
+    const outputDir = resolve(
+      process.cwd(),
+      config.importExport?.directory || 'translations'
+    );
+    const outputFileName = config.importExport?.outputFile || 'translations';
+    const extension = format === 'excel' ? 'xlsx' : format === 'csv' ? 'csv' : 'json';
+    const outputFile = options.output || resolve(outputDir, `${outputFileName}.${extension}`);
+
+    // 确保输出目录存在
+    const { mkdirSync } = await import('fs');
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir, { recursive: true });
+    }
 
     logger.info(`输入目录: ${inputDir}`);
     logger.info(`输出文件: ${outputFile}`);

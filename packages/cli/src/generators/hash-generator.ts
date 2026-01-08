@@ -14,6 +14,7 @@ export interface HashOptions {
   context: HashContext;
   algorithm: 'md5' | 'sha1' | 'sha256';
   length: number;
+  numericOnly?: boolean; // 🆕 只保留数字
   includeContext: boolean;
   contextFields: string[];
 }
@@ -39,15 +40,17 @@ export class HashGenerator {
       context,
       algorithm: this.config.algorithm,
       length: this.config.length,
+      numericOnly: this.config.numericOnly,
       includeContext: this.config.includeContext,
-      contextFields: this.config.contextFields,
+      contextFields: this.config.contextFields || [],
     };
 
     // 1. 生成基础内容哈希
     const contentHash = this.generateContentHash(
       content,
       options.algorithm,
-      options.length
+      options.length,
+      options.numericOnly
     );
 
     // 2. 检查哈希冲突
@@ -78,7 +81,8 @@ export class HashGenerator {
   private generateContentHash(
     content: string,
     algorithm: string,
-    length: number
+    length: number,
+    numericOnly?: boolean
   ): string {
     // 标准化内容：去除多余空格、统一换行符
     const normalizedContent = content
@@ -88,7 +92,31 @@ export class HashGenerator {
 
     const hash = createHash(algorithm);
     hash.update(normalizedContent, 'utf8');
-    return hash.digest('hex').substring(0, length);
+    const hexHash = hash.digest('hex');
+
+    // 如果需要纯数字哈希
+    if (numericOnly) {
+      return this.toNumericHash(hexHash, length);
+    }
+
+    return hexHash.substring(0, length);
+  }
+
+  /**
+   * 将十六进制哈希转换为纯数字
+   */
+  private toNumericHash(hexHash: string, length: number): string {
+    let numeric = '';
+
+    // 将每个十六进制字符转换为其对应的数字值
+    for (let i = 0; i < hexHash.length && numeric.length < length; i++) {
+      const char = hexHash[i];
+      // 将十六进制字符转换为数字 (0-9 保留, a-f 转换为10-15)
+      const value = parseInt(char, 16);
+      numeric += value.toString();
+    }
+
+    return numeric.substring(0, length);
   }
 
   /**
@@ -104,7 +132,8 @@ export class HashGenerator {
       return this.generateContentHash(
         content,
         options.algorithm,
-        options.length + 4
+        options.length + 4,
+        options.numericOnly
       );
     }
 
@@ -130,7 +159,8 @@ export class HashGenerator {
     return this.generateContentHash(
       combinedContent,
       options.algorithm,
-      options.length
+      options.length,
+      options.numericOnly
     );
   }
 
