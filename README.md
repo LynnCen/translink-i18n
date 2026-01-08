@@ -30,12 +30,12 @@
 
 TransLink I18n 采用 Monorepo 架构，包含以下独立包：
 
-| 包名 | 版本 | 描述 | 依赖 |
-|------|------|------|------|
-| [@translink/i18n-cli](./packages/cli) | 1.0.0 | CLI 工具（文本提取、构建、导出/导入） | 零依赖 |
-| [@translink/i18n-runtime](./packages/runtime) | 1.0.0 | 运行时库（翻译引擎、框架适配） | 零依赖 |
-| [@translink/vite-plugin-i18n](./packages/vite-plugin) | 1.0.0 | Vite 插件（构建时转换、HMR） | 依赖 Runtime |
-| [@translink/plugin-vika](./packages/plugins/vika) | 1.0.0 | Vika 云端翻译管理插件（可选） | 依赖 CLI |
+| 包名                                                  | 版本  | 描述                                  | 依赖         |
+| ----------------------------------------------------- | ----- | ------------------------------------- | ------------ |
+| [@translink/i18n-cli](./packages/cli)                 | 1.0.0 | CLI 工具（文本提取、构建、导出/导入） | 零依赖       |
+| [@translink/i18n-runtime](./packages/runtime)         | 1.0.0 | 运行时库（翻译引擎、框架适配）        | 零依赖       |
+| [@translink/vite-plugin-i18n](./packages/vite-plugin) | 1.0.0 | Vite 插件（构建时转换、HMR）          | 依赖 Runtime |
+| [@translink/plugin-vika](./packages/plugins/vika)     | 1.0.0 | Vika 云端翻译管理插件（可选）         | 依赖 CLI     |
 
 ---
 
@@ -92,6 +92,7 @@ npx translink export --format excel --output translations.xlsx
 ```
 
 生成 Excel 文件，包含：
+
 - **key**: 翻译键
 - **zh-CN**, **en-US**, **ja-JP**: 各语言列
 - **context**: 上下文信息
@@ -345,9 +346,7 @@ function App() {
     <div>
       <h1>{tsl('欢迎使用 TransLink I18n')}</h1>
       <p>{t('hello', { name: '张三' })}</p>
-      <button onClick={() => setLocale('en-US')}>
-        切换语言
-      </button>
+      <button onClick={() => setLocale('en-US')}>切换语言</button>
     </div>
   );
 }
@@ -407,7 +406,12 @@ export default MyPlugin;
 export default {
   // ... 其他配置
   plugins: [
-    ['./my-plugin.ts', { /* 插件配置 */ }],
+    [
+      './my-plugin.ts',
+      {
+        /* 插件配置 */
+      },
+    ],
   ],
 };
 ```
@@ -521,25 +525,40 @@ translink-i18n/
 
 ## 📚 完整文档
 
+**[📖 查看完整文档](./docs/)**
+
+### 核心文档
+
+- [快速开始](./docs/quick-start.md) - 5分钟快速上手
+- [架构概览](./docs/architecture.md) - 系统架构设计
+- [最佳实践](./docs/best-practices.md) - 开发最佳实践
+- [常见问题](./docs/faq.md) - FAQ
+
+### 技术教程
+
+深入学习如何从零构建国际化解决方案：
+
+- [教程系列总览](./docs/tutorials/) - 完整技术教程
+  - [1. Monorepo 架构设计](./docs/tutorials/01-monorepo-architecture.md) - pnpm + Turborepo + TypeScript
+  - [2. CLI 工具开发](./docs/tutorials/02-cli-development.md) - Commander + AST + 哈希生成
+  - [3. Runtime 运行时实现](./docs/tutorials/03-runtime-implementation.md) - 翻译引擎 + 缓存 + 框架适配
+  - [4. Vite 插件开发](./docs/tutorials/04-vite-plugin.md) - 虚拟模块 + HMR + 代码转换
+  - [5. 插件系统设计](./docs/tutorials/05-plugin-system.md) - 接口设计 + 生命周期 + Vika 插件
+  - [6. 构建与优化](./docs/tutorials/06-build-optimization.md) - tsup + Tree-shaking + 性能优化
+
 ### 使用指南
 
-- [快速开始](./apps/docs/guides/quick-start.md) - 5分钟快速上手
-- [Excel 工作流](./apps/docs/guides/excel-workflow.md) - 详细的 Excel 导入导出教程
-- [插件开发](./apps/docs/plugin-development.md) - 如何开发自定义插件
-- [最佳实践](./apps/docs/best-practices.md) - 开发最佳实践
-- [迁移指南](./apps/docs/migration-guide.md) - 从其他方案迁移
+- [Excel 工作流](./docs/guides/excel-workflow.md) - 使用 Excel 管理翻译
+- [TypeScript 配置](./docs/guides/typescript-config.md) - TypeScript 配置说明
+- [插件开发](./docs/guides/plugin-development.md) - 开发自定义插件
+- [迁移指南](./docs/guides/migration.md) - 从其他方案迁移
 
 ### API 文档
 
-- [CLI API](./apps/docs/api/cli.md) - 命令行工具 API
-- [Runtime API](./apps/docs/api/runtime.md) - 运行时库 API
-- [Vite Plugin API](./apps/docs/api/vite-plugin.md) - Vite 插件 API
-- [TypeScript Types](./apps/docs/api/typescript.md) - 类型定义
-
-### 技术文档
-
-- [架构设计](./I18N_ARCHITECTURE_GUIDE.md) - 系统架构说明
-- [重构方案](./REFACTOR_PLAN.md) - 完整重构计划
+- [CLI API](./docs/api/cli.md) - 命令行工具 API
+- [Runtime API](./docs/api/runtime.md) - 运行时库 API
+- [Vite Plugin API](./docs/api/vite-plugin.md) - Vite 插件 API
+- [TypeScript 类型](./docs/api/types.md) - 类型定义
 - [项目审查](./PROJECT_AUDIT_REPORT.md) - 项目质量审查
 
 ---
