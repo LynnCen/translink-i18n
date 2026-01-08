@@ -1,0 +1,19 @@
+{
+  "fileNames": [],
+  "fileInfos": [],
+  "root": [],
+  "options": {
+    "allowImportingTsExtensions": true,
+    "composite": true,
+    "jsx": 1,
+    "module": 99,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": 7
+  },
+  "errors": true,
+  "version": "5.9.2"
+}
