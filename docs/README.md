@@ -21,6 +21,7 @@
 
 ### 📘 使用指南
 
+- [AI 自动翻译](./ai-translation.md) - 使用 AI 自动翻译文本 🆕
 - [Excel 工作流](./guides/excel-workflow.md) - 使用 Excel 管理翻译
 - [TypeScript 配置](./guides/typescript-config.md) - TypeScript 配置文件说明
 - [插件开发](./guides/plugin-development.md) - 开发自定义插件

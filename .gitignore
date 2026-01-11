@@ -56,3 +56,4 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+tsconfig.tsbuildinfo
