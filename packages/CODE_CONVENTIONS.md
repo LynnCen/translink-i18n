@@ -13,16 +13,19 @@
 各包都有自己的 Logger 实现，这是**有意为之**的设计：
 
 #### CLI 包 (`packages/cli/src/utils/logger.ts`)
+
 - **依赖**: `chalk`, `ora`
 - **特点**: 支持 spinner（加载动画），适合 CLI 交互
 - **用途**: 命令行工具的输出
 
 #### Vite Plugin 包 (`packages/vite-plugin/src/utils/logger.ts`)
+
 - **依赖**: `picocolors`
 - **特点**: 轻量级，支持日志级别和分组
 - **用途**: 构建工具的输出
 
 #### Runtime 包
+
 - **实现**: 使用原生 `console.*`
 - **原因**: Runtime 包需要最小体积，不引入额外依赖
 
@@ -35,14 +38,17 @@
 为了避免类型冲突，各包的类型定义遵循以下命名规范：
 
 #### CLI 包 (`packages/cli/src/types/`)
+
 - 前缀: `I18n` 或 `Extract` 或 `Build`
 - 示例: `I18nConfig`, `ExtractConfig`, `ExtractResult`
 
 #### Runtime 包 (`packages/runtime/src/types/`)
+
 - 前缀: `I18n` 或 `Translation` 或 `Cache`
 - 示例: `I18nOptions`, `TranslationResource`, `CacheOptions`
 
 #### Vite Plugin 包 (`packages/vite-plugin/src/types/`)
+
 - 前缀: `I18nPlugin` 或 `Transform`
 - 示例: `I18nPluginOptions`, `TransformContext`
 
@@ -51,6 +57,7 @@
 ### 类型导出规范
 
 各包应该：
+
 1. 在 `src/types/index.ts` 中集中导出所有类型
 2. 在包的 `src/index.ts` 中重新导出类型
 3. 使用 `export type` 导出类型（避免值导出）
@@ -67,6 +74,7 @@
 ### 文件路径处理
 
 各包可能需要处理文件路径，应该：
+
 - 使用 Node.js 内置的 `path` 模块
 - 避免引入额外的路径处理库
 - 统一使用 `path.posix` 或 `path.win32`（根据需求）
@@ -76,6 +84,7 @@
 ### 最小化依赖
 
 各包应该：
+
 1. 只包含必需的依赖
 2. 使用 `peerDependencies` 处理可选依赖（如 Vue、React）
 3. 避免引入其他内部包作为依赖
@@ -83,14 +92,17 @@
 ### 当前依赖状态
 
 #### CLI 包
+
 - ✅ 独立，无内部依赖
 - ⚠️ 未来需要移除 Vika 依赖（阶段一）
 
 #### Runtime 包
+
 - ✅ 独立，无内部依赖
 - ✅ Vue/React 为可选 peerDependency
 
 #### Vite Plugin 包
+
 - ❌ 当前依赖 CLI（不合理）
 - ⚠️ 未来需要移除 CLI 依赖，只依赖 Runtime（阶段一）
 
@@ -120,4 +132,3 @@
 
 **最后更新**: 2026-01-03  
 **维护者**: 项目团队
-
