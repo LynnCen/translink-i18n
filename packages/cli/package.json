@@ -38,6 +38,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@google/generative-ai": "^0.21.0",
     "commander": "^11.1.0",
     "exceljs": "^4.4.0",
     "fs-extra": "^11.2.0",
@@ -45,6 +47,7 @@
     "gogocode": "^1.0.0",
     "inquirer": "^9.2.0",
     "jiti": "^2.6.1",
+    "openai": "^4.67.0",
     "ora": "^8.0.0"
   },
   "devDependencies": {
