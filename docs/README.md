@@ -18,10 +18,11 @@
   - [Vite 插件开发](./tutorials/04-vite-plugin.md)
   - [插件系统设计](./tutorials/05-plugin-system.md)
   - [构建与优化](./tutorials/06-build-optimization.md)
+  - [AI 翻译功能实现](./tutorials/07-ai-translation.md) 🆕
 
 ### 📘 使用指南
 
-- [AI 自动翻译](./ai-translation.md) - 使用 AI 自动翻译文本 🆕
+- [AI 自动翻译](./guides/ai-translation.md) - 使用 AI 自动翻译文本 🆕
 - [Excel 工作流](./guides/excel-workflow.md) - 使用 Excel 管理翻译
 - [TypeScript 配置](./guides/typescript-config.md) - TypeScript 配置文件说明
 - [插件开发](./guides/plugin-development.md) - 开发自定义插件

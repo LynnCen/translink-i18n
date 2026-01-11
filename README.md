@@ -17,6 +17,7 @@
 ## ✨ 特性
 
 - 🚀 **智能文本提取** - 基于 AST 的中文文本自动识别和哈希生成
+- 🤖 **AI 自动翻译** - 集成 OpenAI、Gemini、DeepSeek、Anthropic，一键翻译多语言 🆕
 - 📦 **独立包设计** - 每个包可独立安装使用，零相互依赖
 - 📊 **Excel 工作流** - 支持导出/导入 Excel，运营友好的翻译管理
 - 🔌 **插件系统** - 可扩展的插件架构，支持自定义翻译管理方案
@@ -248,6 +249,95 @@ npx translink analyze [options]
 选项:
   --format <type>    输出格式 (json|table|html)
 ```
+
+### `translink translate`
+
+使用 AI 自动翻译多语言文件。🆕
+
+```bash
+npx translink translate [options]
+
+选项:
+  -f, --from <lang>         源语言 (默认为配置的默认语言)
+  -t, --to <langs>          目标语言，逗号分隔
+  -p, --provider <name>     AI 提供商 (deepseek|gemini|openai|anthropic)
+  --stream                  启用流式翻译
+  --force                   强制重新翻译已有的翻译
+  --keys <keys>             只翻译指定的键，逗号分隔
+  --dry-run                 预览模式，不写入文件
+  --estimate-cost           估算翻译成本
+```
+
+**示例：**
+
+```bash
+# 翻译所有支持的语言
+npx translink translate
+
+# 使用 DeepSeek 翻译成英文和日文
+npx translink translate --provider deepseek --to en-US,ja-JP
+
+# 预览翻译结果（不写入文件）
+npx translink translate --dry-run
+
+# 估算翻译成本
+npx translink translate --estimate-cost
+```
+
+**支持的 AI 提供商：**
+
+| 提供商 | 模型 | 成本 | 特点 |
+|--------|------|------|------|
+| DeepSeek | deepseek-chat | ⭐⭐⭐⭐⭐ | 性价比高，适合大批量翻译 |
+| Gemini | gemini-pro | ⭐⭐⭐⭐⭐ | 免费额度，适合测试和小项目 |
+| OpenAI | gpt-4-turbo | ⭐⭐ | 质量最高，适合专业文档 |
+| Anthropic | claude-3-sonnet | ⭐ | 长文本友好，适合复杂上下文 |
+
+**配置 AI 翻译：**
+
+在 `i18n.config.ts` 中添加：
+
+```typescript
+export default {
+  // ... 其他配置
+  
+  // AI 翻译配置
+  aiTranslation: {
+    defaultProvider: 'deepseek',
+    providers: {
+      deepseek: {
+        apiKey: process.env.DEEPSEEK_API_KEY,
+        model: 'deepseek-chat',
+      },
+      gemini: {
+        apiKey: process.env.GEMINI_API_KEY,
+        model: 'gemini-pro',
+      },
+      openai: {
+        apiKey: process.env.OPENAI_API_KEY,
+        model: 'gpt-4-turbo-preview',
+      },
+      anthropic: {
+        apiKey: process.env.ANTHROPIC_API_KEY,
+        model: 'claude-3-sonnet-20240229',
+      },
+    },
+    options: {
+      cache: true,
+      batchSize: 20,
+      concurrency: 3,
+      // 术语表（保持翻译一致性）
+      glossary: {
+        '应用': 'Application',
+        '用户': 'User',
+        '设置': 'Settings',
+      },
+    },
+  },
+};
+```
+
+更多配置和使用说明，请查看 [AI 翻译使用指南](./docs/guides/ai-translation.md)。
 
 ---
 
@@ -545,9 +635,11 @@ translink-i18n/
   - [4. Vite 插件开发](./docs/tutorials/04-vite-plugin.md) - 虚拟模块 + HMR + 代码转换
   - [5. 插件系统设计](./docs/tutorials/05-plugin-system.md) - 接口设计 + 生命周期 + Vika 插件
   - [6. 构建与优化](./docs/tutorials/06-build-optimization.md) - tsup + Tree-shaking + 性能优化
+  - [7. AI 翻译功能实现](./docs/tutorials/07-ai-translation.md) - Provider 抽象 + 批量优化 + 错误处理 🆕
 
 ### 使用指南
 
+- [AI 自动翻译](./docs/guides/ai-translation.md) - 使用 AI 自动翻译文本 🆕
 - [Excel 工作流](./docs/guides/excel-workflow.md) - 使用 Excel 管理翻译
 - [TypeScript 配置](./docs/guides/typescript-config.md) - TypeScript 配置说明
 - [插件开发](./docs/guides/plugin-development.md) - 开发自定义插件
