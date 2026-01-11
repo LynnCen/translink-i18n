@@ -84,6 +84,51 @@ export interface I18nConfig {
 
   // 插件配置
   plugins?: Array<string | [string, any]>;
+
+  // AI 翻译配置
+  aiTranslation?: AITranslationConfig;
+}
+
+export interface AITranslationConfig {
+  // 默认提供商
+  defaultProvider?: string;
+
+  // 提供商配置
+  providers: {
+    [key: string]: AIProviderConfig;
+  };
+
+  // 翻译选项
+  options: {
+    cache?: boolean;
+    cacheTTL?: number; // 缓存过期时间（秒）
+    cacheMaxSize?: number; // 缓存最大条目数
+    batchSize?: number; // 批次大小
+    concurrency?: number; // 并发数
+    maxRetries?: number; // 最大重试次数
+    retryDelay?: number; // 重试延迟（毫秒）
+    skipTranslated?: boolean; // 跳过已翻译项
+    contextPrompt?: string; // 自定义上下文提示
+    glossary?: Record<string, string>; // 术语表
+  };
+
+  // 质量配置
+  quality?: {
+    detectUntranslated?: boolean; // 检测未翻译（原文==译文）
+    minLengthRatio?: number; // 最小长度比例
+    maxLengthRatio?: number; // 最大长度比例
+    validateFormat?: boolean; // 验证格式（保留换行、占位符等）
+  };
+}
+
+export interface AIProviderConfig {
+  apiKey: string;
+  baseURL?: string;
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  contextPrompt?: string;
+  [key: string]: any;
 }
 
 export interface ExtractResult {
