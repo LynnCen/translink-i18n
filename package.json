@@ -1,7 +1,7 @@
 {
   "name": "translink-i18n",
   "version": "1.0.0",
-  "description": "TransLink I18n - 现代化的国际化工具集，连接不同语言的智能桥梁",
+  "description": "TransLink I18n - Modern, efficient, and easy-to-use frontend internationalization solution",
   "private": true,
   "keywords": [
     "i18n",

@@ -2,65 +2,65 @@
 
 <div align="center">
 
-🌍 现代化、高效、易用的前端国际化解决方案
+🌍 Modern, Efficient, and Easy-to-Use Frontend Internationalization Solution
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue)](https://www.typescriptlang.org/)
 
-[快速开始](#-快速开始) • [完整文档](#-完整文档) • [示例项目](#-示例项目)
+[Quick Start](#-quick-start) • [Documentation](#-documentation) • [Examples](#-examples)
 
 </div>
 
 ---
 
-## ✨ 特性
+## ✨ Features
 
-- 🚀 **智能文本提取** - 基于 AST 的中文文本自动识别和哈希生成
-- 🤖 **AI 自动翻译** - 集成 OpenAI、Gemini、DeepSeek、Anthropic，一键翻译多语言 🆕
-- 📦 **独立包设计** - 每个包可独立安装使用，零相互依赖
-- 📊 **Excel 工作流** - 支持导出/导入 Excel，运营友好的翻译管理
-- 🔌 **插件系统** - 可扩展的插件架构，支持自定义翻译管理方案
-- ⚡ **开发体验** - 热更新、懒加载、构建时优化
-- 🔧 **框架支持** - 支持 Vue3、React 等主流框架
-- 📝 **TypeScript** - 完整的类型定义和智能提示
-
----
-
-## 📦 包结构
-
-TransLink I18n 采用 Monorepo 架构，包含以下独立包：
-
-| 包名                                                  | 版本  | 描述                                  | 依赖         |
-| ----------------------------------------------------- | ----- | ------------------------------------- | ------------ |
-| [@translink/i18n-cli](./packages/cli)                 | 1.0.0 | CLI 工具（文本提取、构建、导出/导入） | 零依赖       |
-| [@translink/i18n-runtime](./packages/runtime)         | 1.0.0 | 运行时库（翻译引擎、框架适配）        | 零依赖       |
-| [@translink/vite-plugin-i18n](./packages/vite-plugin) | 1.0.0 | Vite 插件（构建时转换、HMR）          | 依赖 Runtime |
-| [@translink/plugin-vika](./packages/plugins/vika)     | 1.0.0 | Vika 云端翻译管理插件（可选）         | 依赖 CLI     |
+- 🚀 **Smart Text Extraction** - AST-based automatic Chinese text recognition and hash generation
+- 🤖 **AI Auto-Translation** - Integrated OpenAI, Gemini, DeepSeek, Anthropic for one-click multi-language translation 🆕
+- 📦 **Independent Package Design** - Each package can be installed independently with zero mutual dependencies
+- 📊 **Excel Workflow** - Export/import Excel for operations-friendly translation management
+- 🔌 **Plugin System** - Extensible plugin architecture supporting custom translation management solutions
+- ⚡ **Developer Experience** - Hot reload, lazy loading, build-time optimization
+- 🔧 **Framework Support** - Supports Vue3, React, and other mainstream frameworks
+- 📝 **TypeScript** - Complete type definitions and intelligent hints
 
 ---
 
-## 🚀 快速开始
+## 📦 Package Structure
 
-### 方案 A：Excel 工作流（推荐）
+TransLink I18n uses a Monorepo architecture with the following independent packages:
 
-适合团队协作，运营可直接在 Excel 中编辑翻译。
+| Package                                               | Version | Description                                              | Dependencies       |
+| ----------------------------------------------------- | ------- | -------------------------------------------------------- | ------------------ |
+| [@translink/i18n-cli](./packages/cli)                 | 1.0.0   | CLI tool (text extraction, build, export/import)         | Zero dependencies  |
+| [@translink/i18n-runtime](./packages/runtime)         | 1.0.0   | Runtime library (translation engine, framework adapters) | Zero dependencies  |
+| [@translink/vite-plugin-i18n](./packages/vite-plugin) | 1.0.0   | Vite plugin (build-time transformation, HMR)             | Depends on Runtime |
+| [@translink/plugin-vika](./packages/plugins/vika)     | 1.0.0   | Vika cloud translation management plugin (optional)      | Depends on CLI     |
 
-#### 1. 安装 CLI 工具
+---
+
+## 🚀 Quick Start
+
+### Solution A: Excel Workflow (Recommended)
+
+Suitable for team collaboration where operations can directly edit translations in Excel.
+
+#### 1. Install CLI Tool
 
 ```bash
 npm install -D @translink/i18n-cli
-# 或
+# or
 pnpm add -D @translink/i18n-cli
 ```
 
-#### 2. 初始化项目
+#### 2. Initialize Project
 
 ```bash
 npx translink init
 ```
 
-这会生成配置文件 `i18n.config.ts`：
+This generates a configuration file `i18n.config.ts`:
 
 ```typescript
 export default {
@@ -78,82 +78,82 @@ export default {
 };
 ```
 
-#### 3. 提取文本
+#### 3. Extract Text
 
 ```bash
 npx translink extract
 ```
 
-扫描代码，提取中文文本到 `locales/zh-CN.json`。
+Scan code and extract Chinese text to `locales/zh-CN.json`.
 
-#### 4. 导出 Excel
+#### 4. Export to Excel
 
 ```bash
 npx translink export --format excel --output translations.xlsx
 ```
 
-生成 Excel 文件，包含：
+Generate an Excel file containing:
 
-- **key**: 翻译键
-- **zh-CN**, **en-US**, **ja-JP**: 各语言列
-- **context**: 上下文信息
-- **file**, **line**: 源代码位置
+- **key**: Translation key
+- **zh-CN**, **en-US**, **ja-JP**: Language columns
+- **context**: Context information
+- **file**, **line**: Source code location
 
-#### 5. 运营翻译
+#### 5. Operations Translation
 
-将 `translations.xlsx` 发给运营或翻译人员，在 Excel 中编辑翻译。
+Send `translations.xlsx` to operations or translators to edit translations in Excel.
 
-#### 6. 导入翻译
+#### 6. Import Translations
 
 ```bash
 npx translink import --input translations.xlsx
 ```
 
-将 Excel 中的翻译更新回 JSON 文件。
+Update JSON files with translations from Excel.
 
-#### 7. 构建
+#### 7. Build
 
 ```bash
 npx translink build
 ```
 
-优化和压缩翻译文件。
+Optimize and compress translation files.
 
 ---
 
-### 方案 B：JSON 工作流
+### Solution B: JSON Workflow
 
-适合小型项目或个人开发，直接编辑 JSON 文件。
+Suitable for small projects or individual development, directly editing JSON files.
 
 ```bash
-# 1. 提取文本
+# 1. Extract text
 npx translink extract
 
-# 2. 手动编辑 locales/*.json 文件
+# 2. Manually edit locales/*.json files
 
-# 3. 构建
+# 3. Build
 npx translink build
 ```
 
 ---
 
-### 方案 C：Vika 云端工作流（可选插件）
+### Solution C: Vika Cloud Workflow (Optional Plugin)
 
-适合需要在线协作的团队。
+Suitable for teams requiring online collaboration.
 
-#### 1. 安装 Vika 插件
+#### 1. Install Vika Plugin
 
 ```bash
 npm install -D @translink/plugin-vika
 ```
 
-#### 2. 配置插件
+#### 2. Configure Plugin
 
-在 `i18n.config.ts` 中添加：
+Add to `i18n.config.ts`:
 
 ```typescript
 export default {
-  // ... 其他配置
+  // ... other configurations
   plugins: [
     [
       '@translink/plugin-vika',
@@ -166,142 +166,142 @@ export default {
 };
 ```
 
-#### 3. 使用 Vika 命令
+#### 3. Use Vika Commands
 
 ```bash
-# 推送到 Vika
+# Push to Vika
 npx translink push
 
-# 从 Vika 拉取
+# Pull from Vika
 npx translink pull
 ```
 
 ---
 
-## 📖 CLI 命令详解
+## 📖 CLI Commands
 
 ### `translink init`
 
-初始化项目配置文件。
+Initialize project configuration file.
 
 ```bash
 npx translink init [options]
 
-选项:
-  -f, --force    强制覆盖已存在的配置文件
+Options:
+  -f, --force    Force overwrite existing configuration file
 ```
 
 ### `translink extract`
 
-提取代码中的文本。
+Extract text from code.
 
 ```bash
 npx translink extract [options]
 
-选项:
-  -c, --config <path>    指定配置文件路径
-  -w, --watch           监听文件变化，自动提取
+Options:
+  -c, --config <path>    Specify configuration file path
+  -w, --watch           Watch file changes and auto-extract
 ```
 
 ### `translink export`
 
-导出翻译为 Excel/CSV/JSON。
+Export translations to Excel/CSV/JSON.
 
 ```bash
 npx translink export [options]
 
-选项:
-  -f, --format <type>    导出格式 (excel|csv|json)
-  -o, --output <path>    输出文件路径
+Options:
+  -f, --format <type>    Export format (excel|csv|json)
+  -o, --output <path>    Output file path
 ```
 
 ### `translink import`
 
-从 Excel/CSV/JSON 导入翻译。
+Import translations from Excel/CSV/JSON.
 
 ```bash
 npx translink import [options]
 
-选项:
-  -i, --input <path>     输入文件路径
-  --force               强制覆盖已存在的翻译
+Options:
+  -i, --input <path>     Input file path
+  --force               Force overwrite existing translations
 ```
 
 ### `translink build`
 
-构建和优化翻译文件。
+Build and optimize translation files.
 
 ```bash
 npx translink build [options]
 
-选项:
-  -m, --minify    压缩输出
-  -s, --split     按语言分割输出
+Options:
+  -m, --minify    Compress output
+  -s, --split     Split output by language
 ```
 
 ### `translink analyze`
 
-分析翻译覆盖率。
+Analyze translation coverage.
 
 ```bash
 npx translink analyze [options]
 
-选项:
-  --format <type>    输出格式 (json|table|html)
+Options:
+  --format <type>    Output format (json|table|html)
 ```
 
 ### `translink translate`
 
-使用 AI 自动翻译多语言文件。🆕
+Use AI to automatically translate multi-language files. 🆕
 
 ```bash
 npx translink translate [options]
 
-选项:
-  -f, --from <lang>         源语言 (默认为配置的默认语言)
-  -t, --to <langs>          目标语言，逗号分隔
-  -p, --provider <name>     AI 提供商 (deepseek|gemini|openai|anthropic)
-  --stream                  启用流式翻译
-  --force                   强制重新翻译已有的翻译
-  --keys <keys>             只翻译指定的键，逗号分隔
-  --dry-run                 预览模式，不写入文件
-  --estimate-cost           估算翻译成本
+Options:
+  -f, --from <lang>         Source language (defaults to configured default language)
+  -t, --to <langs>          Target languages, comma-separated
+  -p, --provider <name>     AI provider (deepseek|gemini|openai|anthropic)
+  --stream                  Enable streaming translation
+  --force                   Force re-translate existing translations
+  --keys <keys>             Only translate specified keys, comma-separated
+  --dry-run                 Preview mode, don't write files
+  --estimate-cost           Estimate translation cost
 ```
 
-**示例：**
+**Examples:**
 
 ```bash
-# 翻译所有支持的语言
+# Translate all supported languages
 npx translink translate
 
-# 使用 DeepSeek 翻译成英文和日文
+# Use DeepSeek to translate to English and Japanese
 npx translink translate --provider deepseek --to en-US,ja-JP
 
-# 预览翻译结果（不写入文件）
+# Preview translation results (don't write files)
 npx translink translate --dry-run
 
-# 估算翻译成本
+# Estimate translation cost
 npx translink translate --estimate-cost
 ```
 
-**支持的 AI 提供商：**
+**Supported AI Providers:**
 
-| 提供商 | 模型 | 成本 | 特点 |
-|--------|------|------|------|
-| DeepSeek | deepseek-chat | ⭐⭐⭐⭐⭐ | 性价比高，适合大批量翻译 |
-| Gemini | gemini-pro | ⭐⭐⭐⭐⭐ | 免费额度，适合测试和小项目 |
-| OpenAI | gpt-4-turbo | ⭐⭐ | 质量最高，适合专业文档 |
-| Anthropic | claude-3-sonnet | ⭐ | 长文本友好，适合复杂上下文 |
+| Provider  | Model           | Cost       | Features                                                 |
+| --------- | --------------- | ---------- | -------------------------------------------------------- |
+| DeepSeek  | deepseek-chat   | ⭐⭐⭐⭐⭐ | Cost-effective, suitable for bulk translation            |
+| Gemini    | gemini-pro      | ⭐⭐⭐⭐⭐ | Free quota, suitable for testing and small projects      |
+| OpenAI    | gpt-4-turbo     | ⭐⭐       | Highest quality, suitable for professional documentation |
+| Anthropic | claude-3-sonnet | ⭐         | Long text friendly, suitable for complex contexts        |
 
-**配置 AI 翻译：**
+**Configure AI Translation:**
 
-在 `i18n.config.ts` 中添加：
+Add to `i18n.config.ts`:
 
 ```typescript
 export default {
-  // ... 其他配置
-  
-  // AI 翻译配置
+  // ... other configurations
+
+  // AI translation configuration
   aiTranslation: {
     defaultProvider: 'deepseek',
     providers: {
@@ -326,33 +326,33 @@ export default {
       cache: true,
       batchSize: 20,
       concurrency: 3,
-      // 术语表（保持翻译一致性）
+      // Glossary (maintain translation consistency)
       glossary: {
-        '应用': 'Application',
-        '用户': 'User',
-        '设置': 'Settings',
+        应用: 'Application',
+        用户: 'User',
+        设置: 'Settings',
       },
     },
   },
 };
 ```
 
-更多配置和使用说明，请查看 [AI 翻译使用指南](./docs/guides/ai-translation.md)。
+For more configuration and usage instructions, see the [AI Translation Guide](./docs/guides/ai-translation.md).
 
 ---
 
-## 🎨 在应用中使用
+## 🎨 Usage in Applications
 
 ### Vue 3
 
-#### 1. 安装
+#### 1. Install
 
 ```bash
 npm install @translink/i18n-runtime
 npm install -D @translink/vite-plugin-i18n
 ```
 
-#### 2. 配置 Vite
+#### 2. Configure Vite
 
 ```typescript
 // vite.config.ts
@@ -371,14 +371,14 @@ export default defineConfig({
 });
 ```
 
-#### 3. 使用
+#### 3. Usage
 
 ```vue
 <template>
   <div>
-    <!-- 模板中使用 -->
-    <h1>{{ $tsl('欢迎使用 TransLink I18n') }}</h1>
-    <p>{{ $t('hello', { name: '张三' }) }}</p>
+    <!-- Use in template -->
+    <h1>{{ $tsl('Welcome to TransLink I18n') }}</h1>
+    <p>{{ $t('hello', { name: 'John' }) }}</p>
   </div>
 </template>
 
@@ -387,10 +387,10 @@ import { useI18n } from '@translink/i18n-runtime/vue';
 
 const { t, tsl, locale, setLocale } = useI18n();
 
-// Composition API 中使用
-const greeting = tsl('你好，世界');
+// Use in Composition API
+const greeting = tsl('Hello, World');
 
-// 切换语言
+// Switch language
 const switchLanguage = () => {
   setLocale('en-US');
 };
@@ -401,14 +401,14 @@ const switchLanguage = () => {
 
 ### React
 
-#### 1. 安装
+#### 1. Install
 
 ```bash
 npm install @translink/i18n-runtime
 npm install -D @translink/vite-plugin-i18n
 ```
 
-#### 2. 配置
+#### 2. Setup
 
 ```typescript
 // main.tsx
@@ -424,7 +424,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 ```
 
-#### 3. 使用
+#### 3. Usage
 
 ```tsx
 import { useI18n } from '@translink/i18n-runtime/react';
@@ -434,9 +434,9 @@ function App() {
 
   return (
     <div>
-      <h1>{tsl('欢迎使用 TransLink I18n')}</h1>
-      <p>{t('hello', { name: '张三' })}</p>
-      <button onClick={() => setLocale('en-US')}>切换语言</button>
+      <h1>{tsl('Welcome to TransLink I18n')}</h1>
+      <p>{t('hello', { name: 'John' })}</p>
+      <button onClick={() => setLocale('en-US')}>Switch Language</button>
     </div>
   );
 }
@@ -444,11 +444,11 @@ function App() {
 
 ---
 
-## 🔌 插件开发
+## 🔌 Plugin Development
 
-TransLink I18n 支持自定义插件扩展。
+TransLink I18n supports custom plugin extensions.
 
-### 创建插件
+### Create a Plugin
 
 ```typescript
 // my-plugin.ts
@@ -458,28 +458,28 @@ const MyPlugin: I18nPlugin = {
   metadata: {
     name: 'my-plugin',
     version: '1.0.0',
-    description: '我的自定义插件',
+    description: 'My custom plugin',
     author: 'your-name',
   },
 
   async init(context, config) {
-    // 初始化逻辑
+    // Initialization logic
   },
 
   async push(data) {
-    // 推送翻译到你的平台
+    // Push translations to your platform
     return {
       success: true,
-      message: '推送成功',
+      message: 'Push successful',
       count: Object.keys(data.translations).length,
     };
   },
 
   async pull(data) {
-    // 从你的平台拉取翻译
+    // Pull translations from your platform
     return {
       success: true,
-      message: '拉取成功',
+      message: 'Pull successful',
       translations: {},
       count: 0,
     };
@@ -489,35 +489,35 @@ const MyPlugin: I18nPlugin = {
 export default MyPlugin;
 ```
 
-### 使用插件
+### Use Plugin
 
 ```typescript
 // i18n.config.ts
 export default {
-  // ... 其他配置
+  // ... other configurations
   plugins: [
     [
       './my-plugin.ts',
       {
-        /* 插件配置 */
+        /* plugin configuration */
       },
     ],
   ],
 };
 ```
 
-更多插件开发文档，请参考 [插件开发指南](./apps/docs/plugin-development.md)。
+For more plugin development documentation, see the [Plugin Development Guide](./docs/guides/plugin-development.md).
 
 ---
 
-## 📊 配置文件完整示例
+## 📊 Complete Configuration Example
 
 ```typescript
 // i18n.config.ts
 import type { I18nConfig } from '@translink/i18n-cli';
 
 export default {
-  // 提取配置
+  // Extraction configuration
   extract: {
     patterns: ['src/**/*.{vue,tsx,ts,jsx,js}'],
     exclude: ['node_modules/**', 'dist/**'],
@@ -525,29 +525,29 @@ export default {
     extensions: ['.vue', '.ts', '.tsx', '.js', '.jsx'],
   },
 
-  // 哈希配置
+  // Hash configuration
   hash: {
     algorithm: 'md5',
     length: 8,
     prefix: '',
   },
 
-  // 语言配置
+  // Language configuration
   languages: {
     default: 'zh-CN',
     supported: ['zh-CN', 'en-US', 'ja-JP', 'ko-KR'],
   },
 
-  // 输出配置
+  // Output configuration
   output: {
     directory: 'locales',
     format: 'json',
     indent: 2,
   },
 
-  // 插件配置（可选）
+  // Plugin configuration (optional)
   plugins: [
-    // Excel 插件（内置）
+    // Excel plugin (built-in)
     [
       'excel',
       {
@@ -555,7 +555,7 @@ export default {
       },
     ],
 
-    // Vika 插件（需要单独安装）
+    // Vika plugin (requires separate installation)
     [
       '@translink/plugin-vika',
       {
@@ -569,142 +569,153 @@ export default {
 
 ---
 
-## 🏗️ 项目架构
+## 🏗️ Project Architecture
 
 ```
 translink-i18n/
 ├── packages/
 │   ├── cli/                      # @translink/i18n-cli
 │   │   ├── src/
-│   │   │   ├── commands/         # CLI 命令
-│   │   │   ├── extractors/       # 文本提取器
-│   │   │   ├── generators/       # 哈希生成器
-│   │   │   ├── plugins/          # 插件系统
-│   │   │   └── utils/            # 工具函数
-│   │   └── tests/                # 测试文件
+│   │   │   ├── commands/         # CLI commands
+│   │   │   ├── extractors/       # Text extractors
+│   │   │   ├── generators/       # Hash generators
+│   │   │   ├── plugins/          # Plugin system
+│   │   │   └── utils/            # Utility functions
+│   │   └── tests/                # Test files
 │   │
 │   ├── runtime/                  # @translink/i18n-runtime
 │   │   ├── src/
-│   │   │   ├── core/             # 核心引擎
-│   │   │   ├── adapters/         # 框架适配器
-│   │   │   └── types/            # 类型定义
-│   │   └── tests/                # 测试文件
+│   │   │   ├── core/             # Core engine
+│   │   │   ├── adapters/         # Framework adapters
+│   │   │   └── types/            # Type definitions
+│   │   └── tests/                # Test files
 │   │
 │   ├── vite-plugin/              # @translink/vite-plugin-i18n
 │   │   ├── src/
-│   │   │   ├── core/             # 核心逻辑
-│   │   │   └── utils/            # 工具函数
-│   │   └── tests/                # 测试文件
+│   │   │   ├── core/             # Core logic
+│   │   │   └── utils/            # Utility functions
+│   │   └── tests/                # Test files
 │   │
-│   └── plugins/                  # 可选插件
+│   └── plugins/                  # Optional plugins
 │       └── vika/                 # @translink/plugin-vika
 │           ├── src/
 │           └── tests/
 │
 ├── apps/
-│   ├── docs/                     # 文档站点
-│   └── playground/               # 示例应用
+│   ├── docs/                     # Documentation site
+│   └── playground/               # Example applications
 │
-└── docs/                         # 项目文档
-    ├── REFACTOR_PLAN.md          # 重构方案
-    ├── PROJECT_AUDIT_REPORT.md   # 项目审查报告
-    └── I18N_ARCHITECTURE_GUIDE.md # 架构指南
+└── docs/                         # Project documentation
+    ├── api/                      # API documentation
+    ├── guides/                   # User guides
+    └── tutorials/                # Technical tutorials
 ```
 
 ---
 
-## 📚 完整文档
+## 📚 Documentation
 
-**[📖 查看完整文档](./docs/)**
+**[📖 View Complete Documentation](./docs/)**
 
-### 核心文档
+### Core Documentation
 
-- [快速开始](./docs/quick-start.md) - 5分钟快速上手
-- [架构概览](./docs/architecture.md) - 系统架构设计
-- [最佳实践](./docs/best-practices.md) - 开发最佳实践
-- [常见问题](./docs/faq.md) - FAQ
+- [Quick Start](./docs/quick-start.md) - Get started in 5 minutes
+- [Architecture Overview](./docs/architecture.md) - System architecture design
+- [Best Practices](./docs/best-practices.md) - Development best practices
+- [FAQ](./docs/faq.md) - Frequently asked questions
 
-### 技术教程
+### Technical Tutorials
 
-深入学习如何从零构建国际化解决方案：
+Learn how to build an internationalization solution from scratch:
 
-- [教程系列总览](./docs/tutorials/) - 完整技术教程
-  - [1. Monorepo 架构设计](./docs/tutorials/01-monorepo-architecture.md) - pnpm + Turborepo + TypeScript
-  - [2. CLI 工具开发](./docs/tutorials/02-cli-development.md) - Commander + AST + 哈希生成
-  - [3. Runtime 运行时实现](./docs/tutorials/03-runtime-implementation.md) - 翻译引擎 + 缓存 + 框架适配
-  - [4. Vite 插件开发](./docs/tutorials/04-vite-plugin.md) - 虚拟模块 + HMR + 代码转换
-  - [5. 插件系统设计](./docs/tutorials/05-plugin-system.md) - 接口设计 + 生命周期 + Vika 插件
-  - [6. 构建与优化](./docs/tutorials/06-build-optimization.md) - tsup + Tree-shaking + 性能优化
-  - [7. AI 翻译功能实现](./docs/tutorials/07-ai-translation.md) - Provider 抽象 + 批量优化 + 错误处理 🆕
+- [Tutorial Series Overview](./docs/tutorials/) - Complete technical tutorials
+  - [1. Monorepo Architecture](./docs/tutorials/01-monorepo-architecture.md) - pnpm + Turborepo + TypeScript
+  - [2. CLI Tool Development](./docs/tutorials/02-cli-development.md) - Commander + AST + Hash generation
+  - [3. Runtime Implementation](./docs/tutorials/03-runtime-implementation.md) - Translation engine + Cache + Framework adapters
+  - [4. Vite Plugin Development](./docs/tutorials/04-vite-plugin.md) - Virtual modules + HMR + Code transformation
+  - [5. Plugin System Design](./docs/tutorials/05-plugin-system.md) - Interface design + Lifecycle + Vika plugin
+  - [6. Build & Optimization](./docs/tutorials/06-build-optimization.md) - tsup + Tree-shaking + Performance optimization
+  - [7. AI Translation Implementation](./docs/tutorials/07-ai-translation.md) - Provider abstraction + Batch optimization + Error handling 🆕
 
-### 使用指南
+### User Guides
 
-- [AI 自动翻译](./docs/guides/ai-translation.md) - 使用 AI 自动翻译文本 🆕
-- [Excel 工作流](./docs/guides/excel-workflow.md) - 使用 Excel 管理翻译
-- [TypeScript 配置](./docs/guides/typescript-config.md) - TypeScript 配置说明
-- [插件开发](./docs/guides/plugin-development.md) - 开发自定义插件
-- [迁移指南](./docs/guides/migration.md) - 从其他方案迁移
+- [AI Auto-Translation](./docs/guides/ai-translation.md) - Use AI to automatically translate text 🆕
+- [Excel Workflow](./docs/guides/excel-workflow.md) - Manage translations using Excel
+- [TypeScript Configuration](./docs/guides/typescript-config.md) - TypeScript configuration guide
+- [Plugin Development](./docs/guides/plugin-development.md) - Develop custom plugins
+- [Migration Guide](./docs/guides/migration.md) - Migrate from other solutions
 
-### API 文档
+### API Documentation
 
-- [CLI API](./docs/api/cli.md) - 命令行工具 API
-- [Runtime API](./docs/api/runtime.md) - 运行时库 API
-- [Vite Plugin API](./docs/api/vite-plugin.md) - Vite 插件 API
-- [TypeScript 类型](./docs/api/types.md) - 类型定义
-- [项目审查](./PROJECT_AUDIT_REPORT.md) - 项目质量审查
+- [CLI API](./docs/api/cli.md) - Command-line tool API
+- [Runtime API](./docs/api/runtime.md) - Runtime library API
+- [Vite Plugin API](./docs/api/vite-plugin.md) - Vite plugin API
+- [TypeScript Types](./docs/api/types.md) - Type definitions
+
+---
+
+## 🎯 Examples
+
+Check out our example projects in the [playground](./apps/playground/) directory:
+
+- [Vue 3 Demo](./apps/playground/vue-demo) - Complete Vue 3 application with i18n
+- [React Demo](./apps/playground/react-demo) - React application example
+- [TypeScript Demo](./apps/playground/typescript-demo) - Pure TypeScript usage
+- [JavaScript Demo](./apps/playground/javascript-demo) - Vanilla JavaScript example
 
 ---
 
 ## 🛣️ Roadmap
 
-### 已完成 ✅
+### Completed ✅
 
-- [x] 基础架构搭建（Monorepo + TypeScript + Turborepo）
-- [x] CLI 工具核心功能（extract、build、init、analyze）
-- [x] Runtime 核心引擎和框架适配器（Vue3、React）
-- [x] Vite 插件开发（代码转换、HMR）
-- [x] 完全解耦的包设计（零相互依赖）
-- [x] Excel 导出/导入功能
-- [x] 插件系统架构
-- [x] Vika 插件（独立包）
+- [x] Basic architecture (Monorepo + TypeScript + Turborepo)
+- [x] CLI core features (extract, build, init, analyze)
+- [x] Runtime core engine and framework adapters (Vue3, React)
+- [x] Vite plugin development (code transformation, HMR)
+- [x] Fully decoupled package design (zero mutual dependencies)
+- [x] Excel export/import functionality
+- [x] Plugin system architecture
+- [x] Vika plugin (independent package)
+- [x] AI auto-translation (DeepSeek, Gemini, OpenAI, Anthropic) 🆕
 
-### 进行中 🚧
+### In Progress 🚧
 
-- [ ] 完善测试覆盖（目标 80%+）
-- [ ] 性能优化（AST 缓存、并发控制）
-- [ ] 文档完善
+- [ ] Improve test coverage (target 80%+)
+- [ ] Performance optimization (AST caching, concurrency control)
+- [ ] Complete documentation
 
-### 计划中 📝
+### Planned 📝
 
-- [ ] 支持更多框架（Svelte、Angular）
-- [ ] CLI 交互式UI
-- [ ] VSCode 插件
-- [ ] Web 管理界面
-- [ ] 更多翻译平台插件（Crowdin、Lokalise等）
-
----
-
-## 🤝 贡献
-
-欢迎贡献代码、报告问题或提出建议！
-
-1. Fork 项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
+- [ ] Support more frameworks (Svelte, Angular)
+- [ ] CLI interactive UI
+- [ ] VSCode extension
+- [ ] Web management interface
+- [ ] More translation platform plugins (Crowdin, Lokalise, etc.)
 
 ---
 
-## 📄 许可证
+## 🤝 Contributing
 
-本项目采用 [MIT](./LICENSE) 许可证。
+Contributions are welcome! Please feel free to submit code, report issues, or suggest improvements.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
-## 🙏 致谢
+## 📄 License
 
-感谢以下开源项目的启发：
+This project is licensed under the [MIT](./LICENSE) License.
+
+---
+
+## 🙏 Acknowledgments
+
+Thanks to the following open source projects for inspiration:
 
 - [vue-i18n](https://github.com/intlify/vue-i18n-next)
 - [react-i18next](https://github.com/i18next/react-i18next)
@@ -712,16 +723,16 @@ translink-i18n/
 
 ---
 
-## 📧 联系方式
+## 📧 Contact
 
-- 作者: lynncen
-- 项目: [TransLink I18n](https://github.com/lynncen/translink-i18n)
-- 问题反馈: [GitHub Issues](https://github.com/lynncen/translink-i18n/issues)
+- Author: lynncen
+- Project: [TransLink I18n](https://github.com/lynncen/translink-i18n)
+- Issues: [GitHub Issues](https://github.com/lynncen/translink-i18n/issues)
 
 ---
 
 <div align="center">
 
-**如果这个项目对你有帮助，请给个 ⭐️ Star 支持一下！**
+**If this project helps you, please give it a ⭐️ Star!**
 
 </div>
