@@ -1,14 +1,16 @@
 # @translink/i18n-runtime
 
-TransLink I18n 运行时库 - 轻量、高效的国际化运行时。
+TransLink I18n Runtime Library - Lightweight, efficient internationalization runtime.
 
-## 📦 安装
+## 📦 Installation
 
 ```bash
+npm install @translink/i18n-runtime
+# or
 pnpm add @translink/i18n-runtime
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
 ### Vue 3
 
@@ -18,7 +20,7 @@ import { createApp } from 'vue';
 import { createI18n } from '@translink/i18n-runtime/vue';
 import App from './App.vue';
 
-// 导入语言包
+// Import language packages
 import zhCN from './locales/zh-CN.json';
 import enUS from './locales/en-US.json';
 
@@ -37,18 +39,18 @@ app.use(i18n);
 app.mount('#app');
 ```
 
-在组件中使用：
+Using in components:
 
 ```vue
 <template>
   <div>
-    <!-- 使用 $tsl 函数 -->
-    <h1>{{ $tsl('欢迎') }}</h1>
-    
-    <!-- 使用 Composition API -->
-    <p>{{ t('描述文本') }}</p>
-    
-    <!-- 语言切换 -->
+    <!-- Using $tsl function -->
+    <h1>{{ $tsl('Welcome') }}</h1>
+
+    <!-- Using Composition API -->
+    <p>{{ t('Description text') }}</p>
+
+    <!-- Language switching -->
     <button @click="changeLanguage('en-US')">English</button>
   </div>
 </template>
@@ -89,15 +91,15 @@ function MyComponent() {
 
   return (
     <div>
-      <h1>{t('欢迎')}</h1>
-      <p>{t('描述文本')}</p>
+      <h1>{t('Welcome')}</h1>
+      <p>{t('Description text')}</p>
       <button onClick={() => changeLanguage('en-US')}>English</button>
     </div>
   );
 }
 ```
 
-### 原生 JavaScript
+### Vanilla JavaScript
 
 ```typescript
 import { I18nEngine } from '@translink/i18n-runtime';
@@ -114,25 +116,25 @@ const i18n = new I18nEngine({
   },
 });
 
-// 翻译
-const text = i18n.translate('欢迎');
+// Translate
+const text = i18n.translate('Welcome');
 
-// 切换语言
+// Change language
 i18n.changeLanguage('en-US');
 
-// 监听语言变化
-i18n.on('languageChanged', (newLang) => {
+// Listen to language changes
+i18n.on('languageChanged', newLang => {
   console.log('Language changed to:', newLang);
 });
 ```
 
-## 📖 API 参考
+## 📖 API Reference
 
 ### Vue API
 
 #### `createI18n(options)`
 
-创建 i18n 实例。
+Create i18n instance.
 
 ```typescript
 interface I18nOptions {
@@ -147,26 +149,26 @@ interface I18nOptions {
 
 #### `useI18n()`
 
-Composition API Hook。
+Composition API Hook.
 
 ```typescript
 const {
-  t,              // 翻译函数
-  locale,         // 当前语言（ref）
-  changeLanguage, // 切换语言
-  isReady,        // 是否就绪
+  t, // Translation function
+  locale, // Current language (ref)
+  changeLanguage, // Change language
+  isReady, // Is ready
 } = useI18n();
 ```
 
 #### `$tsl(key, params?)`
 
-全局翻译函数（Options API）。
+Global translation function (Options API).
 
 ### React API
 
 #### `<I18nProvider>`
 
-Provider 组件。
+Provider component.
 
 ```typescript
 <I18nProvider
@@ -181,68 +183,68 @@ Provider 组件。
 
 #### `useI18n()`
 
-React Hook。
+React Hook.
 
 ```typescript
 const {
-  t,              // 翻译函数
-  locale,         // 当前语言
-  changeLanguage, // 切换语言
-  isReady,        // 是否就绪
+  t, // Translation function
+  locale, // Current language
+  changeLanguage, // Change language
+  isReady, // Is ready
 } = useI18n();
 ```
 
-### 核心 API
+### Core API
 
 #### `I18nEngine`
 
 ```typescript
 class I18nEngine {
   constructor(options: I18nOptions);
-  
-  // 翻译
+
+  // Translation
   translate(key: string, params?: Record<string, any>): string;
-  t(key: string, params?: Record<string, any>): string; // 别名
-  
-  // 语言管理
+  t(key: string, params?: Record<string, any>): string; // Alias
+
+  // Language management
   changeLanguage(lang: string): Promise<void>;
   getCurrentLanguage(): string;
   getSupportedLanguages(): string[];
-  
-  // 资源管理
+
+  // Resource management
   addResources(lang: string, resources: Record<string, string>): void;
   getResource(lang: string, key: string): string | undefined;
-  
-  // 事件系统
+
+  // Event system
   on(event: string, handler: Function): void;
   off(event: string, handler: Function): void;
   emit(event: string, ...args: any[]): void;
 }
 ```
 
-## ⚙️ 配置选项
+## ⚙️ Configuration Options
 
 ```typescript
 interface I18nOptions {
-  // 默认语言
+  // Default language
   defaultLanguage: string;
-  
-  // 回退语言
+
+  // Fallback language
   fallbackLanguage?: string;
-  
-  // 支持的语言列表
+
+  // Supported languages list
   supportedLanguages: string[];
-  
-  // 语言资源
+
+  // Language resources
   resources: Record<string, Record<string, string>>;
-  
-  // 启用缓存
+
+  // Enable caching
   cache?: boolean;
-  
-  // 调试模式
+
+  // Debug mode
   debug?: boolean;
-  
-  // 缓存配置
+
+  // Cache configuration
   cacheConfig?: {
     type: 'memory' | 'localStorage' | 'sessionStorage';
     maxSize?: number;
@@ -251,37 +253,67 @@ interface I18nOptions {
 }
 ```
 
-## 🎯 特性
+## 🎯 Features
 
-### ✅ 轻量级
+### ✅ Lightweight
 
-- 核心代码 < 10KB (gzipped)
-- 零外部依赖
+- Core code < 10KB (gzipped)
+- Zero external dependencies
 - Tree-shakable
 
-### ⚡ 高性能
+### ⚡ High Performance
 
-- 内存缓存
-- 懒加载
-- 批量更新
+- Memory caching
+- Lazy loading
+- Batch updates
 
-### 🔧 灵活
+### 🔧 Flexible
 
-- 支持多框架
-- 可扩展的插件系统
-- 完整的 TypeScript 支持
+- Multi-framework support
+- Extensible plugin system
+- Complete TypeScript support
 
-## 📚 完整文档
+### 🌍 Interpolation
 
-- [Runtime API 文档](../../docs/api/runtime.md)
-- [快速开始](../../docs/quick-start.md)
-- [最佳实践](../../docs/best-practices.md)
+Support for parameter interpolation:
 
-## 🤝 贡献
+```typescript
+// Basic interpolation
+t('Hello {{name}}', { name: 'John' });
+// Output: Hello John
 
-欢迎贡献代码！请查看 [贡献指南](../../CONTRIBUTING.md)。
+// Multiple parameters
+t('{{user}} has {{count}} messages', { user: 'Alice', count: 5 });
+// Output: Alice has 5 messages
+```
 
-## 📄 许可证
+### 🎨 Framework Adapters
+
+Built-in adapters for popular frameworks:
+
+- **Vue 3**: Full Composition API and Options API support
+- **React**: Hook-based API with context provider
+- **Vanilla JS**: Pure JavaScript engine for any framework
+
+### 💾 Smart Caching
+
+Automatic caching for improved performance:
+
+- In-memory cache for translations
+- LRU cache strategy
+- Configurable cache size and TTL
+- Cache invalidation on language change
+
+## 📚 Complete Documentation
+
+- [Runtime API Documentation](../../docs/api/runtime.md)
+- [Quick Start Guide](../../docs/quick-start.md)
+- [Best Practices](../../docs/best-practices.md)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see the [Contributing Guide](../../CONTRIBUTING.md).
+
+## 📄 License
 
 MIT © lynncen
-

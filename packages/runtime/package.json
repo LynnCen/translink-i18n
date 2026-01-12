@@ -1,7 +1,7 @@
 {
   "name": "@translink/i18n-runtime",
   "version": "1.0.0",
-  "description": "TransLink I18n Runtime - 高性能国际化运行时库，支持 Vue3 和 React",
+  "description": "TransLink I18n Runtime - Lightweight, high-performance internationalization runtime library with Vue 3 and React support",
   "keywords": [
     "i18n",
     "runtime",
@@ -73,6 +73,15 @@
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lynncen/translink-i18n.git",
+    "directory": "packages/runtime"
+  },
+  "homepage": "https://github.com/lynncen/translink-i18n#readme",
+  "bugs": {
+    "url": "https://github.com/lynncen/translink-i18n/issues"
   },
   "publishConfig": {
     "access": "public"
