@@ -30,6 +30,15 @@
   ],
   "author": "lynncen",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lynncen/translink-i18n.git",
+    "directory": "packages/plugins/vika"
+  },
+  "homepage": "https://github.com/lynncen/translink-i18n#readme",
+  "bugs": {
+    "url": "https://github.com/lynncen/translink-i18n/issues"
+  },
   "dependencies": {
     "@translink/i18n-cli": "workspace:*"
   },
