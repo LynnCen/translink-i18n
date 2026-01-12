@@ -1,17 +1,17 @@
 # @translink/vite-plugin-i18n
 
-TransLink I18n Vite 插件 - 构建时优化和 HMR 支持。
+TransLink I18n Vite Plugin - Build-time optimization and HMR support.
 
-## 📦 安装
+## 📦 Installation
 
 ```bash
-pnpm add -D @translink/vite-plugin-i18n
-pnpm add @translink/i18n-runtime
+npm install -D @translink/vite-plugin-i18n
+npm install @translink/i18n-runtime
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### Vite 配置
+### Vite Configuration
 
 ```typescript
 // vite.config.ts
@@ -23,26 +23,26 @@ export default defineConfig({
   plugins: [
     vue(),
     i18n({
-      // 语言包目录
+      // Language package directory
       localeDir: 'src/locales',
-      
-      // 支持的语言
+
+      // Supported languages
       languages: ['zh-CN', 'en-US', 'ja-JP'],
-      
-      // 默认语言
+
+      // Default language
       defaultLanguage: 'zh-CN',
-      
-      // 启用 HMR
+
+      // Enable HMR
       hmr: true,
-      
-      // 启用懒加载
+
+      // Enable lazy loading
       lazyLoad: true,
     }),
   ],
 });
 ```
 
-### 在应用中使用
+### Using in Application
 
 ```typescript
 // main.ts
@@ -60,64 +60,71 @@ app.use(i18n);
 app.mount('#app');
 ```
 
-## ⚙️ 配置选项
+## ⚙️ Configuration Options
 
 ```typescript
 interface PluginOptions {
-  // 语言包目录（相对于项目根目录）
+  // Language package directory (relative to project root)
   localeDir?: string;
-  
-  // 支持的语言列表
+
+  // Supported languages list
   languages: string[];
-  
-  // 默认语言
+
+  // Default language
   defaultLanguage: string;
-  
-  // 回退语言
+
+  // Fallback language
   fallbackLanguage?: string;
-  
-  // 启用热更新（HMR）
+
+  // Enable hot module replacement (HMR)
   hmr?: boolean;
-  
-  // 启用懒加载
+
+  // Enable lazy loading
   lazyLoad?: boolean;
-  
-  // 代码转换
+
+  // Code transformation
   transform?: {
-    // 是否转换 $tsl() 为哈希键
+    // Whether to transform $tsl() to hash keys
     enabled: boolean;
-    // 转换函数名列表
+    // List of function names to transform
     functions?: string[];
   };
-  
-  // 构建优化
+
+  // Build optimization
   build?: {
-    // 压缩输出
+    // Compress output
     minify?: boolean;
-    // 生成 source map
+    // Generate source map
     sourcemap?: boolean;
   };
-  
-  // 调试模式
+
+  // Debug mode
   debug?: boolean;
 }
 ```
 
-## 🎯 特性
+## 🎯 Features
 
-### ⚡ 热更新（HMR）
+### ⚡ Hot Module Replacement (HMR)
 
-语言文件变更时自动更新界面，无需刷新页面。
+Automatically update UI when language files change, without page refresh.
 
 ```typescript
 i18n({
-  hmr: true, // 启用 HMR
+  hmr: true, // Enable HMR
 });
 ```
 
-### 📦 懒加载
+**Benefits:**
 
-按需加载语言包，优化首屏加载速度。
+- Instant translation updates during development
+- No page refresh required
+- Preserves application state
+- Fast feedback loop
+
+### 📦 Lazy Loading
+
+Load language packages on demand to optimize initial load speed.
 
 ```typescript
 i18n({
@@ -125,9 +132,16 @@ i18n({
 });
 ```
 
-### 🔄 代码转换
+**Benefits:**
 
-构建时将 `$tsl()` 自动转换为哈希键，提升运行时性能。
+- Smaller initial bundle size
+- Faster page load times
+- Load languages only when needed
+- Reduced memory footprint
+
+### 🔄 Code Transformation
+
+Automatically transform `$tsl()` to hash keys at build time for improved runtime performance.
 
 ```typescript
 i18n({
@@ -138,21 +152,28 @@ i18n({
 });
 ```
 
-**转换示例**：
+**Transformation Example:**
 
 ```vue
-<!-- 开发时 -->
-<h1>{{ $tsl('欢迎使用') }}</h1>
+<!-- Development -->
+<h1>{{ $tsl('Welcome') }}</h1>
 
-<!-- 构建后 -->
+<!-- After build -->
 <h1>{{ t('12345678') }}</h1>
 ```
 
-### 🗜️ 构建优化
+**Benefits:**
 
-- 自动压缩语言文件
-- Tree-shaking 未使用的翻译
-- 生成优化的语言包
+- Smaller runtime overhead
+- Faster lookups
+- Automatic key management
+- No manual key naming
+
+### 🗜️ Build Optimization
+
+- Automatic language file compression
+- Tree-shaking unused translations
+- Generate optimized language packages
 
 ```typescript
 i18n({
@@ -163,62 +184,77 @@ i18n({
 });
 ```
 
-## 📖 工作原理
+## 📖 How It Works
 
-### 1. 语言包虚拟模块
+### 1. Virtual Modules
 
-插件创建虚拟模块，动态导入语言文件：
+The plugin creates virtual modules that dynamically import language files:
 
 ```typescript
 import { useI18n } from '@translink/i18n-runtime/vue';
 
-// 虚拟模块自动生成
+// Virtual modules automatically generated
 // virtual:i18n/zh-CN
 // virtual:i18n/en-US
 ```
 
-### 2. 代码转换
+### 2. Code Transformation
 
-在构建时扫描代码，将翻译函数调用转换为哈希键：
+Scan code during build and transform translation function calls to hash keys:
 
 ```typescript
-// 源代码
-const text = $tsl('你好世界');
+// Source code
+const text = $tsl('Hello World');
 
-// 转换后
+// Transformed
 const text = t('12345678');
 ```
 
-### 3. HMR 集成
+### 3. HMR Integration
 
-监听语言文件变化，触发热更新：
+Watch language file changes and trigger hot updates:
 
 ```typescript
 if (import.meta.hot) {
-  import.meta.hot.accept('/path/to/locale.json', (newModule) => {
-    // 更新翻译
+  import.meta.hot.accept('/path/to/locale.json', newModule => {
+    // Update translations
   });
 }
 ```
 
-## 🔧 高级用法
+### 4. Virtual Module Resolution
 
-### 自定义语言加载器
+The plugin intercepts virtual module requests and provides language data:
+
+```typescript
+// When importing
+import zhCN from 'virtual:i18n/zh-CN';
+
+// Plugin resolves to
+{
+  "key1": "translation1",
+  "key2": "translation2"
+}
+```
+
+## 🔧 Advanced Usage
+
+### Custom Language Loader
 
 ```typescript
 i18n({
   localeDir: 'src/locales',
   languages: ['zh-CN', 'en-US'],
-  
-  // 自定义加载逻辑
-  loader: async (lang) => {
+
+  // Custom loading logic
+  loader: async lang => {
     const response = await fetch(`/api/locales/${lang}`);
     return response.json();
   },
 });
 ```
 
-### 多个语言包目录
+### Multiple Language Package Directories
 
 ```typescript
 i18n([
@@ -233,29 +269,92 @@ i18n([
 ]);
 ```
 
-### 与 CLI 工具集成
+### Integration with CLI Tools
 
 ```bash
-# 1. 提取翻译
+# 1. Extract translations
 npx translink extract
 
-# 2. 生成语言文件到 src/locales/
+# 2. Generate language files to src/locales/
 
-# 3. Vite 插件自动识别并处理
+# 3. Vite plugin automatically recognizes and processes
 pnpm dev
 ```
 
-## 📚 完整文档
+### Custom Transformation Functions
 
-- [Vite Plugin API 文档](../../docs/api/vite-plugin.md)
-- [快速开始](../../docs/quick-start.md)
-- [最佳实践](../../docs/best-practices.md)
+```typescript
+i18n({
+  transform: {
+    enabled: true,
+    functions: ['t', '$t', '$tsl', 'i18n.t', 'translate'],
+  },
+});
+```
 
-## 🤝 贡献
+This will transform all specified functions:
 
-欢迎贡献代码！请查看 [贡献指南](../../CONTRIBUTING.md)。
+```typescript
+// Before
+$tsl('Hello');
+t('World');
+i18n.t('Foo');
 
-## 📄 许可证
+// After
+t('abc12345');
+t('def67890');
+t('ghi11121');
+```
+
+## 🎨 Framework Support
+
+### Vue 3
+
+Full support for Vue 3 with:
+
+- Template transformation
+- Script setup support
+- Options API compatibility
+
+### React
+
+Works with:
+
+- JSX/TSX transformation
+- Hook-based API
+- Server-side rendering
+
+### Other Frameworks
+
+Compatible with any framework that uses:
+
+- ESM modules
+- Vite build system
+
+## 📊 Performance
+
+### Build Performance
+
+- **Fast transformation**: AST-based parsing with caching
+- **Parallel processing**: Handle multiple files concurrently
+- **Incremental builds**: Only process changed files
+
+### Runtime Performance
+
+- **Smaller bundles**: Hash keys reduce bundle size
+- **Faster lookups**: Direct object access vs. string matching
+- **Lazy loading**: Load translations on demand
+
+## 📚 Complete Documentation
+
+- [Vite Plugin API Documentation](../../docs/api/vite-plugin.md)
+- [Quick Start Guide](../../docs/quick-start.md)
+- [Best Practices](../../docs/best-practices.md)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see the [Contributing Guide](../../CONTRIBUTING.md).
+
+## 📄 License
 
 MIT © lynncen
-
