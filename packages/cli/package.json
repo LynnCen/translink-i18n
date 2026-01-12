@@ -1,14 +1,17 @@
 {
   "name": "@translink/i18n-cli",
   "version": "1.0.0",
-  "description": "TransLink I18n CLI Tool - 智能国际化文本提取和管理工具",
+  "description": "TransLink I18n CLI Tool - Powerful internationalization management CLI with AI auto-translation",
   "keywords": [
     "i18n",
     "cli",
     "internationalization",
     "translation",
     "ast",
-    "extract"
+    "extract",
+    "ai-translation",
+    "excel",
+    "automation"
   ],
   "author": "lynncen",
   "license": "MIT",

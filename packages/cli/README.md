@@ -1,141 +1,171 @@
 # @translink/i18n-cli
 
-TransLink I18n 命令行工具 - 强大的国际化管理 CLI。
+TransLink I18n Command Line Tool - Powerful internationalization management CLI.
 
-## 📦 安装
+## 📦 Installation
 
 ```bash
-# 全局安装
-pnpm add -g @translink/i18n-cli
+# Global installation
+npm install -g @translink/i18n-cli
 
-# 或项目内安装
-pnpm add -D @translink/i18n-cli
+# Or install in project
+npm install -D @translink/i18n-cli
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 初始化配置
+### 1. Initialize Configuration
 
 ```bash
 npx translink init
 ```
 
-这将创建 `translink.config.ts` 配置文件。
+This creates a `translink.config.ts` configuration file.
 
-### 2. 提取翻译文本
+### 2. Extract Translation Text
 
 ```bash
 npx translink extract
 ```
 
-自动扫描代码，提取需要翻译的文本，生成语言文件。
+Automatically scan code, extract text requiring translation, and generate language files.
 
-### 3. 导出到 Excel
+### 3. Export to Excel
 
 ```bash
 npx translink export --format excel
 ```
 
-导出翻译数据到 Excel，方便翻译人员编辑。
+Export translation data to Excel for easy editing by translators.
 
-### 4. 导入翻译
+### 4. Import Translations
 
 ```bash
 npx translink import --input translations.xlsx
 ```
 
-导入翻译后的 Excel 文件。
+Import translated Excel files.
 
-### 5. 构建语言包
+### 5. Build Language Packages
 
 ```bash
 npx translink build
 ```
 
-构建优化后的语言包。
+Build optimized language packages.
 
-## 📖 命令参考
+## 📖 Command Reference
 
 ### `translink init`
 
-初始化配置文件。
+Initialize configuration file.
 
-**选项**：
-- `--ts` - 生成 TypeScript 配置（默认）
-- `--js` - 生成 JavaScript 配置
+**Options**:
+- `--ts` - Generate TypeScript configuration (default)
+- `--js` - Generate JavaScript configuration
 
 ### `translink extract`
 
-提取翻译文本。
+Extract translation text.
 
-**选项**：
-- `--config <path>` - 指定配置文件
-- `--verbose` - 显示详细输出
+**Options**:
+- `--config <path>` - Specify configuration file
+- `--verbose` - Show detailed output
 
 ### `translink export`
 
-导出翻译数据。
+Export translation data.
 
-**选项**：
-- `--format <type>` - 导出格式：excel（默认）、csv、json
-- `--output <path>` - 输出文件路径
-- `--languages <langs>` - 指定语言，逗号分隔
+**Options**:
+- `--format <type>` - Export format: excel (default), csv, json
+- `--output <path>` - Output file path
+- `--languages <langs>` - Specify languages, comma-separated
 
 ### `translink import`
 
-导入翻译数据。
+Import translation data.
 
-**选项**：
-- `--input <path>` - 输入文件路径（必需）
-- `--merge` - 合并模式（默认：true）
-- `--force` - 强制覆盖已有翻译
+**Options**:
+- `--input <path>` - Input file path (required)
+- `--merge` - Merge mode (default: true)
+- `--force` - Force overwrite existing translations
 
 ### `translink build`
 
-构建语言包。
+Build language packages.
 
-**选项**：
-- `--minify` - 压缩输出
-- `--sourcemap` - 生成 source map
+**Options**:
+- `--minify` - Compress output
+- `--sourcemap` - Generate source map
 
 ### `translink analyze`
 
-分析翻译覆盖率。
+Analyze translation coverage.
 
-**选项**：
-- `--detailed` - 显示详细分析
+**Options**:
+- `--detailed` - Show detailed analysis
 
-## ⚙️ 配置文件
+### `translink translate`
 
-创建 `translink.config.ts`：
+Use AI to automatically translate text. 🆕
+
+**Options**:
+- `-f, --from <lang>` - Source language (default: configured default language)
+- `-t, --to <langs>` - Target languages, comma-separated
+- `-p, --provider <name>` - AI provider (deepseek|gemini|openai|anthropic)
+- `--stream` - Enable streaming translation
+- `--force` - Force re-translate existing translations
+- `--keys <keys>` - Only translate specified keys, comma-separated
+- `--dry-run` - Preview mode, don't write files
+- `--estimate-cost` - Estimate translation cost
+
+**Examples**:
+
+```bash
+# Translate all supported languages
+npx translink translate
+
+# Use DeepSeek to translate to English and Japanese
+npx translink translate --provider deepseek --to en-US,ja-JP
+
+# Preview translation results
+npx translink translate --dry-run
+
+# Estimate translation cost
+npx translink translate --estimate-cost
+```
+
+## ⚙️ Configuration File
+
+Create `translink.config.ts`:
 
 ```typescript
 import type { I18nConfig } from '@translink/i18n-cli';
 
 export default {
-  // 项目信息
+  // Project information
   project: {
     name: 'my-app',
     version: '1.0.0',
   },
 
-  // 提取配置
+  // Extraction configuration
   extract: {
     patterns: ['src/**/*.{vue,tsx,ts,jsx,js}'],
     exclude: ['node_modules/**', 'dist/**'],
     functions: ['t', '$tsl', '$t', 'i18n.t'],
-    extensions: ['.vue', '.tsx', '.ts', '.jsx', '.js'],
+    extensions: ['.vue', '.ts', '.tsx', '.js', '.jsx'],
   },
 
-  // 哈希配置
+  // Hash configuration
   hash: {
     enabled: true,
     algorithm: 'sha256',
     length: 8,
-    numericOnly: true, // 使用纯数字键
+    numericOnly: true, // Use numeric-only keys
   },
 
-  // 语言配置
+  // Language configuration
   languages: {
     source: 'zh-CN',
     default: 'zh-CN',
@@ -143,7 +173,7 @@ export default {
     fallback: 'zh-CN',
   },
 
-  // 输出配置
+  // Output configuration
   output: {
     directory: 'src/locales',
     format: 'json',
@@ -151,7 +181,7 @@ export default {
     sortKeys: true,
   },
 
-  // 导入导出配置
+  // Import/export configuration
   importExport: {
     format: 'excel',
     directory: 'translations',
@@ -161,7 +191,40 @@ export default {
     },
   },
 
-  // CLI 配置
+  // AI translation configuration
+  aiTranslation: {
+    defaultProvider: 'deepseek',
+    providers: {
+      deepseek: {
+        apiKey: process.env.DEEPSEEK_API_KEY,
+        model: 'deepseek-chat',
+      },
+      gemini: {
+        apiKey: process.env.GEMINI_API_KEY,
+        model: 'gemini-pro',
+      },
+      openai: {
+        apiKey: process.env.OPENAI_API_KEY,
+        model: 'gpt-4-turbo-preview',
+      },
+      anthropic: {
+        apiKey: process.env.ANTHROPIC_API_KEY,
+        model: 'claude-3-sonnet-20240229',
+      },
+    },
+    options: {
+      cache: true,
+      batchSize: 20,
+      concurrency: 3,
+      glossary: {
+        '应用': 'Application',
+        '用户': 'User',
+        '设置': 'Settings',
+      },
+    },
+  },
+
+  // CLI configuration
   cli: {
     table: {
       enabled: true,
@@ -169,23 +232,23 @@ export default {
     },
   },
 
-  // 插件配置
+  // Plugin configuration
   plugins: [],
 } as I18nConfig;
 ```
 
-## 🔌 插件系统
+## 🔌 Plugin System
 
-CLI 支持可扩展的插件系统。
+The CLI supports an extensible plugin system.
 
-### 使用插件
+### Using Plugins
 
 ```typescript
 // translink.config.ts
 export default {
   plugins: [
-    // 使用 Vika 插件
-    ['@translink/i18n-plugin-vika', {
+    // Use Vika plugin
+    ['@translink/plugin-vika', {
       apiKey: process.env.VIKA_API_KEY,
       datasheetId: process.env.VIKA_DATASHEET_ID,
     }],
@@ -193,21 +256,44 @@ export default {
 };
 ```
 
-### 开发插件
+### Developing Plugins
 
-查看 [插件开发指南](../../docs/guides/plugin-development.md)。
+See the [Plugin Development Guide](../../docs/guides/plugin-development.md).
 
-## 📚 完整文档
+## 🎯 Features
 
-- [CLI API 文档](../../docs/api/cli.md)
-- [快速开始](../../docs/quick-start.md)
-- [Excel 工作流](../../docs/guides/excel-workflow.md)
+### Smart Text Extraction
 
-## 🤝 贡献
+- **AST-based**: Uses Abstract Syntax Tree parsing for accurate text extraction
+- **Auto-detection**: Automatically identifies Chinese text in code
+- **Hash generation**: Generates unique hash keys for each text
+- **Context aware**: Preserves context information for better translation
 
-欢迎贡献代码！请查看 [贡献指南](../../CONTRIBUTING.md)。
+### AI Auto-Translation
 
-## 📄 许可证
+- **Multiple providers**: Supports OpenAI, Gemini, DeepSeek, Anthropic
+- **Cost-effective**: Choose the best provider for your budget
+- **Batch processing**: Efficiently translate large volumes of text
+- **Glossary support**: Maintain consistent terminology across translations
+
+### Excel Workflow
+
+- **Operations-friendly**: Non-technical team members can edit translations
+- **Metadata included**: File paths, line numbers, and context information
+- **Easy import/export**: Seamless workflow between code and Excel
+- **Version control**: Track translation changes over time
+
+## 📚 Complete Documentation
+
+- [CLI API Documentation](../../docs/api/cli.md)
+- [Quick Start Guide](../../docs/quick-start.md)
+- [Excel Workflow Guide](../../docs/guides/excel-workflow.md)
+- [AI Translation Guide](../../docs/guides/ai-translation.md)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see the [Contributing Guide](../../CONTRIBUTING.md).
+
+## 📄 License
 
 MIT © lynncen
-
