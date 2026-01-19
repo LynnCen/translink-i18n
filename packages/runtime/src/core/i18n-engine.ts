@@ -16,6 +16,7 @@ import { ResourceLoader } from './resource-loader.js';
 import { Interpolator } from './interpolator.js';
 import { PluralResolver } from './plural-resolver.js';
 import { I18nDevTools } from './devtools.js';
+import { Logger, getDefaultLogger } from '../utils/logger.js';
 
 export class I18nEngine extends EventEmitter {
   private options: I18nOptions;
@@ -25,6 +26,7 @@ export class I18nEngine extends EventEmitter {
   private interpolator: Interpolator;
   private pluralResolver: PluralResolver;
   private devTools?: I18nDevTools;
+  private logger: Logger;
   private isInitialized = false;
   private initPromise?: Promise<void>;
 
@@ -61,6 +63,15 @@ export class I18nEngine extends EventEmitter {
       simplifyPluralSuffix:
         this.options.pluralization?.simplifyPluralSuffix ?? true,
     });
+
+    // 初始化 Logger
+    this.logger = this.options.logger || getDefaultLogger();
+    if (this.options.logLevel) {
+      this.logger.setLevel(this.options.logLevel);
+    }
+    if (this.options.debug) {
+      this.logger.setLevel('debug');
+    }
 
     // 初始化 DevTools（仅在 development 模式或显式启用时）
     if (this.options.devTools?.enabled) {
@@ -456,27 +467,21 @@ export class I18nEngine extends EventEmitter {
    * 日志记录
    */
   private log(message: string, ...args: any[]): void {
-    if (this.options.debug && this.shouldLog('info')) {
-      console.log(`[TransLink I18n]`, message, ...args);
-    }
+    this.logger.info(message, ...args);
   }
 
   private logWarning(message: string, ...args: any[]): void {
-    if (this.shouldLog('warn')) {
-      console.warn(`[TransLink I18n]`, message, ...args);
-    }
+    this.logger.warn(message, ...args);
   }
 
   private logError(message: string, ...args: any[]): void {
-    if (this.shouldLog('error')) {
-      console.error(`[TransLink I18n]`, message, ...args);
-    }
+    this.logger.error(message, ...args);
   }
 
-  private shouldLog(level: 'error' | 'warn' | 'info' | 'debug'): boolean {
-    const levels = ['error', 'warn', 'info', 'debug'];
-    const currentLevelIndex = levels.indexOf(this.options.logLevel || 'warn');
-    const messageLevelIndex = levels.indexOf(level);
-    return messageLevelIndex <= currentLevelIndex;
+  /**
+   * 获取 Logger 实例
+   */
+  getLogger(): Logger {
+    return this.logger;
   }
 }

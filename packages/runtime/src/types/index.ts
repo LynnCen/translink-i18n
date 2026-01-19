@@ -57,6 +57,7 @@ export interface I18nOptions<
   // 调试配置
   debug?: boolean;
   logLevel?: 'error' | 'warn' | 'info' | 'debug';
+  logger?: any; // Logger 实例
 
   // DevTools 配置
   devTools?: {
