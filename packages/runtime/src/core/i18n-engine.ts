@@ -14,6 +14,8 @@ import { EventEmitter } from '../utils/event-emitter.js';
 import { CacheManager } from '../cache/cache-manager.js';
 import { ResourceLoader } from './resource-loader.js';
 import { Interpolator } from './interpolator.js';
+import { PluralResolver } from './plural-resolver.js';
+import { I18nDevTools } from './devtools.js';
 
 export class I18nEngine extends EventEmitter {
   private options: I18nOptions;
@@ -21,6 +23,8 @@ export class I18nEngine extends EventEmitter {
   private cache: CacheManager<string>;
   private resourceLoader: ResourceLoader;
   private interpolator: Interpolator;
+  private pluralResolver: PluralResolver;
+  private devTools?: I18nDevTools;
   private isInitialized = false;
   private initPromise?: Promise<void>;
 
@@ -53,6 +57,16 @@ export class I18nEngine extends EventEmitter {
       format: this.options.interpolation?.format,
     });
 
+    this.pluralResolver = new PluralResolver({
+      simplifyPluralSuffix:
+        this.options.pluralization?.simplifyPluralSuffix ?? true,
+    });
+
+    // 初始化 DevTools（仅在 development 模式或显式启用时）
+    if (this.options.devTools?.enabled) {
+      this.devTools = new I18nDevTools(this, this.options.devTools);
+    }
+
     // 绑定资源加载器事件
     this.bindResourceLoaderEvents();
   }
@@ -83,6 +97,7 @@ export class I18nEngine extends EventEmitter {
       lng?: string;
       ns?: string;
       defaultValue?: string;
+      count?: number;
     }
   ): string {
     if (!this.isInitialized) {
@@ -93,6 +108,7 @@ export class I18nEngine extends EventEmitter {
     const language = options?.lng || this.currentLanguage;
     const namespace = options?.ns || 'translation';
     const defaultValue = options?.defaultValue || key;
+    const count = options?.count ?? params?.count;
 
     try {
       // 生成缓存键
@@ -106,11 +122,35 @@ export class I18nEngine extends EventEmitter {
         }
       }
 
+      // 处理复数形式
+      let translationKey = key;
+      if (
+        count !== undefined &&
+        this.options.pluralization?.enabled !== false
+      ) {
+        const pluralCategory = this.pluralResolver.resolve(language, count);
+        const pluralKey = this.pluralResolver.generateKey(key, pluralCategory);
+
+        // 尝试使用复数key，如果不存在则回退到原key
+        const pluralTranslation = this.getTranslation(
+          pluralKey,
+          language,
+          namespace
+        );
+        if (pluralTranslation) {
+          translationKey = pluralKey;
+        }
+      }
+
       // 获取翻译文本
-      const translation = this.getTranslation(key, language, namespace);
+      const translation = this.getTranslation(
+        translationKey,
+        language,
+        namespace
+      );
 
       if (!translation) {
-        this.emit('translationMissing', key, language);
+        this.emit('translationMissing', translationKey, language);
         return defaultValue;
       }
 
@@ -190,14 +230,21 @@ export class I18nEngine extends EventEmitter {
     namespace: string,
     resource: TranslationResource
   ): void {
-    const resourceKey = `${language}/${namespace}`;
-    this.resourceLoader.getLoadedResource(language, namespace);
-
-    // 这里需要扩展 ResourceLoader 来支持动态添加资源
-    // 暂时通过事件通知
-    this.emit('resourceLoaded', language, namespace);
+    // 使用 ResourceLoader 的 addResource 方法
+    this.resourceLoader.addResource(language, namespace, resource);
 
     // 清除相关缓存
+    this.clearCacheForLanguage(language);
+  }
+
+  /**
+   * 批量添加资源
+   */
+  addResources(
+    language: string,
+    resources: Record<string, TranslationResource>
+  ): void {
+    this.resourceLoader.addResources(language, resources);
     this.clearCacheForLanguage(language);
   }
 
@@ -230,6 +277,13 @@ export class I18nEngine extends EventEmitter {
    */
   getCacheStats() {
     return this.cache.getStats();
+  }
+
+  /**
+   * 获取 DevTools 实例
+   */
+  getDevTools(): I18nDevTools | undefined {
+    return this.devTools;
   }
 
   /**
@@ -345,9 +399,9 @@ export class I18nEngine extends EventEmitter {
    * 清除特定语言的缓存
    */
   private clearCacheForLanguage(language: string): void {
-    // 这里需要扩展 CacheManager 来支持按前缀清除
-    // 暂时清除所有缓存
-    this.cache.clear();
+    // 清除特定语言的所有缓存
+    const prefix = `${language}:`;
+    this.cache.clearByPrefix(prefix);
   }
 
   /**

@@ -155,6 +155,47 @@ export class CacheManager<T = any> {
   }
 
   /**
+   * 按前缀清除缓存
+   */
+  clearByPrefix(prefix: string): number {
+    let cleared = 0;
+
+    // 清除内存缓存中匹配前缀的项
+    const keysToDelete: string[] = [];
+    for (const [key, _entry] of this.memoryCache.entries()) {
+      if (key.startsWith(prefix)) {
+        keysToDelete.push(key);
+      }
+    }
+
+    keysToDelete.forEach(key => {
+      this.memoryCache.delete(key);
+      cleared++;
+    });
+
+    // 清除持久化缓存中匹配前缀的项
+    if (this.options.storage !== 'memory' && this.isStorageAvailable()) {
+      const storage = this.getStorage();
+      const storageKeysToDelete: string[] = [];
+      const fullPrefix = this.getStorageKey(prefix);
+
+      for (let i = 0; i < storage.length; i++) {
+        const key = storage.key(i);
+        if (key && key.startsWith(fullPrefix)) {
+          storageKeysToDelete.push(key);
+        }
+      }
+
+      storageKeysToDelete.forEach(key => {
+        storage.removeItem(key);
+        cleared++;
+      });
+    }
+
+    return cleared;
+  }
+
+  /**
    * 获取缓存统计信息
    */
   getStats() {

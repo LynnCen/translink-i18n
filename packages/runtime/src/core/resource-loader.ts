@@ -178,6 +178,38 @@ export class ResourceLoader extends EventEmitter {
   }
 
   /**
+   * 动态添加资源
+   */
+  addResource(
+    language: string,
+    namespace: string = 'translation',
+    resource: TranslationResource
+  ): void {
+    const resourceKey = this.getResourceKey(language, namespace);
+    const existing = this.loadedResources.get(resourceKey) || {};
+
+    // 深度合并资源
+    this.loadedResources.set(resourceKey, {
+      ...existing,
+      ...resource,
+    });
+
+    this.emit('resourceLoaded', language, namespace);
+  }
+
+  /**
+   * 批量添加资源
+   */
+  addResources(
+    language: string,
+    resources: Record<string, TranslationResource>
+  ): void {
+    Object.entries(resources).forEach(([namespace, resource]) => {
+      this.addResource(language, namespace, resource);
+    });
+  }
+
+  /**
    * 清除所有加载的资源
    */
   clearResources(): void {

@@ -3,26 +3,33 @@
  */
 
 export type EventListener<T = any> = (data: T) => void;
+export type UnsubscribeFn = () => void;
 
 export class EventEmitter {
   private events = new Map<string, Set<EventListener>>();
 
   /**
    * 添加事件监听器
+   * @returns 返回清理函数，调用后移除监听器
    */
-  on<T = any>(event: string, listener: EventListener<T>): this {
+  on<T = any>(event: string, listener: EventListener<T>): UnsubscribeFn {
     if (!this.events.has(event)) {
       this.events.set(event, new Set());
     }
 
     this.events.get(event)!.add(listener);
-    return this;
+
+    // 返回清理函数
+    return () => {
+      this.off(event, listener);
+    };
   }
 
   /**
    * 添加一次性事件监听器
+   * @returns 返回清理函数，调用后移除监听器
    */
-  once<T = any>(event: string, listener: EventListener<T>): this {
+  once<T = any>(event: string, listener: EventListener<T>): UnsubscribeFn {
     const onceWrapper = (data: T) => {
       listener(data);
       this.off(event, onceWrapper);

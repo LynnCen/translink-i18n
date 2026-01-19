@@ -2,20 +2,34 @@
  * TransLink I18n Runtime 类型定义
  */
 
+// 翻译资源类型（支持嵌套）
 export interface TranslationResource {
   [key: string]: string | TranslationResource;
 }
 
-export interface I18nOptions {
+// 严格的翻译资源类型（仅字符串值，用于运行时）
+export type StrictTranslationResource = Record<string, string>;
+
+// 带类型推断的翻译资源
+export type TypedTranslationResource<T extends Record<string, any>> = {
+  [K in keyof T]: T[K] extends Record<string, any>
+    ? TypedTranslationResource<T[K]>
+    : string;
+};
+
+// 泛型化的 I18nOptions，支持类型推断
+export interface I18nOptions<
+  TResource extends TranslationResource = TranslationResource,
+> {
   // 语言配置
   defaultLanguage: string;
   fallbackLanguage: string;
-  supportedLanguages: string[];
+  supportedLanguages: readonly string[];
 
   // 资源配置
-  resources?: Record<string, TranslationResource>;
+  resources?: Record<string, TResource>;
   loadPath?: string;
-  loadFunction?: (lng: string, ns: string) => Promise<TranslationResource>;
+  loadFunction?: (lng: string, ns: string) => Promise<TResource>;
 
   // 缓存配置
   cache?: {
@@ -35,18 +49,46 @@ export interface I18nOptions {
 
   // 复数配置
   pluralization?: {
-    enabled: boolean;
+    enabled?: boolean;
+    simplifyPluralSuffix?: boolean;
     rules?: Record<string, (count: number) => number>;
   };
 
   // 调试配置
   debug?: boolean;
   logLevel?: 'error' | 'warn' | 'info' | 'debug';
+
+  // DevTools 配置
+  devTools?: {
+    enabled: boolean;
+    trackMissingKeys?: boolean;
+    logMissingKeys?: boolean;
+    maxMissingKeys?: number;
+    exposeToWindow?: boolean;
+    windowKey?: string;
+  };
 }
 
+// 翻译参数类型
+export type TranslationParamValue =
+  | string
+  | number
+  | boolean
+  | Date
+  | null
+  | undefined;
+
 export interface TranslationParams {
-  [key: string]: string | number | boolean | Date | null | undefined;
+  [key: string]: TranslationParamValue | TranslationParams; // 支持嵌套对象
+  count?: number; // 用于复数处理
 }
+
+// 类型安全的翻译参数
+export type TypedTranslationParams<T extends Record<string, any>> = {
+  [K in keyof T]: T[K] extends object
+    ? TypedTranslationParams<T[K]>
+    : TranslationParamValue;
+};
 
 export interface LoaderResult {
   data: TranslationResource;

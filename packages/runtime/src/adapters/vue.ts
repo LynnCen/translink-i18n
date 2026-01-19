@@ -151,7 +151,7 @@ export function useI18n(_options?: {
   const isReady = ref(false);
   const isLoading = ref(false);
 
-  // 监听引擎状态
+  // 监听引擎状态 - on 方法现在返回清理函数
   const unsubscribeReady = engine.on('ready', () => {
     isReady.value = true;
   });
@@ -178,10 +178,10 @@ export function useI18n(_options?: {
     }
   };
 
-  // 组件卸载时清理
+  // 组件卸载时清理 - 直接调用清理函数
   onUnmounted(() => {
     if (unsubscribeReady) {
-      engine.off('ready', unsubscribeReady);
+      unsubscribeReady();
     }
   });
 
