@@ -21,6 +21,9 @@ export type {
   TranslationItem,
 } from './types/config.js';
 
+// 导出配置辅助函数和默认配置
+export { defineConfig, DEFAULT_CONFIG } from './utils/config.js';
+
 // 导出插件类型
 export type {
   I18nPlugin,
