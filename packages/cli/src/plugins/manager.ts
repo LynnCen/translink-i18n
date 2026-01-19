@@ -66,7 +66,10 @@ export class PluginManager {
   /**
    * 执行推送操作
    */
-  async push(pluginName: string, data: any): Promise<any> {
+  async push(
+    pluginName: string,
+    data: import('./types.js').PushTranslationsData
+  ): Promise<import('./types.js').PushResult> {
     const plugin = this.getPlugin(pluginName);
     if (!plugin) {
       throw new Error(`Plugin "${pluginName}" not found`);
@@ -87,7 +90,10 @@ export class PluginManager {
   /**
    * 执行拉取操作
    */
-  async pull(pluginName: string, data: any): Promise<any> {
+  async pull(
+    pluginName: string,
+    data: import('./types.js').PullTranslationsData
+  ): Promise<import('./types.js').PullResult> {
     const plugin = this.getPlugin(pluginName);
     if (!plugin) {
       throw new Error(`Plugin "${pluginName}" not found`);
@@ -108,7 +114,9 @@ export class PluginManager {
   /**
    * 获取统计信息
    */
-  async getStats(pluginName: string): Promise<any> {
+  async getStats(
+    pluginName: string
+  ): Promise<import('./types.js').TranslationStats> {
     const plugin = this.getPlugin(pluginName);
     if (!plugin) {
       throw new Error(`Plugin "${pluginName}" not found`);
@@ -152,7 +160,7 @@ export class PluginManager {
   /**
    * 注册插件命令
    */
-  registerPluginCommands(program: any): void {
+  registerPluginCommands(program: import('commander').Command): void {
     const plugins = this.getAllPlugins();
 
     for (const [name, plugin] of plugins) {

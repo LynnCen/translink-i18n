@@ -15,19 +15,22 @@ export interface PluginMetadata {
   homepage?: string;
 }
 
+import type { I18nConfig } from '../types/config.js';
+import type { Logger } from '../utils/logger.js';
+
 /**
  * 插件配置
  */
 export interface PluginConfig {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
  * 插件上下文
  */
 export interface PluginContext {
-  config: any; // I18nConfig
-  logger: any; // Logger
+  config: I18nConfig;
+  logger: Logger;
   cwd: string;
 }
 
@@ -35,7 +38,7 @@ export interface PluginContext {
  * 插件命令选项
  */
 export interface PluginCommandOptions {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -124,7 +127,7 @@ export interface I18nPlugin {
    * 注册 CLI 命令（可选）
    * 插件可以注册自己的命令到 CLI
    */
-  registerCommands?(program: any): void;
+  registerCommands?(program: import('commander').Command): void;
 
   /**
    * 清理资源
@@ -137,6 +140,6 @@ export interface I18nPlugin {
  */
 export interface PluginLoaderOptions {
   cwd?: string;
-  config?: any;
-  logger?: any;
+  config?: I18nConfig;
+  logger?: Logger;
 }

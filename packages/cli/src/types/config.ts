@@ -3,14 +3,14 @@
  */
 
 export interface I18nConfig {
-  // 项目信息
+  // 项目信息（可选）
   project?: {
     name: string;
     version: string;
   };
 
-  // 扫描配置
-  extract: {
+  // 扫描配置（可选，使用默认值）
+  extract?: {
     patterns: string[];
     exclude: string[];
     functions: string[];
@@ -19,28 +19,28 @@ export interface I18nConfig {
     createEmptyTranslations?: boolean;
   };
 
-  // 哈希配置
-  hash: {
+  // 哈希配置（可选，使用默认值）
+  hash?: {
     enabled: boolean;
     algorithm: 'md5' | 'sha1' | 'sha256';
     length: number;
-    numericOnly?: boolean; // 🆕 只保留数字
+    numericOnly?: boolean;
     includeContext: boolean;
     contextFields?: ('filePath' | 'componentName' | 'functionName')[];
   };
 
-  // 语言配置
+  // 语言配置（必需）
   languages: {
-    source: string; // 🆕 源语言（代码中使用的语言）
+    source?: string; // 源语言，默认同 default
     default: string;
     supported: string[];
-    fallback: string;
+    fallback?: string; // 默认同 default
   };
 
-  // 输出配置
+  // 输出配置（必需）
   output: {
     directory: string;
-    format: 'json' | 'yaml' | 'js' | 'ts';
+    format?: 'json' | 'yaml' | 'js' | 'ts';
     indent?: number;
     sortKeys?: boolean;
     splitByNamespace?: boolean;
