@@ -88,7 +88,7 @@ async function analyzeCommand(options: AnalyzeOptions) {
     );
 
     // 显示分析结果
-    displayAnalysisResults(report, options.verbose);
+    displayAnalysisResults(report, options.verbose!);
 
     // 保存报告文件
     if (outputFile) {

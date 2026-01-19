@@ -23,4 +23,3 @@ providerManager.register('deepseek', DeepSeekProvider);
 providerManager.register('gemini', GeminiProvider);
 providerManager.register('openai', OpenAIProvider);
 providerManager.register('anthropic', AnthropicProvider);
-

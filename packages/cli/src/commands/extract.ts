@@ -349,29 +349,6 @@ async function generateLanguageFiles(
 }
 
 /**
- * 设置嵌套对象值
- */
-function setNestedValue(obj: any, key: string, value: any) {
-  // 如果key包含点号，创建嵌套结构
-  if (key.includes('.')) {
-    const keys = key.split('.');
-    let current = obj;
-
-    for (let i = 0; i < keys.length - 1; i++) {
-      const k = keys[i];
-      if (!(k in current)) {
-        current[k] = {};
-      }
-      current = current[k];
-    }
-
-    current[keys[keys.length - 1]] = value;
-  } else {
-    obj[key] = value;
-  }
-}
-
-/**
  * 格式化语言文件内容
  */
 function formatLanguageFile(data: any, config: I18nConfig): string {

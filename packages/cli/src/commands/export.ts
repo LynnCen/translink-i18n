@@ -34,7 +34,9 @@ async function exportCommand(options: ExportOptions) {
     const config = await configManager.loadConfig();
 
     const inputDir = options.input || config.output.directory;
-    const format = (options.format || config.importExport?.format || 'excel') as 'excel' | 'csv' | 'json';
+    const format = (options.format ||
+      config.importExport?.format ||
+      'excel') as 'excel' | 'csv' | 'json';
     const languages = options.languages
       ? options.languages.split(',').map(l => l.trim())
       : config.languages.supported;
@@ -45,8 +47,10 @@ async function exportCommand(options: ExportOptions) {
       config.importExport?.directory || 'translations'
     );
     const outputFileName = config.importExport?.outputFile || 'translations';
-    const extension = format === 'excel' ? 'xlsx' : format === 'csv' ? 'csv' : 'json';
-    const outputFile = options.output || resolve(outputDir, `${outputFileName}.${extension}`);
+    const extension =
+      format === 'excel' ? 'xlsx' : format === 'csv' ? 'csv' : 'json';
+    const outputFile =
+      options.output || resolve(outputDir, `${outputFileName}.${extension}`);
 
     // 确保输出目录存在
     const { mkdirSync } = await import('fs');

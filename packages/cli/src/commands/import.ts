@@ -45,7 +45,7 @@ async function importCommand(options: ImportOptions) {
       // 只是文件名，在配置目录中查找
       const importDir = config.importExport?.directory || 'translations';
       inputPath = resolve(process.cwd(), importDir, options.input);
-      
+
       // 如果不存在，回退到当前目录
       if (!existsSync(inputPath)) {
         inputPath = resolve(process.cwd(), options.input);
@@ -64,7 +64,9 @@ async function importCommand(options: ImportOptions) {
       logger.error(`输入文件不存在: ${inputPath}`);
       logger.info('💡 提示：');
       logger.info(`   1. 检查文件路径是否正确`);
-      logger.info(`   2. 默认会在 ${config.importExport?.directory || 'translations'} 目录中查找`);
+      logger.info(
+        `   2. 默认会在 ${config.importExport?.directory || 'translations'} 目录中查找`
+      );
       logger.info(`   3. 可以使用绝对路径或相对路径`);
       process.exit(1);
     }

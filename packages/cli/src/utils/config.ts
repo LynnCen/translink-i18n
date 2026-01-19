@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { pathToFileURL } from 'url';
 import type { I18nConfig } from '../types/config.js';
 import { logger } from './logger.js';

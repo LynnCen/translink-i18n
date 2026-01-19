@@ -286,7 +286,7 @@ async function initCommand(options: InitOptions) {
       name: 'numericOnly',
       message: '是否只使用数字 key（推荐）:',
       default: true,
-      when: (answers) => answers.useHash,
+      when: answers => answers.useHash,
     },
     {
       type: 'list',
@@ -326,7 +326,10 @@ async function initCommand(options: InitOptions) {
     .replace('{{HASH_ENABLED}}', answers.useHash ? 'true' : 'false')
     .replace('{{NUMERIC_ONLY}}', answers.numericOnly ? 'true' : 'false')
     .replace('{{IMPORT_EXPORT_FORMAT}}', answers.importExportFormat)
-    .replace(/{{INCLUDE_METADATA}}/g, answers.includeMetadata ? 'true' : 'false');
+    .replace(
+      /{{INCLUDE_METADATA}}/g,
+      answers.includeMetadata ? 'true' : 'false'
+    );
 
   try {
     // 写入配置文件
@@ -336,7 +339,7 @@ async function initCommand(options: InitOptions) {
     // 创建输出目录
     const outputDir = resolve(cwd, answers.outputDirectory);
     const { mkdirSync } = await import('fs');
-    
+
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir, { recursive: true });
       logger.success(`✓ 创建目录: ${answers.outputDirectory}/`);
@@ -347,7 +350,9 @@ async function initCommand(options: InitOptions) {
       const localeFilePath = resolve(outputDir, `${lang}.json`);
       if (!existsSync(localeFilePath)) {
         writeFileSync(localeFilePath, '{}\\n', 'utf-8');
-        logger.success(`✓ 创建语言文件: ${answers.outputDirectory}/${lang}.json`);
+        logger.success(
+          `✓ 创建语言文件: ${answers.outputDirectory}/${lang}.json`
+        );
       }
     }
 

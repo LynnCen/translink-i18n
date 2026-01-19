@@ -245,8 +245,7 @@ function displayReport(report: any, targetLang: string): void {
 async function estimateCost(
   sourceFile: string,
   targetLangs: string[],
-  provider: string,
-  config: any
+  provider: string
 ): Promise<void> {
   const sourceData = JSON.parse(readFileSync(sourceFile, 'utf-8'));
 
