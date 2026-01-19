@@ -9,189 +9,42 @@ interface InitOptions {
   typescript?: boolean;
 }
 
-const CONFIG_TEMPLATE_TS = `import type { I18nConfig } from '@translink/i18n-cli';
+const CONFIG_TEMPLATE_TS = `import { defineConfig } from '@translink/i18n-cli';
 
-const config: I18nConfig = {
-  // 项目信息
-  project: {
-    name: '{{PROJECT_NAME}}',
-    version: '1.0.0',
-  },
-
-  // 扫描配置
-  extract: {
-    patterns: ['src/**/*.{vue,tsx,ts,jsx,js}'],
-    exclude: ['node_modules/**', 'dist/**', '**/*.d.ts'],
-    functions: ['t', '$tsl', '$t', 'i18n.t'],
-    extensions: ['.vue', '.tsx', '.ts', '.jsx', '.js'],
-    incremental: true,
-    createEmptyTranslations: true,
-  },
-
-  // 哈希配置
-  hash: {
-    enabled: {{HASH_ENABLED}},
-    algorithm: 'sha256',
-    length: 8,
-    numericOnly: {{NUMERIC_ONLY}},
-    includeContext: false,
-    contextFields: ['componentName', 'functionName'],
-  },
-
-  // 语言配置
+export default defineConfig({
+  // Language Configuration
   languages: {
-    source: '{{SOURCE_LANGUAGE}}',
     default: '{{DEFAULT_LANGUAGE}}',
     supported: [{{SUPPORTED_LANGUAGES}}],
-    fallback: '{{FALLBACK_LANGUAGE}}',
   },
 
-  // 输出配置
+  // Output Configuration
   output: {
     directory: '{{OUTPUT_DIRECTORY}}',
-    format: '{{OUTPUT_FORMAT}}',
-    indent: 2,
-    sortKeys: true,
-    splitByNamespace: false,
-    flattenKeys: false,
   },
 
-  // 导入导出配置
-  importExport: {
-    format: '{{IMPORT_EXPORT_FORMAT}}',
-    excel: {
-      sheetName: 'Translations',
-      includeMetadata: {{INCLUDE_METADATA}},
-      freezeHeader: true,
-      autoWidth: true,
-    },
-    csv: {
-      delimiter: ',',
-      encoding: 'utf-8',
-      includeHeaders: true,
-    },
-    columns: {
-      key: true,
-      status: true,
-      context: {{INCLUDE_METADATA}},
-      file: {{INCLUDE_METADATA}},
-      line: {{INCLUDE_METADATA}},
-    },
-  },
-
-  // 构建配置
-  build: {
-    minify: true,
-    sourcemap: false,
-    outputDir: 'dist/locales',
-  },
-
-  // CLI 输出配置
-  cli: {
-    verbose: false,
-    table: {
-      enabled: true,
-      maxRows: 20,
-      showDiff: true,
-    },
-  },
-
-  // 插件配置
+  // Optional: Plugins
   plugins: [],
-};
-
-export default config;
+});
 `;
 
-const CONFIG_TEMPLATE_JS = `/** @type {import('@translink/i18n-cli').I18nConfig} */
-export default {
-  // 项目信息
-  project: {
-    name: '{{PROJECT_NAME}}',
-    version: '1.0.0',
-  },
+const CONFIG_TEMPLATE_JS = `import { defineConfig } from '@translink/i18n-cli';
 
-  // 扫描配置
-  extract: {
-    patterns: ['src/**/*.{vue,tsx,ts,jsx,js}'],
-    exclude: ['node_modules/**', 'dist/**', '**/*.d.ts'],
-    functions: ['t', '$tsl', '$t', 'i18n.t'],
-    extensions: ['.vue', '.tsx', '.ts', '.jsx', '.js'],
-    incremental: true,
-    createEmptyTranslations: true,
-  },
-
-  // 哈希配置
-  hash: {
-    enabled: {{HASH_ENABLED}},
-    algorithm: 'sha256',
-    length: 8,
-    numericOnly: {{NUMERIC_ONLY}},
-    includeContext: false,
-    contextFields: ['componentName', 'functionName'],
-  },
-
-  // 语言配置
+export default defineConfig({
+  // Language Configuration
   languages: {
-    source: '{{SOURCE_LANGUAGE}}',
     default: '{{DEFAULT_LANGUAGE}}',
     supported: [{{SUPPORTED_LANGUAGES}}],
-    fallback: '{{FALLBACK_LANGUAGE}}',
   },
 
-  // 输出配置
+  // Output Configuration
   output: {
     directory: '{{OUTPUT_DIRECTORY}}',
-    format: '{{OUTPUT_FORMAT}}',
-    indent: 2,
-    sortKeys: true,
-    splitByNamespace: false,
-    flattenKeys: false,
   },
 
-  // 导入导出配置
-  importExport: {
-    format: '{{IMPORT_EXPORT_FORMAT}}',
-    excel: {
-      sheetName: 'Translations',
-      includeMetadata: {{INCLUDE_METADATA}},
-      freezeHeader: true,
-      autoWidth: true,
-    },
-    csv: {
-      delimiter: ',',
-      encoding: 'utf-8',
-      includeHeaders: true,
-    },
-    columns: {
-      key: true,
-      status: true,
-      context: {{INCLUDE_METADATA}},
-      file: {{INCLUDE_METADATA}},
-      line: {{INCLUDE_METADATA}},
-    },
-  },
-
-  // 构建配置
-  build: {
-    minify: true,
-    sourcemap: false,
-    outputDir: 'dist/locales',
-  },
-
-  // CLI 输出配置
-  cli: {
-    verbose: false,
-    table: {
-      enabled: true,
-      maxRows: 20,
-      showDiff: true,
-    },
-  },
-
-  // 插件配置
+  // Optional: Plugins
   plugins: [],
-};
+});
 `;
 
 async function initCommand(options: InitOptions) {
@@ -221,89 +74,35 @@ async function initCommand(options: InitOptions) {
     }
   }
 
-  // 交互式配置
+  // 交互式配置 - 简化版，只询问核心配置
   const answers = await inquirer.prompt([
     {
       type: 'input',
-      name: 'projectName',
-      message: '项目名称:',
-      default: 'my-app',
-    },
-    {
-      type: 'input',
-      name: 'sourceLanguage',
-      message: '源语言（代码中使用的语言）:',
-      default: 'zh-CN',
-    },
-    {
-      type: 'input',
       name: 'defaultLanguage',
-      message: '默认语言（用户首次访问时的语言）:',
+      message: 'Default language (used in code and for users):',
       default: 'zh-CN',
     },
     {
       type: 'checkbox',
       name: 'supportedLanguages',
-      message: '支持的语言:',
+      message: 'Supported languages:',
       choices: [
-        { name: '中文 (zh-CN)', value: 'zh-CN', checked: true },
-        { name: '英文 (en-US)', value: 'en-US', checked: true },
-        { name: '日文 (ja-JP)', value: 'ja-JP' },
-        { name: '韩文 (ko-KR)', value: 'ko-KR' },
-        { name: '法文 (fr-FR)', value: 'fr-FR' },
-        { name: '德文 (de-DE)', value: 'de-DE' },
+        { name: 'Chinese (zh-CN)', value: 'zh-CN', checked: true },
+        { name: 'English (en-US)', value: 'en-US', checked: true },
+        { name: 'Japanese (ja-JP)', value: 'ja-JP' },
+        { name: 'Korean (ko-KR)', value: 'ko-KR' },
+        { name: 'French (fr-FR)', value: 'fr-FR' },
+        { name: 'German (de-DE)', value: 'de-DE' },
       ],
       validate: input => {
-        return input.length > 0 ? true : '请至少选择一种语言';
+        return input.length > 0 ? true : 'Please select at least one language';
       },
     },
     {
       type: 'input',
       name: 'outputDirectory',
-      message: '语言文件输出目录:',
+      message: 'Output directory for locale files:',
       default: 'src/locales',
-    },
-    {
-      type: 'list',
-      name: 'outputFormat',
-      message: '语言文件格式:',
-      choices: [
-        { name: 'JSON', value: 'json' },
-        { name: 'YAML', value: 'yaml' },
-        { name: 'TypeScript', value: 'ts' },
-        { name: 'JavaScript', value: 'js' },
-      ],
-      default: 'json',
-    },
-    {
-      type: 'confirm',
-      name: 'useHash',
-      message: '是否使用哈希作为 key（推荐）:',
-      default: true,
-    },
-    {
-      type: 'confirm',
-      name: 'numericOnly',
-      message: '是否只使用数字 key（推荐）:',
-      default: true,
-      when: answers => answers.useHash,
-    },
-    {
-      type: 'list',
-      name: 'importExportFormat',
-      message: '导入导出默认格式:',
-      choices: [
-        { name: 'Excel', value: 'excel' },
-        { name: 'CSV', value: 'csv' },
-        { name: 'JSON', value: 'json' },
-      ],
-      default: 'excel',
-    },
-    {
-      type: 'confirm',
-      name: 'includeMetadata',
-      message: '是否包含调试信息（Context, File, Line）:',
-      default: false,
     },
   ]);
 
@@ -316,20 +115,9 @@ async function initCommand(options: InitOptions) {
     .join(', ');
 
   configContent = configContent
-    .replace('{{PROJECT_NAME}}', answers.projectName)
-    .replace('{{SOURCE_LANGUAGE}}', answers.sourceLanguage)
     .replace('{{DEFAULT_LANGUAGE}}', answers.defaultLanguage)
     .replace('{{SUPPORTED_LANGUAGES}}', supportedLanguagesStr)
-    .replace('{{FALLBACK_LANGUAGE}}', answers.defaultLanguage)
-    .replace('{{OUTPUT_DIRECTORY}}', answers.outputDirectory)
-    .replace('{{OUTPUT_FORMAT}}', answers.outputFormat)
-    .replace('{{HASH_ENABLED}}', answers.useHash ? 'true' : 'false')
-    .replace('{{NUMERIC_ONLY}}', answers.numericOnly ? 'true' : 'false')
-    .replace('{{IMPORT_EXPORT_FORMAT}}', answers.importExportFormat)
-    .replace(
-      /{{INCLUDE_METADATA}}/g,
-      answers.includeMetadata ? 'true' : 'false'
-    );
+    .replace('{{OUTPUT_DIRECTORY}}', answers.outputDirectory);
 
   try {
     // 写入配置文件
@@ -349,7 +137,7 @@ async function initCommand(options: InitOptions) {
     for (const lang of answers.supportedLanguages) {
       const localeFilePath = resolve(outputDir, `${lang}.json`);
       if (!existsSync(localeFilePath)) {
-        writeFileSync(localeFilePath, '{}\\n', 'utf-8');
+        writeFileSync(localeFilePath, '{}\n', 'utf-8');
         logger.success(
           `✓ 创建语言文件: ${answers.outputDirectory}/${lang}.json`
         );
