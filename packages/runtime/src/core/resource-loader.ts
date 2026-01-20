@@ -321,10 +321,14 @@ export class ResourceLoader extends EventEmitter {
 
   /**
    * 通过动态导入加载
+   *
+   * 注意：这里使用完全动态的 import()，路径由用户配置决定
+   * 添加 @vite-ignore 告诉 Vite 这是预期行为，不需要静态分析
    */
   private async loadByImport(path: string): Promise<TranslationResource> {
     try {
-      const module = await import(path);
+      // @ts-ignore
+      const module = await import(/* @vite-ignore */ path);
       return module.default || module;
     } catch (error) {
       throw new Error(`Failed to import resource from ${path}: ${error}`);

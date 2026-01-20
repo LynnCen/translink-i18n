@@ -1,0 +1,144 @@
+/* 共享的 Demo 卡片样式 */
+
+.demo-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.demo-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #2c3e50;
+}
+
+.demo-number {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.demo-description {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.demo-description p {
+  margin: 0;
+  color: #666;
+  line-height: 1.6;
+}
+
+.demo-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.test-case {
+  border-left: 3px solid #667eea;
+  padding-left: 1rem;
+}
+
+.test-case h4 {
+  margin: 0 0 0.75rem 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.result code {
+  background: #f5f5f5;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 0.875rem;
+  color: #e83e8c;
+  overflow-x: auto;
+}
+
+.output {
+  background: #e3f2fd;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #90caf9;
+  color: #1565c0;
+  font-weight: 500;
+}
+
+.demo-api {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px dashed #e0e0e0;
+}
+
+.demo-api h4 {
+  margin: 0 0 0.75rem 0;
+  color: #667eea;
+  font-size: 1rem;
+}
+
+.demo-api ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.demo-api li {
+  color: #666;
+  line-height: 1.8;
+}
+
+.demo-api li code {
+  background: #f5f5f5;
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 0.875rem;
+  color: #e83e8c;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .demo-card {
+    padding: 1rem;
+  }
+
+  .demo-title {
+    font-size: 1.1rem;
+  }
+
+  .demo-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .test-case {
+    padding-left: 0.75rem;
+  }
+
+  .result code {
+    font-size: 0.75rem;
+  }
+}
