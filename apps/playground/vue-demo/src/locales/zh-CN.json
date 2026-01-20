@@ -1,119 +1,102 @@
 {
-  "app": {
-    "title": "TransLink I18n 演示",
-    "loading": "加载中..."
-  },
-  "welcome": {
-    "title": "欢迎使用 TransLink I18n",
-    "description": "这是一个功能完整的国际化解决方案，支持 Vue 3、React 和原生 JavaScript。"
-  },
-  "features": {
-    "codeTransform": {
-      "title": "智能代码转换",
-      "description": "自动将 $tsl 函数转换为哈希键，提升运行时性能。"
-    },
-    "hmr": {
-      "title": "热更新支持",
-      "description": "语言文件变更时实时更新界面，无需刷新页面。"
-    },
-    "lazyLoad": {
-      "title": "懒加载机制",
-      "description": "按需加载语言包，优化首屏加载性能。"
-    },
-    "cache": {
-      "title": "多级缓存",
-      "description": "内存、本地存储、网络三级缓存策略。"
+  "appTitle": "TransLink I18n 演示",
+  "currentLocale": "当前语言",
+  "initializing": "初始化中...",
+  "loading": "加载中...",
+  "demoScenes": "演示场景",
+  "quickActions": "快捷操作",
+  "toggleLanguage": "切换语言",
+  "openDevTools": "打开 DevTools",
+  "footerInfo": "© 2024 TransLink I18n - 现代化的国际化解决方案",
+  "footerLocale": "语言",
+  "footerScene": "场景",
+  "footerDevtools": "开发工具",
+  "footerEnabled": "已启用",
+
+  "sceneBasicTranslation": "基础翻译",
+  "sceneLanguageSwitcher": "语言切换",
+  "sceneParameterInterpolation": "参数插值",
+  "scenePluralization": "复数支持",
+  "sceneDirective": "v-t 指令",
+  "sceneTranslationComponent": "Translation 组件",
+  "sceneGlobalProperties": "全局属性",
+  "sceneLoadingStates": "加载状态",
+  "sceneDevtools": "DevTools 集成",
+
+  "basicTranslationTitle": "基础翻译",
+  "basicTranslationDesc": "验证 t() 函数的基本翻译功能，包括嵌套键名访问、数组索引和默认值fallback。",
+  "hello": "你好，世界！",
+  "nested": {
+    "level1": {
+      "level2": "这是一个嵌套的翻译键"
     }
   },
-  "demo": {
-    "title": "交互演示",
-    "userProfile": "用户信息",
-    "contactForm": "表单示例",
-    "dataDisplay": "数据展示",
-    "notifications": "消息通知"
-  },
-  "tech": {
-    "sectionTitle": "技术特性",
-    "cache": {
-      "title": "智能缓存",
-      "description": "多级缓存策略，提升翻译性能",
-      "stat": "缓存命中率: {{rate}}%"
-    },
-    "lazyLoad": {
-      "title": "懒加载",
-      "description": "按需加载语言包，减少初始体积"
-    },
-    "hmr": {
-      "title": "热更新",
-      "description": "开发时实时更新翻译，无需刷新"
-    },
-    "devtools": {
-      "title": "开发工具",
-      "description": "强大的调试工具，追踪缺失翻译"
-    }
-  },
-  "form": {
-    "name": "姓名",
-    "namePlaceholder": "请输入您的姓名",
-    "email": "邮箱",
-    "emailPlaceholder": "请输入您的邮箱",
-    "message": "消息",
-    "messagePlaceholder": "请输入您的消息",
-    "submit": "提交",
-    "successMessage": "感谢 {{name}}！您的消息已成功提交。"
-  },
-  "stats": {
-    "item": "{{count}} 项",
-    "item_one": "{{count}} 项",
-    "item_other": "{{count}} 项",
-    "user": "{{count}} 个用户",
-    "user_one": "{{count}} 个用户",
-    "user_other": "{{count}} 个用户",
-    "message": "{{count}} 条消息",
-    "message_one": "{{count}} 条消息",
-    "message_other": "{{count}} 条消息",
-    "lastUpdate": "最后更新: {{time}}",
-    "refresh": "刷新"
-  },
-  "notification": {
-    "showSuccess": "成功",
-    "showWarning": "警告",
-    "showError": "错误",
-    "successTitle": "成功",
-    "warningTitle": "警告",
-    "errorTitle": "错误",
-    "successMessage": "操作成功完成！",
-    "warningMessage": "请注意此操作！",
-    "errorMessage": "发生错误，请重试。"
-  },
-  "devtools": {
-    "title": "开发者工具",
-    "description": "在浏览器控制台中使用以下命令：",
-    "openButton": "打开 DevTools"
-  },
-  "footer": {
-    "copyright": "© 2024 TransLink I18n. 保留所有权利。",
-    "currentLanguage": "当前语言",
-    "cacheHitRate": "缓存命中率",
-    "devMode": "开发模式",
-    "openDevTools": "打开 DevTools"
-  },
-  "user": {
-    "avatar": "用户头像",
-    "name": "用户名称",
-    "level": "用户等级",
-    "vip": "VIP 会员",
-    "advanced": "高级用户",
-    "joinDate": "加入时间",
-    "lastActive": "最后活动",
-    "followers": "关注者",
-    "following": "正在关注",
-    "viewPosts": "查看文章",
-    "publishPost": "发布文章",
-    "editProfile": "编辑资料"
-  },
-  "language": {
-    "select": "选择语言",
-    "switching": "切换中..."
-  }
+  "items": ["第一项", "第二项", "第三项"],
+
+  "languageSwitcherTitle": "语言切换",
+  "languageSwitcherDesc": "验证 setLocale() 方法、locale 响应式状态、availableLocales 列表和 isLoading 加载状态。",
+  "languageSelect": "选择语言",
+  "languageSwitching": "切换中...",
+  "languageSwitchSuccess": "语言切换成功！",
+  "languageSwitchError": "语言切换失败，请重试。",
+  "languageChinese": "中文",
+  "languageEnglish": "English",
+
+  "parameterInterpolationTitle": "参数插值",
+  "parameterInterpolationDesc": "验证 t(key, params) 的参数插值功能，支持多种参数类型和特殊字符转义。",
+  "greeting": "你好，{{name}}！",
+  "userInfo": "用户 {{username}} 今年 {{age}} 岁",
+  "numbers": "数量：{{count}}，价格：¥{{price}}",
+  "escapeHtml": "输入内容：{{html}}",
+
+  "pluralizationTitle": "复数支持",
+  "pluralizationDesc": "验证 t(key, { count }) 的自动复数化功能，根据不同语言的复数规则自动选择合适的翻译。",
+  "items_zero": "没有项目",
+  "items_one": "1 个项目",
+  "items_other": "{{count}} 个项目",
+  "itemsWithUser_other": "{{user}} 有 {{count}} 个项目",
+
+  "directiveTitle": "v-t 指令",
+  "directiveDesc": "验证 v-t 指令的各种用法，包括基础用法、参数支持、HTML 模式和响应式更新。",
+  "directiveBasic": "这是通过 v-t 指令渲染的文本",
+  "directiveWithParams": "你好 {{name}}，现在是 {{time}}",
+  "directiveHtml": "<strong>这是粗体</strong>和<em>斜体</em>文本",
+  "directiveMorning": "早上好！",
+  "directiveAfternoon": "下午好！",
+  "directiveEvening": "晚上好！",
+  "directiveReactiveHint": "切换语言时，下方文本会自动更新：",
+
+  "translationComponentTitle": "Translation 组件",
+  "translationComponentDesc": "验证 <Translation> 组件的各种属性和用法，包括 keypath、params、plural、tag 等。",
+  "translationComponentBasic": "这是通过 Translation 组件渲染的",
+  "translationComponentWithParams": "{{name}} 是一位 {{role}}",
+  "translationComponentCustomTag": "自定义 HTML 标签",
+
+  "globalPropertiesTitle": "全局属性",
+  "globalPropertiesDesc": "验证全局属性 $t、$i18n 和 $locale 的使用，这些属性在 Composition API 和 Options API 中都可用。",
+  "globalPropertiesTestKey": "通过 $t() 全局方法翻译",
+  "globalPropertiesOptionsApiMessage": "这是 Options API 组件中的消息",
+
+  "loadingStatesTitle": "加载状态",
+  "loadingStatesDesc": "验证 isReady 和 isLoading 状态，用于条件渲染和禁用 UI。",
+  "loadingStatesReady": "I18n 已就绪",
+  "loadingStatesInitializing": "初始化中...",
+  "loadingStatesSwitching": "正在切换语言...",
+  "loadingStatesNoLoading": "当前没有进行任何加载操作",
+  "loadingStatesSwitchBtn": "切换语言测试",
+
+  "devtoolsTitle": "DevTools 集成",
+  "devtoolsDesc": "验证 DevTools 的统计功能、缺失键追踪和导出功能。",
+  "devtoolsAvailable": "DevTools 可用",
+  "devtoolsNotAvailable": "DevTools 不可用（仅开发环境）",
+  "devtoolsStatsMissing": "缺失键",
+  "devtoolsStatsCacheHits": "缓存命中",
+  "devtoolsStatsCacheMisses": "缓存未命中",
+  "devtoolsStatsHitRate": "命中率",
+  "devtoolsRefresh": "刷新统计",
+  "devtoolsPrintStats": "打印统计",
+  "devtoolsExportJSON": "导出 JSON",
+  "devtoolsGetMissing": "获取缺失键",
+  "devtoolsClearMissing": "清除缺失键",
+  "devtoolsConsoleHint": "在浏览器控制台使用以下命令"
 }

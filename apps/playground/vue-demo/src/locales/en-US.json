@@ -1,119 +1,101 @@
 {
-  "app": {
-    "title": "TransLink I18n Demo",
-    "loading": "Loading..."
-  },
-  "welcome": {
-    "title": "Welcome to TransLink I18n",
-    "description": "A full-featured internationalization solution that supports Vue 3, React, and vanilla JavaScript."
-  },
-  "features": {
-    "codeTransform": {
-      "title": "Smart Code Transform",
-      "description": "Automatically converts $tsl functions to hash keys for improved runtime performance."
-    },
-    "hmr": {
-      "title": "Hot Module Replacement",
-      "description": "Real-time UI updates when language files change, no page refresh needed."
-    },
-    "lazyLoad": {
-      "title": "Lazy Loading",
-      "description": "Load language packs on demand to optimize initial load performance."
-    },
-    "cache": {
-      "title": "Multi-level Cache",
-      "description": "Three-tier caching strategy: memory, local storage, and network."
+  "appTitle": "TransLink I18n Demo",
+  "currentLocale": "Current Locale",
+  "initializing": "Initializing...",
+  "loading": "Loading...",
+  "demoScenes": "Demo Scenes",
+  "quickActions": "Quick Actions",
+  "toggleLanguage": "Toggle Language",
+  "openDevTools": "Open DevTools",
+  "footerInfo": "© 2024 TransLink I18n - Modern Internationalization Solution",
+  "footerLocale": "Locale",
+  "footerScene": "Scene",
+  "footerDevtools": "DevTools",
+  "footerEnabled": "Enabled",
+
+  "sceneBasicTranslation": "Basic Translation",
+  "sceneLanguageSwitcher": "Language Switcher",
+  "sceneParameterInterpolation": "Parameter Interpolation",
+  "scenePluralization": "Pluralization",
+  "sceneDirective": "v-t Directive",
+  "sceneTranslationComponent": "Translation Component",
+  "sceneGlobalProperties": "Global Properties",
+  "sceneLoadingStates": "Loading States",
+  "sceneDevtools": "DevTools Integration",
+
+  "basicTranslationTitle": "Basic Translation",
+  "basicTranslationDesc": "Validate the basic translation functionality of the t() function, including nested key access, array indexing, and default value fallback.",
+  "hello": "Hello, World!",
+  "nested": {
+    "level1": {
+      "level2": "This is a nested translation key"
     }
   },
-  "demo": {
-    "title": "Interactive Demo",
-    "userProfile": "User Profile",
-    "contactForm": "Contact Form",
-    "dataDisplay": "Data Display",
-    "notifications": "Notifications"
-  },
-  "tech": {
-    "sectionTitle": "Technical Features",
-    "cache": {
-      "title": "Smart Caching",
-      "description": "Multi-level cache strategy for improved translation performance",
-      "stat": "Cache Hit Rate: {{rate}}%"
-    },
-    "lazyLoad": {
-      "title": "Lazy Loading",
-      "description": "Load language packs on demand to reduce initial bundle size"
-    },
-    "hmr": {
-      "title": "Hot Reload",
-      "description": "Real-time translation updates during development, no refresh needed"
-    },
-    "devtools": {
-      "title": "DevTools",
-      "description": "Powerful debugging tools to track missing translations"
-    }
-  },
-  "form": {
-    "name": "Name",
-    "namePlaceholder": "Please enter your name",
-    "email": "Email",
-    "emailPlaceholder": "Please enter your email",
-    "message": "Message",
-    "messagePlaceholder": "Please enter your message",
-    "submit": "Submit",
-    "successMessage": "Thank you, {{name}}! Your message has been successfully submitted."
-  },
-  "stats": {
-    "item": "{{count}} items",
-    "item_one": "{{count}} item",
-    "item_other": "{{count}} items",
-    "user": "{{count}} users",
-    "user_one": "{{count}} user",
-    "user_other": "{{count}} users",
-    "message": "{{count}} messages",
-    "message_one": "{{count}} message",
-    "message_other": "{{count}} messages",
-    "lastUpdate": "Last Update: {{time}}",
-    "refresh": "Refresh"
-  },
-  "notification": {
-    "showSuccess": "Success",
-    "showWarning": "Warning",
-    "showError": "Error",
-    "successTitle": "Success",
-    "warningTitle": "Warning",
-    "errorTitle": "Error",
-    "successMessage": "Operation completed successfully!",
-    "warningMessage": "Please be aware of this action!",
-    "errorMessage": "An error occurred, please try again."
-  },
-  "devtools": {
-    "title": "Developer Tools",
-    "description": "Use the following commands in your browser console:",
-    "openButton": "Open DevTools"
-  },
-  "footer": {
-    "copyright": "© 2024 TransLink I18n. All rights reserved.",
-    "currentLanguage": "Current Language",
-    "cacheHitRate": "Cache Hit Rate",
-    "devMode": "Development Mode",
-    "openDevTools": "Open DevTools"
-  },
-  "user": {
-    "avatar": "User Avatar",
-    "name": "User Name",
-    "level": "User Level",
-    "vip": "VIP Member",
-    "advanced": "Advanced User",
-    "joinDate": "Join Date",
-    "lastActive": "Last Active",
-    "followers": "Followers",
-    "following": "Following",
-    "viewPosts": "View Posts",
-    "publishPost": "Publish Post",
-    "editProfile": "Edit Profile"
-  },
-  "language": {
-    "select": "Select Language",
-    "switching": "Switching..."
-  }
+  "items": ["First item", "Second item", "Third item"],
+
+  "languageSwitcherTitle": "Language Switcher",
+  "languageSwitcherDesc": "Validate the setLocale() method, reactive locale state, availableLocales list, and isLoading state.",
+  "languageSelect": "Select Language",
+  "languageSwitching": "Switching...",
+  "languageSwitchSuccess": "Language switched successfully!",
+  "languageSwitchError": "Failed to switch language, please try again.",
+  "languageChinese": "中文",
+  "languageEnglish": "English",
+
+  "parameterInterpolationTitle": "Parameter Interpolation",
+  "parameterInterpolationDesc": "Validate the parameter interpolation functionality of t(key, params), supporting various parameter types and special character escaping.",
+  "greeting": "Hello, {{name}}!",
+  "userInfo": "User {{username}} is {{age}} years old",
+  "numbers": "Count: {{count}}, Price: ${{price}}",
+  "escapeHtml": "Input content: {{html}}",
+
+  "pluralizationTitle": "Pluralization",
+  "pluralizationDesc": "Validate the automatic pluralization functionality of t(key, { count }), automatically selecting the appropriate translation based on plural rules for different languages.",
+  "items_one": "1 item",
+  "items_other": "{{count}} items",
+  "itemsWithUser_other": "{{user}} has {{count}} items",
+
+  "directiveTitle": "v-t Directive",
+  "directiveDesc": "Validate various usages of the v-t directive, including basic usage, parameter support, HTML mode, and reactive updates.",
+  "directiveBasic": "This text is rendered via v-t directive",
+  "directiveWithParams": "Hello {{name}}, it's {{time}}",
+  "directiveHtml": "<strong>This is bold</strong> and <em>italic</em> text",
+  "directiveMorning": "Good morning!",
+  "directiveAfternoon": "Good afternoon!",
+  "directiveEvening": "Good evening!",
+  "directiveReactiveHint": "When switching languages, the text below will auto-update:",
+
+  "translationComponentTitle": "Translation Component",
+  "translationComponentDesc": "Validate various properties and usages of the <Translation> component, including keypath, params, plural, tag, etc.",
+  "translationComponentBasic": "This is rendered via Translation component",
+  "translationComponentWithParams": "{{name}} is a {{role}}",
+  "translationComponentCustomTag": "Custom HTML Tag",
+
+  "globalPropertiesTitle": "Global Properties",
+  "globalPropertiesDesc": "Validate the usage of global properties $t, $i18n, and $locale, which are available in both Composition API and Options API.",
+  "globalPropertiesTestKey": "Translated via $t() global method",
+  "globalPropertiesOptionsApiMessage": "This is a message in Options API component",
+
+  "loadingStatesTitle": "Loading States",
+  "loadingStatesDesc": "Validate isReady and isLoading states, used for conditional rendering and disabling UI.",
+  "loadingStatesReady": "I18n is ready",
+  "loadingStatesInitializing": "Initializing...",
+  "loadingStatesSwitching": "Switching language...",
+  "loadingStatesNoLoading": "No loading operation in progress",
+  "loadingStatesSwitchBtn": "Test Language Switch",
+
+  "devtoolsTitle": "DevTools Integration",
+  "devtoolsDesc": "Validate DevTools statistics, missing key tracking, and export functionality.",
+  "devtoolsAvailable": "DevTools Available",
+  "devtoolsNotAvailable": "DevTools Not Available (Dev Only)",
+  "devtoolsStatsMissing": "Missing Keys",
+  "devtoolsStatsCacheHits": "Cache Hits",
+  "devtoolsStatsCacheMisses": "Cache Misses",
+  "devtoolsStatsHitRate": "Hit Rate",
+  "devtoolsRefresh": "Refresh Stats",
+  "devtoolsPrintStats": "Print Stats",
+  "devtoolsExportJSON": "Export JSON",
+  "devtoolsGetMissing": "Get Missing Keys",
+  "devtoolsClearMissing": "Clear Missing",
+  "devtoolsConsoleHint": "Use these commands in browser console"
 }
