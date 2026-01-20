@@ -61,12 +61,23 @@ export type {
 export type { SSRContext, SSROptions } from './ssr/index.js';
 
 // Logger 类型
-export type { LogLevel, LogMessage, LogHandler, LoggerOptions } from './utils/logger.js';
+export type {
+  LogLevel,
+  LogMessage,
+  LogHandler,
+  LoggerOptions,
+} from './utils/logger.js';
 
 // Scheduler 类型
-export type { UpdateCallback, SchedulerOptions } from './utils/update-scheduler.js';
+export type {
+  UpdateCallback,
+  SchedulerOptions,
+} from './utils/update-scheduler.js';
 
 // 创建便捷的实例创建函数
+import { I18nEngine } from './core/i18n-engine.js';
+import type { I18nOptions } from './types/index.js';
+
 export function createI18n(options: I18nOptions): I18nEngine {
   return new I18nEngine(options);
 }

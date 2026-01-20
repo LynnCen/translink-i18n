@@ -28,7 +28,7 @@ export function serializeSSRContext(engine: I18nEngine): SSRContext {
 
   // 收集当前语言的资源
   const resources: Record<string, TranslationResource> = {};
-  
+
   // 注意：这里简化处理，实际应该从 ResourceLoader 获取已加载的资源
   // 为了避免循环依赖，我们通过公开方法获取
   resources[currentLanguage] = {};
@@ -45,7 +45,9 @@ export function serializeSSRContext(engine: I18nEngine): SSRContext {
  * 反序列化 SSR 上下文
  * 用于客户端 hydrate 时恢复服务端状态
  */
-export function deserializeSSRContext(context: SSRContext): Partial<I18nOptions> {
+export function deserializeSSRContext(
+  context: SSRContext
+): Partial<I18nOptions> {
   return {
     defaultLanguage: context.language,
     supportedLanguages: context.supportedLanguages as any,
@@ -55,7 +57,7 @@ export function deserializeSSRContext(context: SSRContext): Partial<I18nOptions>
 
 /**
  * 创建支持 SSR 的 I18n 实例
- * 
+ *
  * @example
  * // 服务端
  * const i18n = await createI18nWithSSR({
@@ -63,10 +65,10 @@ export function deserializeSSRContext(context: SSRContext): Partial<I18nOptions>
  *   supportedLanguages: ['zh-CN', 'en-US'],
  *   resources: { ... }
  * });
- * 
+ *
  * // 渲染完成后序列化上下文
  * const ssrContext = serializeSSRContext(i18n);
- * 
+ *
  * // 客户端 hydrate
  * const i18n = await createI18nWithSSR({
  *   ...deserializeSSRContext(ssrContext),
@@ -101,7 +103,10 @@ export async function createI18nWithSSR(
  * 提取 SSR 脚本标签
  * 用于在 HTML 中嵌入 SSR 上下文
  */
-export function renderSSRScript(context: SSRContext, varName = '__I18N_SSR__'): string {
+export function renderSSRScript(
+  context: SSRContext,
+  varName = '__I18N_SSR__'
+): string {
   const json = JSON.stringify(context);
   return `<script>window.${varName}=${json}</script>`;
 }
@@ -109,13 +114,15 @@ export function renderSSRScript(context: SSRContext, varName = '__I18N_SSR__'): 
 /**
  * 从 window 对象读取 SSR 上下文
  */
-export function loadSSRContextFromWindow(varName = '__I18N_SSR__'): SSRContext | null {
+export function loadSSRContextFromWindow(
+  varName = '__I18N_SSR__'
+): SSRContext | null {
   if (typeof window === 'undefined') {
     return null;
   }
 
   const context = (window as any)[varName];
-  
+
   if (!context || typeof context !== 'object') {
     return null;
   }
@@ -126,7 +133,7 @@ export function loadSSRContextFromWindow(varName = '__I18N_SSR__'): SSRContext |
 /**
  * 创建同构 I18n 实例
  * 自动判断服务端或客户端环境
- * 
+ *
  * @example
  * // 通用代码（同时运行在服务端和客户端）
  * const i18n = await createIsomorphicI18n({
@@ -158,5 +165,5 @@ export async function createIsomorphicI18n(
   return createI18nWithSSR(options);
 }
 
-// 导出类型
-export type { SSRContext, SSROptions };
+// 最佳实践：类型已在上方定义，无需重复导出
+// export type { SSRContext, SSROptions };
