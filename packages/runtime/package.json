@@ -17,21 +17,22 @@
   "main": "./dist/index.js",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./vue": {
+      "types": "./dist/vue.d.ts",
       "import": "./dist/vue.esm.js",
-      "require": "./dist/vue.js",
-      "types": "./dist/vue.d.ts"
+      "require": "./dist/vue.js"
     },
     "./react": {
+      "types": "./dist/react.d.ts",
       "import": "./dist/react.esm.js",
-      "require": "./dist/react.js",
-      "types": "./dist/react.d.ts"
+      "require": "./dist/react.js"
     }
   },
   "files": [
