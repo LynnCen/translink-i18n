@@ -18,6 +18,7 @@ This guide provides recommendations for using TransLink I18n Runtime effectively
 ### 1. Lazy Load Languages
 
 **❌ Bad**: Loading all languages upfront
+
 ```typescript
 import zhCN from './locales/zh-CN.json'; // 100KB
 import enUS from './locales/en-US.json'; // 100KB
@@ -26,19 +27,20 @@ import frFR from './locales/fr-FR.json'; // 100KB
 // Total: 400KB in initial bundle!
 
 const i18n = createI18n({
-  resources: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'fr-FR': frFR }
+  resources: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'fr-FR': frFR },
 });
 ```
 
 **✅ Good**: Load language on demand
+
 ```typescript
 const i18n = createI18n({
   defaultLanguage: 'zh-CN',
   supportedLanguages: ['zh-CN', 'en-US', 'ja-JP', 'fr-FR'],
-  loadFunction: async (lng) => {
+  loadFunction: async lng => {
     const module = await import(`./locales/${lng}.json`);
     return module.default;
-  }
+  },
 });
 // Initial bundle: only current language (~100KB)
 ```
@@ -46,33 +48,34 @@ const i18n = createI18n({
 ### 2. Enable Caching
 
 **✅ Good**: Enable cache with appropriate TTL
+
 ```typescript
 const i18n = createI18n({
   cache: {
     enabled: true,
-    maxSize: 1000,        // Limit memory usage
-    ttl: 5 * 60 * 1000,   // 5 minutes
-    storage: 'memory',    // or 'localStorage' for persistence
-  }
+    maxSize: 1000, // Limit memory usage
+    ttl: 5 * 60 * 1000, // 5 minutes
+    storage: 'memory', // or 'localStorage' for persistence
+  },
 });
 ```
 
 ### 3. Use Batch Updates
 
 **❌ Bad**: Multiple individual updates
+
 ```typescript
 translations.forEach(key => {
-  updateUI(t(key));  // Triggers re-render for each key
+  updateUI(t(key)); // Triggers re-render for each key
 });
 ```
 
 **✅ Good**: Batch updates together
+
 ```typescript
 import { batchUpdates } from '@translink/i18n-runtime';
 
-batchUpdates(
-  translations.map(key => () => updateUI(t(key)))
-);
+batchUpdates(translations.map(key => () => updateUI(t(key))));
 // Single re-render for all updates
 ```
 
@@ -80,7 +83,9 @@ batchUpdates(
 
 ```typescript
 // Prefetch next likely language in the background
-const i18n = await createI18n({ /* ... */ });
+const i18n = await createI18n({
+  /* ... */
+});
 
 // After app loads
 requestIdleCallback(() => {
@@ -107,6 +112,7 @@ import * as I18n from '@translink/i18n-runtime';
 ### 1. Clean Up Event Listeners
 
 **✅ Good**: Always unsubscribe
+
 ```typescript
 // Vue
 const { t } = useI18n();
@@ -125,8 +131,8 @@ useEffect(() => {
 ```typescript
 const i18n = createI18n({
   cache: {
-    maxSize: 1000,  // Prevent unlimited growth
-  }
+    maxSize: 1000, // Prevent unlimited growth
+  },
 });
 ```
 
@@ -151,7 +157,7 @@ function switchUser() {
 ```typescript
 // Clean up when app unmounts
 function cleanup() {
-  i18n.destroy();  // Clears cache, removes listeners
+  i18n.destroy(); // Clears cache, removes listeners
 }
 ```
 
@@ -162,11 +168,13 @@ function cleanup() {
 ### 1. Always Provide Fallbacks
 
 **❌ Bad**: No fallback
+
 ```typescript
-const text = t('some.key');  // Returns "some.key" if missing
+const text = t('some.key'); // Returns "some.key" if missing
 ```
 
 **✅ Good**: Explicit fallback
+
 ```typescript
 const text = t('some.key', {}, { defaultValue: 'Default Text' });
 ```
@@ -178,14 +186,14 @@ const i18n = createI18n({
   devTools: {
     enabled: true,
     trackMissingKeys: true,
-  }
+  },
 });
 
 // Track missing keys
 i18n.on('translationMissing', (key, language) => {
   // Log to analytics
   console.warn(`Missing translation: ${key} for ${language}`);
-  
+
   // Send to error tracking service
   errorTracker.captureMessage(`Missing i18n key: ${key}`);
 });
@@ -195,7 +203,7 @@ i18n.on('translationMissing', (key, language) => {
 
 ```typescript
 const i18n = createI18n({
-  loadFunction: async (lng) => {
+  loadFunction: async lng => {
     try {
       const response = await fetch(`/api/translations/${lng}`);
       if (!response.ok) throw new Error('Load failed');
@@ -205,7 +213,7 @@ const i18n = createI18n({
       // Return fallback translations
       return getFallbackTranslations(lng);
     }
-  }
+  },
 });
 ```
 
@@ -222,17 +230,18 @@ const i18n = createI18n({
     trackMissingKeys: true,
     logMissingKeys: true,
     exposeToWindow: true,
-  }
+  },
 });
 ```
 
 **Check missing keys in console**:
+
 ```javascript
 // Print statistics
-window.__TRANSLINK_DEVTOOLS__.printStats()
+window.__TRANSLINK_DEVTOOLS__.printStats();
 
 // Export missing keys for translation
-window.__TRANSLINK_DEVTOOLS__.exportCSV()
+window.__TRANSLINK_DEVTOOLS__.exportCSV();
 ```
 
 ### 2. Type-Safe Translation Keys
@@ -295,10 +304,10 @@ npx translink import translations.xlsx
 ```typescript
 const i18n = createI18n({
   devTools: {
-    enabled: false,  // ✅ Disable in production
+    enabled: false, // ✅ Disable in production
   },
   debug: false,
-  logLevel: 'error',  // Only log errors
+  logLevel: 'error', // Only log errors
 });
 ```
 
@@ -306,13 +315,13 @@ const i18n = createI18n({
 
 ```typescript
 const i18n = createI18n({
-  loadFunction: async (lng) => {
+  loadFunction: async lng => {
     // Load from CDN
     const response = await fetch(
       `https://cdn.example.com/translations/${lng}.json`
     );
     return response.json();
-  }
+  },
 });
 ```
 
@@ -320,7 +329,7 @@ const i18n = createI18n({
 
 ```typescript
 // Use service worker to cache translation files
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   if (event.request.url.includes('/translations/')) {
     event.respondWith(
       caches.match(event.request).then(response => {
@@ -355,25 +364,28 @@ console.log(`Cache hit rate: ${stats.hitRate * 100}%`);
 ### 1. ❌ Don't Translate in Loops
 
 **Bad**:
+
 ```typescript
 items.forEach(item => {
-  item.label = t(item.key);  // Translates on every render
+  item.label = t(item.key); // Translates on every render
 });
 ```
 
 **Good**:
+
 ```typescript
 const translations = useMemo(() => {
   return items.map(item => ({
     ...item,
-    label: t(item.key)
+    label: t(item.key),
   }));
-}, [items, locale]);  // Only retranslate when needed
+}, [items, locale]); // Only retranslate when needed
 ```
 
 ### 2. ❌ Don't Load All Languages Synchronously
 
 **Bad**:
+
 ```typescript
 const allLanguages = ['zh-CN', 'en-US', 'ja-JP', ...];
 allLanguages.forEach(lang => {
@@ -382,6 +394,7 @@ allLanguages.forEach(lang => {
 ```
 
 **Good**:
+
 ```typescript
 // Load current language
 await i18n.loadLanguage(currentLang);
@@ -395,13 +408,13 @@ requestIdleCallback(() => {
 ### 3. ❌ Don't Ignore Pluralization
 
 **Bad**:
+
 ```typescript
-const text = count === 1 
-  ? `${count} item` 
-  : `${count} items`;
+const text = count === 1 ? `${count} item` : `${count} items`;
 ```
 
 **Good**:
+
 ```typescript
 const text = t('item', { count });
 // Handles all plural forms automatically
@@ -410,27 +423,31 @@ const text = t('item', { count });
 ### 4. ❌ Don't Mutate Translation Objects
 
 **Bad**:
+
 ```typescript
 const translations = i18n.getResource('zh-CN');
-translations.newKey = 'new value';  // Don't mutate!
+translations.newKey = 'new value'; // Don't mutate!
 ```
 
 **Good**:
+
 ```typescript
 i18n.addResource('zh-CN', 'translation', {
-  newKey: 'new value'
+  newKey: 'new value',
 });
 ```
 
 ### 5. ❌ Don't Forget Error Boundaries
 
 **Bad**:
+
 ```typescript
 // Crashes app if translation fails
 <h1>{t('title')}</h1>
 ```
 
 **Good**:
+
 ```typescript
 // Wrapped in error boundary
 <ErrorBoundary fallback={<h1>Welcome</h1>}>

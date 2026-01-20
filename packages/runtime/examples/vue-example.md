@@ -23,6 +23,7 @@ src/
 ```
 
 **zh-CN.json**:
+
 ```json
 {
   "welcome": "欢迎",
@@ -38,6 +39,7 @@ src/
 ```
 
 **en-US.json**:
+
 ```json
 {
   "welcome": "Welcome",
@@ -55,6 +57,7 @@ src/
 ### 2. Initialize I18n
 
 **main.ts**:
+
 ```typescript
 import { createApp } from 'vue';
 import { createI18n } from '@translink/i18n-runtime/vue';
@@ -155,15 +158,15 @@ export default {
   data() {
     return {
       userName: 'Bob',
-      itemCount: 3
+      itemCount: 3,
     };
   },
   methods: {
     switchLanguage() {
       const newLocale = this.$locale.value === 'zh-CN' ? 'en-US' : 'zh-CN';
       this.$i18n.changeLanguage(newLocale);
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -194,7 +197,7 @@ const userName = ref('Charlie');
 
 <template>
   <Translation keypath="hello" :params="{ name: userName }" />
-  
+
   <!-- With render prop -->
   <Translation keypath="welcome" v-slot="{ translation }">
     <strong>{{ translation }}</strong>
@@ -250,18 +253,23 @@ const i18n = createI18n({
 
 ```typescript
 // server.ts
-import { createI18nWithSSR, serializeSSRContext } from '@translink/i18n-runtime';
+import {
+  createI18nWithSSR,
+  serializeSSRContext,
+} from '@translink/i18n-runtime';
 
 app.get('*', async (req, res) => {
   const i18n = await createI18nWithSSR({
     defaultLanguage: 'zh-CN',
     supportedLanguages: ['zh-CN', 'en-US'],
-    resources: { /* ... */ }
+    resources: {
+      /* ... */
+    },
   });
 
   // Render app
   const html = await renderApp(i18n);
-  
+
   // Serialize context
   const ssrContext = serializeSSRContext(i18n);
   const ssrScript = renderSSRScript(ssrContext);
@@ -293,22 +301,22 @@ Open browser console:
 
 ```javascript
 // Check missing translations
-window.__TRANSLINK_DEVTOOLS__.printStats()
+window.__TRANSLINK_DEVTOOLS__.printStats();
 
 // Get missing keys
-window.__TRANSLINK_DEVTOOLS__.getMissingKeys()
+window.__TRANSLINK_DEVTOOLS__.getMissingKeys();
 
 // Export as JSON
-window.__TRANSLINK_DEVTOOLS__.exportJSON()
+window.__TRANSLINK_DEVTOOLS__.exportJSON();
 
 // Export as CSV
-window.__TRANSLINK_DEVTOOLS__.exportCSV()
+window.__TRANSLINK_DEVTOOLS__.exportCSV();
 
 // Clear tracked keys
-window.__TRANSLINK_DEVTOOLS__.clear()
+window.__TRANSLINK_DEVTOOLS__.clear();
 
 // Show help
-window.__TRANSLINK_DEVTOOLS__.help()
+window.__TRANSLINK_DEVTOOLS__.help();
 ```
 
 ## TypeScript Support

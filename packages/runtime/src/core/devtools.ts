@@ -59,9 +59,12 @@ export class I18nDevTools {
   private init(): void {
     // 监听翻译缺失事件
     if (this.options.trackMissingKeys) {
-      this.engine.on<{ key: string; language: string }>('translationMissing', (data) => {
-        this.trackMissingKey(data.key, data.language);
-      });
+      this.engine.on<{ key: string; language: string }>(
+        'translationMissing',
+        data => {
+          this.trackMissingKey(data.key, data.language);
+        }
+      );
     }
 
     // 暴露到 window 对象

@@ -252,7 +252,7 @@ export function createMemoryHandler(maxSize = 1000): {
   return {
     handler: (logMessage: LogMessage) => {
       logs.push(logMessage);
-      
+
       // 限制大小
       if (logs.length > maxSize) {
         logs.shift();

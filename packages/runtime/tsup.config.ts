@@ -21,7 +21,7 @@ export default defineConfig([
   {
     entry: ['src/vue.ts'],
     format: ['cjs', 'esm'],
-    dts: true, 
+    dts: true,
     tsconfig: './tsconfig.build.json',
     sourcemap: true,
     external: ['vue'],
@@ -48,4 +48,3 @@ export default defineConfig([
     },
   },
 ]);
-
