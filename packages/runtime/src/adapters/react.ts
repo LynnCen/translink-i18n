@@ -252,7 +252,6 @@ export function Translation({
     return React.createElement(InterpolatedComponent, {
       translation,
       components,
-      children,
     });
   }
 
@@ -265,16 +264,14 @@ export function Translation({
 }
 
 /**
- * 支持组件插值的内部组件
+ * 最佳实践：支持组件插值的内部组件
  */
 function InterpolatedComponent({
   translation,
   components,
-  _children,
 }: {
   translation: string;
   components: Record<string, ComponentType<any>>;
-  _children?: ReactNode;
 }) {
   // 解析包含组件标签的翻译文本
   const parsed = useMemo(() => {
@@ -383,16 +380,8 @@ export async function createI18nWithInit(options: ReactI18nOptions): Promise<{
   await engine.init();
 
   const Provider = ({ children }: { children: ReactNode }) => {
-    return React.createElement(I18nProvider, { i18n: engine }, children);
+    return React.createElement(I18nProvider, { i18n: engine, children });
   };
 
   return { i18n: engine, Provider };
 }
-
-// 导出类型
-export type {
-  ReactI18nOptions,
-  I18nContextValue,
-  UseTranslationReturn,
-  TranslationProps,
-};

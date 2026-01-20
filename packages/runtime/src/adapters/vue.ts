@@ -200,7 +200,7 @@ export function useI18n(_options?: {
  */
 export const vT = {
   mounted(el: HTMLElement, binding: any) {
-    const { value, arg, modifiers } = binding;
+    const { value, modifiers } = binding;
     const i18n = inject<VueI18nInstance>(I18N_SYMBOL);
 
     if (!i18n) {
@@ -373,12 +373,14 @@ export function withTranslation<T extends Record<string, any>>(
     },
   };
 
+  // 最佳实践：使用 Object.defineProperty 设置 name
   if (options?.name) {
-    wrappedComponent.name = options.name;
+    Object.defineProperty(wrappedComponent, 'name', {
+      value: options.name,
+      writable: false,
+      configurable: true,
+    });
   }
 
   return wrappedComponent as T;
 }
-
-// 导出类型（用于 TypeScript 支持）
-export type { VueI18nOptions, VueI18nInstance, UseI18nReturn };
