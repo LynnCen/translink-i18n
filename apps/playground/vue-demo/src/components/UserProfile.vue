@@ -2,8 +2,7 @@
   <div class="user-profile">
     <div class="profile-header">
       <div class="avatar">
-        <img
-:src="user.avatar" :alt="$tsl('用户头像')" />
+        <img :src="user.avatar" :alt="$tsl('用户头像')" />
       </div>
       <div class="profile-info">
         <h4>{{ user.name }}</h4>
@@ -29,12 +28,10 @@
     </div>
 
     <div class="profile-actions">
-      <button class="btn btn-primary"
-@click="editProfile">
+      <button class="btn btn-primary" @click="editProfile">
         {{ $tsl('编辑资料') }}
       </button>
-      <button class="btn btn-secondary"
-@click="viewPosts">
+      <button class="btn btn-secondary" @click="viewPosts">
         {{ $tsl('查看文章') }}
       </button>
     </div>

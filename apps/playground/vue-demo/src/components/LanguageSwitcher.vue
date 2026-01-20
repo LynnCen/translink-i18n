@@ -1,10 +1,10 @@
 <template>
   <div class="language-switcher">
-    <label for="language-select">{{ $tsl('选择语言') }}:</label>
+    <label for="language-select">{{ t('language.select') }}:</label>
     <select
       id="language-select"
       :value="currentLanguage"
-      :disabled="isLoading"
+      :disabled="isSwitching"
       class="language-select"
       @change="handleLanguageChange"
     >
@@ -17,10 +17,9 @@
       </option>
     </select>
 
-    <div v-if="isLoading"
-class="loading-indicator">
+    <div v-if="isSwitching" class="loading-indicator">
       <span class="spinner" />
-      {{ $tsl('切换中...') }}
+      {{ t('language.switching') }}
     </div>
   </div>
 </template>
@@ -29,56 +28,90 @@ class="loading-indicator">
 import { ref, computed } from 'vue';
 import { useI18n } from '@translink/i18n-runtime/vue';
 
-// 使用 i18n
-const { locale, setLocale, availableLocales, isLoading } = useI18n();
+/**
+ * 最佳实践：使用 useI18n Composition API
+ */
+const { t, locale } = useI18n();
+
+// 切换状态
+const isSwitching = ref(false);
 
 // 语言选项配置
 const languageOptions = {
   'zh-CN': { name: '中文', flag: '🇨🇳' },
   'en-US': { name: 'English', flag: '🇺🇸' },
-  'ja-JP': { name: '日本語', flag: '🇯🇵' },
 };
 
-// 计算属性
+/**
+ * 最佳实践：使用 computed 属性
+ */
 const currentLanguage = computed(() => locale.value);
 
 const availableLanguages = computed(() => {
-  return availableLocales.value.map(code => ({
+  // 从配置中获取支持的语言
+  const supportedLanguages = ['zh-CN', 'en-US'];
+
+  return supportedLanguages.map(code => ({
     code,
     name: languageOptions[code as keyof typeof languageOptions]?.name || code,
     flag: languageOptions[code as keyof typeof languageOptions]?.flag || '🌐',
   }));
 });
 
-// 方法
+/**
+ * 最佳实践：处理语言切换
+ * 使用 i18n engine 的 changeLanguage 方法
+ */
 const handleLanguageChange = async (event: Event) => {
   const target = event.target as HTMLSelectElement;
   const newLanguage = target.value;
 
   if (newLanguage !== currentLanguage.value) {
+    isSwitching.value = true;
+
     try {
-      await setLocale(newLanguage);
+      // 获取 i18n engine 实例
+      const engine = (window as any).__i18n_engine__;
+
+      if (engine && typeof engine.changeLanguage === 'function') {
+        await engine.changeLanguage(newLanguage);
+        console.log(`✅ Language switched to: ${newLanguage}`);
+      } else {
+        // Fallback: 直接设置 locale
+        locale.value = newLanguage;
+      }
 
       // 显示切换成功提示
-      showNotification($tsl('语言切换成功！'));
+      showNotification(
+        newLanguage === 'zh-CN'
+          ? '语言切换成功！'
+          : 'Language switched successfully!'
+      );
     } catch (error) {
       console.error('Language switch failed:', error);
-      showNotification($tsl('语言切换失败，请重试。'), 'error');
+      showNotification(
+        currentLanguage.value === 'zh-CN'
+          ? '语言切换失败，请重试。'
+          : 'Failed to switch language, please try again.',
+        'error'
+      );
+    } finally {
+      isSwitching.value = false;
     }
   }
 };
 
-// 通知函数（简单实现）
+/**
+ * 最佳实践：简单的通知实现
+ */
 const showNotification = (
   message: string,
   type: 'success' | 'error' = 'success'
 ) => {
-  // 创建通知元素
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.textContent = message;
 
-  // 添加样式
   Object.assign(notification.style, {
     position: 'fixed',
     top: '20px',
@@ -97,16 +130,16 @@ const showNotification = (
 
   document.body.appendChild(notification);
 
-  // 动画显示
   setTimeout(() => {
     notification.style.transform = 'translateX(0)';
   }, 10);
 
-  // 自动移除
   setTimeout(() => {
     notification.style.transform = 'translateX(100%)';
     setTimeout(() => {
-      document.body.removeChild(notification);
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
     }, 300);
   }, 3000);
 };

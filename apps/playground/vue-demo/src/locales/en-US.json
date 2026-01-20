@@ -1,36 +1,119 @@
 {
-  "10013440": "demo",
-  "10141355": "",
-  "11134119": "",
-  "11150937": "",
-  "11153813": "",
-  "11446591": "",
-  "11851593": "user grade",
-  "11901081": "select lang",
-  "12111415": "",
-  "12140212": "",
-  "12240012": "",
-  "13081434": "",
-  "13116112": "",
-  "13215051": "",
-  "13731480": "",
-  "15611141": "",
-  "15636155": "",
-  "15929414": "",
-  "21511119": "",
-  "31021111": "",
-  "33147149": "",
-  "40014870": "",
-  "41215122": "",
-  "42612454": "",
-  "43641315": "",
-  "49032491": "",
-  "52134415": "",
-  "61471412": "",
-  "71101173": "",
-  "71651251": "",
-  "81510141": "",
-  "85011111": "",
-  "90731211": "",
-  "06312101": ""
+  "app": {
+    "title": "TransLink I18n Demo",
+    "loading": "Loading..."
+  },
+  "welcome": {
+    "title": "Welcome to TransLink I18n",
+    "description": "A full-featured internationalization solution that supports Vue 3, React, and vanilla JavaScript."
+  },
+  "features": {
+    "codeTransform": {
+      "title": "Smart Code Transform",
+      "description": "Automatically converts $tsl functions to hash keys for improved runtime performance."
+    },
+    "hmr": {
+      "title": "Hot Module Replacement",
+      "description": "Real-time UI updates when language files change, no page refresh needed."
+    },
+    "lazyLoad": {
+      "title": "Lazy Loading",
+      "description": "Load language packs on demand to optimize initial load performance."
+    },
+    "cache": {
+      "title": "Multi-level Cache",
+      "description": "Three-tier caching strategy: memory, local storage, and network."
+    }
+  },
+  "demo": {
+    "title": "Interactive Demo",
+    "userProfile": "User Profile",
+    "contactForm": "Contact Form",
+    "dataDisplay": "Data Display",
+    "notifications": "Notifications"
+  },
+  "tech": {
+    "sectionTitle": "Technical Features",
+    "cache": {
+      "title": "Smart Caching",
+      "description": "Multi-level cache strategy for improved translation performance",
+      "stat": "Cache Hit Rate: {{rate}}%"
+    },
+    "lazyLoad": {
+      "title": "Lazy Loading",
+      "description": "Load language packs on demand to reduce initial bundle size"
+    },
+    "hmr": {
+      "title": "Hot Reload",
+      "description": "Real-time translation updates during development, no refresh needed"
+    },
+    "devtools": {
+      "title": "DevTools",
+      "description": "Powerful debugging tools to track missing translations"
+    }
+  },
+  "form": {
+    "name": "Name",
+    "namePlaceholder": "Please enter your name",
+    "email": "Email",
+    "emailPlaceholder": "Please enter your email",
+    "message": "Message",
+    "messagePlaceholder": "Please enter your message",
+    "submit": "Submit",
+    "successMessage": "Thank you, {{name}}! Your message has been successfully submitted."
+  },
+  "stats": {
+    "item": "{{count}} items",
+    "item_one": "{{count}} item",
+    "item_other": "{{count}} items",
+    "user": "{{count}} users",
+    "user_one": "{{count}} user",
+    "user_other": "{{count}} users",
+    "message": "{{count}} messages",
+    "message_one": "{{count}} message",
+    "message_other": "{{count}} messages",
+    "lastUpdate": "Last Update: {{time}}",
+    "refresh": "Refresh"
+  },
+  "notification": {
+    "showSuccess": "Success",
+    "showWarning": "Warning",
+    "showError": "Error",
+    "successTitle": "Success",
+    "warningTitle": "Warning",
+    "errorTitle": "Error",
+    "successMessage": "Operation completed successfully!",
+    "warningMessage": "Please be aware of this action!",
+    "errorMessage": "An error occurred, please try again."
+  },
+  "devtools": {
+    "title": "Developer Tools",
+    "description": "Use the following commands in your browser console:",
+    "openButton": "Open DevTools"
+  },
+  "footer": {
+    "copyright": "© 2024 TransLink I18n. All rights reserved.",
+    "currentLanguage": "Current Language",
+    "cacheHitRate": "Cache Hit Rate",
+    "devMode": "Development Mode",
+    "openDevTools": "Open DevTools"
+  },
+  "user": {
+    "avatar": "User Avatar",
+    "name": "User Name",
+    "level": "User Level",
+    "vip": "VIP Member",
+    "advanced": "Advanced User",
+    "joinDate": "Join Date",
+    "lastActive": "Last Active",
+    "followers": "Followers",
+    "following": "Following",
+    "viewPosts": "View Posts",
+    "publishPost": "Publish Post",
+    "editProfile": "Edit Profile"
+  },
+  "language": {
+    "select": "Select Language",
+    "switching": "Switching..."
+  }
 }

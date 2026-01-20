@@ -62,16 +62,20 @@ this.i18n = new I18nEngine({
   defaultLanguage: 'zh-CN',
   supportedLanguages: ['zh-CN', 'en-US', 'ja-JP'],
   resources: {
-    'zh-CN': { /* 中文翻译 */ },
-    'en-US': { /* 英文翻译 */ },
+    'zh-CN': {
+      /* 中文翻译 */
+    },
+    'en-US': {
+      /* 英文翻译 */
+    },
     // ...
   },
   cache: {
     enabled: true,
     maxSize: 500,
     ttl: 10 * 60 * 1000, // 10分钟
-    storage: 'memory'
-  }
+    storage: 'memory',
+  },
 });
 ```
 
@@ -90,7 +94,7 @@ export function createUserManager(i18n) {
         throw new Error(validation.errors.join(', '));
       }
       // ...
-    }
+    },
   };
 }
 ```
@@ -114,7 +118,7 @@ console.log($tsl('用户登录成功: {{name}}'), { name: user.name });
 
 ```javascript
 // 监听语言切换事件
-this.i18n.on('languageChanged', (language) => {
+this.i18n.on('languageChanged', language => {
   console.log($tsl('语言已切换到: {{language}}'), { language });
   this.showWelcome();
 });
@@ -158,17 +162,17 @@ this.i18n.on('translationMissing', (key, language) => {
 
 ```javascript
 // 推荐的命名方式
-'user.login.success'        // 用户.登录.成功
-'task.validation.required'  // 任务.验证.必填
-'notification.type.error'   // 通知.类型.错误
+'user.login.success'; // 用户.登录.成功
+'task.validation.required'; // 任务.验证.必填
+'notification.type.error'; // 通知.类型.错误
 ```
 
 ### 2. 插值参数使用
 
 ```javascript
 // 正确的插值使用
-i18n.t('validation.required', { field: i18n.t('user.name') })
-i18n.t('task.dueDate.value', { date: task.dueDate.toLocaleDateString() })
+i18n.t('validation.required', { field: i18n.t('user.name') });
+i18n.t('task.dueDate.value', { date: task.dueDate.toLocaleDateString() });
 ```
 
 ### 3. 错误处理
@@ -213,13 +217,13 @@ resources: {
 // 在模块中添加自定义验证
 validateCustomData(data) {
   const errors = [];
-  
+
   if (data.customField && !this.isValidCustomField(data.customField)) {
-    errors.push(i18n.t('validation.custom.invalid', { 
-      field: i18n.t('fields.customField') 
+    errors.push(i18n.t('validation.custom.invalid', {
+      field: i18n.t('fields.customField')
     }));
   }
-  
+
   return { isValid: errors.length === 0, errors };
 }
 ```
@@ -233,7 +237,7 @@ const notificationTypes = {
   error: { icon: '❌', color: '\x1b[31m', priority: 4 },
   warning: { icon: '⚠️', color: '\x1b[33m', priority: 3 },
   info: { icon: 'ℹ️', color: '\x1b[36m', priority: 2 },
-  debug: { icon: '🐛', color: '\x1b[90m', priority: 0 } // 新增调试类型
+  debug: { icon: '🐛', color: '\x1b[90m', priority: 0 }, // 新增调试类型
 };
 ```
 

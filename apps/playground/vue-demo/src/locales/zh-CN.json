@@ -1,36 +1,119 @@
 {
-  "10013440": "交互演示",
-  "10141355": "切换中...",
-  "11134119": "智能代码转换",
-  "11150937": "VIP 会员",
-  "11153813": "© 2024 TransLink I18n. 保留所有权利。",
-  "11446591": "加载时间",
-  "11851593": "用户等级",
-  "11901081": "选择语言",
-  "12111415": "关注者",
-  "12140212": "技术特性",
-  "12240012": "内存、本地存储、网络三级缓存策略。",
-  "13081434": "欢迎使用 TransLink I18n",
-  "13116112": "缓存命中率",
-  "13215051": "TransLink I18n 演示",
-  "13731480": "最后活动",
-  "15611141": "查看文章",
-  "15636155": "语言文件变更时实时更新界面，无需刷新页面。",
-  "15929414": "加入时间",
-  "21511119": "当前语言",
-  "31021111": "表单示例",
-  "33147149": "懒加载机制",
-  "40014870": "多级缓存",
-  "41215122": "消息通知",
-  "42612454": "用户信息",
-  "43641315": "自动将 $tsl 函数转换为哈希键，提升运行时性能。",
-  "49032491": "发布文章",
-  "52134415": "高级用户",
-  "61471412": "编辑资料",
-  "71101173": "数据展示",
-  "71651251": "正在关注",
-  "81510141": "这是一个功能完整的国际化解决方案，支持 Vue 3、React 和原生 JavaScript。",
-  "85011111": "用户头像",
-  "90731211": "热更新支持",
-  "06312101": "按需加载语言包，优化首屏加载性能。"
+  "app": {
+    "title": "TransLink I18n 演示",
+    "loading": "加载中..."
+  },
+  "welcome": {
+    "title": "欢迎使用 TransLink I18n",
+    "description": "这是一个功能完整的国际化解决方案，支持 Vue 3、React 和原生 JavaScript。"
+  },
+  "features": {
+    "codeTransform": {
+      "title": "智能代码转换",
+      "description": "自动将 $tsl 函数转换为哈希键，提升运行时性能。"
+    },
+    "hmr": {
+      "title": "热更新支持",
+      "description": "语言文件变更时实时更新界面，无需刷新页面。"
+    },
+    "lazyLoad": {
+      "title": "懒加载机制",
+      "description": "按需加载语言包，优化首屏加载性能。"
+    },
+    "cache": {
+      "title": "多级缓存",
+      "description": "内存、本地存储、网络三级缓存策略。"
+    }
+  },
+  "demo": {
+    "title": "交互演示",
+    "userProfile": "用户信息",
+    "contactForm": "表单示例",
+    "dataDisplay": "数据展示",
+    "notifications": "消息通知"
+  },
+  "tech": {
+    "sectionTitle": "技术特性",
+    "cache": {
+      "title": "智能缓存",
+      "description": "多级缓存策略，提升翻译性能",
+      "stat": "缓存命中率: {{rate}}%"
+    },
+    "lazyLoad": {
+      "title": "懒加载",
+      "description": "按需加载语言包，减少初始体积"
+    },
+    "hmr": {
+      "title": "热更新",
+      "description": "开发时实时更新翻译，无需刷新"
+    },
+    "devtools": {
+      "title": "开发工具",
+      "description": "强大的调试工具，追踪缺失翻译"
+    }
+  },
+  "form": {
+    "name": "姓名",
+    "namePlaceholder": "请输入您的姓名",
+    "email": "邮箱",
+    "emailPlaceholder": "请输入您的邮箱",
+    "message": "消息",
+    "messagePlaceholder": "请输入您的消息",
+    "submit": "提交",
+    "successMessage": "感谢 {{name}}！您的消息已成功提交。"
+  },
+  "stats": {
+    "item": "{{count}} 项",
+    "item_one": "{{count}} 项",
+    "item_other": "{{count}} 项",
+    "user": "{{count}} 个用户",
+    "user_one": "{{count}} 个用户",
+    "user_other": "{{count}} 个用户",
+    "message": "{{count}} 条消息",
+    "message_one": "{{count}} 条消息",
+    "message_other": "{{count}} 条消息",
+    "lastUpdate": "最后更新: {{time}}",
+    "refresh": "刷新"
+  },
+  "notification": {
+    "showSuccess": "成功",
+    "showWarning": "警告",
+    "showError": "错误",
+    "successTitle": "成功",
+    "warningTitle": "警告",
+    "errorTitle": "错误",
+    "successMessage": "操作成功完成！",
+    "warningMessage": "请注意此操作！",
+    "errorMessage": "发生错误，请重试。"
+  },
+  "devtools": {
+    "title": "开发者工具",
+    "description": "在浏览器控制台中使用以下命令：",
+    "openButton": "打开 DevTools"
+  },
+  "footer": {
+    "copyright": "© 2024 TransLink I18n. 保留所有权利。",
+    "currentLanguage": "当前语言",
+    "cacheHitRate": "缓存命中率",
+    "devMode": "开发模式",
+    "openDevTools": "打开 DevTools"
+  },
+  "user": {
+    "avatar": "用户头像",
+    "name": "用户名称",
+    "level": "用户等级",
+    "vip": "VIP 会员",
+    "advanced": "高级用户",
+    "joinDate": "加入时间",
+    "lastActive": "最后活动",
+    "followers": "关注者",
+    "following": "正在关注",
+    "viewPosts": "查看文章",
+    "publishPost": "发布文章",
+    "editProfile": "编辑资料"
+  },
+  "language": {
+    "select": "选择语言",
+    "switching": "切换中..."
+  }
 }
