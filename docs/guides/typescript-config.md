@@ -6,7 +6,7 @@
 
 ```
 ⚠ Failed to register tsx loader. Make sure tsx is installed.
-✗ Failed to load config from .../translink.config.ts: 
+✗ Failed to load config from .../translink.config.ts:
   TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts"
 ```
 
@@ -35,12 +35,14 @@
 **CLI 工具现在会自动尝试转换**：
 
 当你运行命令时，如果检测到 `.ts` 配置文件，CLI 会：
+
 1. 自动将其转换为 `.js` 文件
 2. 保留配置内容
 3. 添加 JSDoc 类型注释
 4. 使用转换后的 `.js` 文件
 
 **示例**：
+
 ```bash
 npx translink extract
 # 输出：
@@ -55,6 +57,7 @@ npx translink extract
 如果自动转换失败，可以手动转换：
 
 **步骤 1：复制文件**
+
 ```bash
 cp translink.config.ts translink.config.js
 ```
@@ -62,6 +65,7 @@ cp translink.config.ts translink.config.js
 **步骤 2：修改文件内容**
 
 **原 TypeScript 配置**：
+
 ```typescript
 import type { I18nConfig } from '@translink/i18n-cli';
 
@@ -73,6 +77,7 @@ export default config;
 ```
 
 **转换为 JavaScript**：
+
 ```javascript
 /** @type {import('@translink/i18n-cli').I18nConfig} */
 export default {
@@ -81,6 +86,7 @@ export default {
 ```
 
 **关键修改**：
+
 - ✅ 第一行改为 JSDoc 类型注释
 - ✅ 移除 `import type` 语句
 - ✅ 移除 `: I18nConfig` 类型注解
@@ -100,7 +106,7 @@ export default {
     name: 'my-app',
     version: '1.0.0',
   },
-  
+
   extract: {
     patterns: ['src/**/*.{vue,tsx,ts,jsx,js}'],
     exclude: ['node_modules/**', 'dist/**', '**/*.d.ts'],
@@ -109,7 +115,7 @@ export default {
     incremental: true,
     createEmptyTranslations: true,
   },
-  
+
   hash: {
     enabled: true,
     algorithm: 'sha256',
@@ -117,40 +123,41 @@ export default {
     numericOnly: true,
     includeContext: false,
   },
-  
+
   languages: {
     source: 'zh-CN',
     default: 'zh-CN',
     supported: ['zh-CN', 'en-US'],
     fallback: 'zh-CN',
   },
-  
+
   output: {
     directory: 'src/locales',
     format: 'json',
     indent: 2,
     sortKeys: true,
   },
-  
+
   importExport: {
     format: 'excel',
     excel: {
       includeMetadata: false,
     },
   },
-  
+
   cli: {
     table: {
       enabled: true,
       maxRows: 20,
     },
   },
-  
+
   plugins: [],
 };
 ```
 
 **优势**：
+
 - ✅ 无需转换，直接可用
 - ✅ JSDoc 注释提供类型提示（在 VSCode 中）
 - ✅ 兼容性最好
@@ -236,12 +243,12 @@ CLI 启动 → 查找配置文件 → 尝试加载
 
 ## 🎯 总结
 
-| 方案 | 优势 | 劣势 | 推荐度 |
-|------|------|------|--------|
-| **自动转换** | 无需手动操作 | 可能需要检查 | ⭐⭐⭐⭐⭐ |
-| **手动转换** | 完全控制 | 需要手动操作 | ⭐⭐⭐⭐ |
-| **JavaScript 配置** | 直接可用 | 无编译时类型检查 | ⭐⭐⭐⭐ |
-| **JSON 配置** | 最简单 | 功能受限 | ⭐⭐⭐ |
+| 方案                | 优势         | 劣势             | 推荐度     |
+| ------------------- | ------------ | ---------------- | ---------- |
+| **自动转换**        | 无需手动操作 | 可能需要检查     | ⭐⭐⭐⭐⭐ |
+| **手动转换**        | 完全控制     | 需要手动操作     | ⭐⭐⭐⭐   |
+| **JavaScript 配置** | 直接可用     | 无编译时类型检查 | ⭐⭐⭐⭐   |
+| **JSON 配置**       | 最简单       | 功能受限         | ⭐⭐⭐     |
 
 **推荐**：使用 TypeScript 配置文件，让 CLI 自动转换为 JavaScript。
 
@@ -252,4 +259,3 @@ CLI 启动 → 查找配置文件 → 尝试加载
 - [Node.js ESM Loader Hooks](https://nodejs.org/api/esm.html#loaders)
 - [tsx 文档](https://github.com/esbuild-kit/tsx)
 - [JSDoc 类型注释](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
-

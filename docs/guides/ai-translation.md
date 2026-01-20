@@ -162,21 +162,21 @@ npx translink translate --provider openai --force
 
 ## AI 提供商对比
 
-| 提供商    | 成本       | 质量       | 速度       | 适用场景             |
-| --------- | ---------- | ---------- | ---------- | -------------------- |
-| DeepSeek  | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐   | ⭐⭐⭐⭐   | 日常大批量翻译       |
-| Gemini    | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | ⭐⭐⭐⭐⭐ | 测试、小规模项目     |
-| OpenAI    | ⭐⭐       | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐   | 专业文档、高质量要求 |
+| 提供商   | 成本       | 质量       | 速度       | 适用场景             |
+| -------- | ---------- | ---------- | ---------- | -------------------- |
+| DeepSeek | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐   | ⭐⭐⭐⭐   | 日常大批量翻译       |
+| Gemini   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | ⭐⭐⭐⭐⭐ | 测试、小规模项目     |
+| OpenAI   | ⭐⭐       | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐   | 专业文档、高质量要求 |
 
 ### 成本估算
 
 以翻译 1000 条文本（平均 15 字）为例：
 
-| 提供商   | 估算 Tokens | 成本     | 时间 |
-| -------- | ----------- | -------- | ---- |
-| DeepSeek | ~22,500     | $0.003   | 30s  |
-| Gemini   | ~22,500     | $0       | 25s  |
-| OpenAI   | ~22,500     | $0.225   | 35s  |
+| 提供商   | 估算 Tokens | 成本   | 时间 |
+| -------- | ----------- | ------ | ---- |
+| DeepSeek | ~22,500     | $0.003 | 30s  |
+| Gemini   | ~22,500     | $0     | 25s  |
+| OpenAI   | ~22,500     | $0.225 | 35s  |
 
 ## 工作原理
 
@@ -253,7 +253,7 @@ npx translink translate --provider openai --force
 You are translating a project management SaaS product.
 Target audience: Business professionals.
 Tone: Professional and friendly.
-    `
+    `;
   }
 }
 ```
@@ -314,11 +314,11 @@ glossary: {
   // 产品术语
   '应用': 'Application',
   '工作区': 'Workspace',
-  
+
   // UI 术语
   '确定': 'Confirm',
   '取消': 'Cancel',
-  
+
   // 功能术语
   '数据面板': 'Data Board',
   '权限管理': 'Permission Management',
@@ -388,4 +388,3 @@ npx translink analyze
 - [AI Translation Design](../AI_TRANSLATION_DESIGN.md) - 完整的设计方案
 - [Configuration](./configuration.md) - 配置说明
 - [Quick Start](./quick-start.md) - 快速开始指南
-

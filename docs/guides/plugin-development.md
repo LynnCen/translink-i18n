@@ -66,9 +66,9 @@ export default MyPlugin;
 export default {
   // ... 其他配置
   plugins: [
-    './my-plugin.ts',  // 本地插件
+    './my-plugin.ts', // 本地插件
     // 或
-    '@my-org/translink-plugin-xxx',  // npm 包
+    '@my-org/translink-plugin-xxx', // npm 包
   ],
 };
 ```
@@ -111,11 +111,11 @@ interface I18nPlugin {
 
 ```typescript
 interface PluginMetadata {
-  name: string;           // 插件名称
-  version: string;        // 版本号
-  description: string;    // 描述
-  author: string;         // 作者
-  homepage?: string;      // 主页 URL
+  name: string; // 插件名称
+  version: string; // 版本号
+  description: string; // 描述
+  author: string; // 作者
+  homepage?: string; // 主页 URL
 }
 ```
 
@@ -125,9 +125,9 @@ interface PluginMetadata {
 
 ```typescript
 interface PluginContext {
-  config: any;           // 全局配置
-  logger: Logger;        // 日志工具
-  cwd: string;           // 当前工作目录
+  config: any; // 全局配置
+  logger: Logger; // 日志工具
+  cwd: string; // 当前工作目录
 }
 ```
 
@@ -135,17 +135,17 @@ interface PluginContext {
 
 ```typescript
 interface PushTranslationsData {
-  translations: Record<string, string>;  // key-value 翻译映射
-  language: string;                      // 语言代码
-  context: Record<string, TranslationItem>;  // 上下文信息
+  translations: Record<string, string>; // key-value 翻译映射
+  language: string; // 语言代码
+  context: Record<string, TranslationItem>; // 上下文信息
 }
 
 interface TranslationItem {
-  text: string;        // 原文本
-  file: string;        // 文件路径
-  line: number;        // 行号
-  column?: number;     // 列号
-  context?: string;    // 上下文
+  text: string; // 原文本
+  file: string; // 文件路径
+  line: number; // 行号
+  column?: number; // 列号
+  context?: string; // 上下文
 }
 ```
 
@@ -153,10 +153,11 @@ interface TranslationItem {
 
 ```typescript
 interface PushResult {
-  success: boolean;              // 是否成功
-  message: string;               // 消息
-  count?: number;                // 推送的翻译数量
-  errors?: Array<{               // 错误列表
+  success: boolean; // 是否成功
+  message: string; // 消息
+  count?: number; // 推送的翻译数量
+  errors?: Array<{
+    // 错误列表
     key: string;
     message: string;
   }>;
@@ -167,8 +168,8 @@ interface PushResult {
 
 ```typescript
 interface PullTranslationsData {
-  language: string;                      // 要拉取的语言
-  context: Record<string, TranslationItem>;  // 上下文信息
+  language: string; // 要拉取的语言
+  context: Record<string, TranslationItem>; // 上下文信息
 }
 ```
 
@@ -176,11 +177,12 @@ interface PullTranslationsData {
 
 ```typescript
 interface PullResult {
-  success: boolean;                      // 是否成功
-  message: string;                       // 消息
-  translations: Record<string, string>;  // 拉取到的翻译
-  count: number;                         // 拉取的翻译数量
-  errors?: Array<{                       // 错误列表
+  success: boolean; // 是否成功
+  message: string; // 消息
+  translations: Record<string, string>; // 拉取到的翻译
+  count: number; // 拉取的翻译数量
+  errors?: Array<{
+    // 错误列表
     key: string;
     message: string;
   }>;
@@ -191,11 +193,11 @@ interface PullResult {
 
 ```typescript
 interface TranslationStats {
-  total: number;          // 总数
-  translated: number;     // 已翻译
-  pending: number;        // 待翻译
-  reviewed?: number;      // 已审核
-  languages?: string[];   // 支持的语言
+  total: number; // 总数
+  translated: number; // 已翻译
+  pending: number; // 待翻译
+  reviewed?: number; // 已审核
+  languages?: string[]; // 支持的语言
 }
 ```
 
@@ -208,12 +210,17 @@ interface TranslationStats {
 实现一个简单的文件存储插件：
 
 ```typescript
-import type { I18nPlugin, PluginContext, PushTranslationsData, PullTranslationsData } from '@translink/i18n-cli/plugins';
+import type {
+  I18nPlugin,
+  PluginContext,
+  PushTranslationsData,
+  PullTranslationsData,
+} from '@translink/i18n-cli/plugins';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 interface FileStorageConfig {
-  storageDir: string;  // 存储目录
+  storageDir: string; // 存储目录
 }
 
 const FileStoragePlugin: I18nPlugin = {
@@ -232,7 +239,7 @@ const FileStoragePlugin: I18nPlugin = {
   async init(context, config) {
     this._context = context;
     this._config = config as FileStorageConfig;
-    
+
     context.logger.info(`文件存储插件初始化: ${this._config.storageDir}`);
   },
 
@@ -247,8 +254,11 @@ const FileStoragePlugin: I18nPlugin = {
     }
 
     try {
-      const filePath = resolve(this._config.storageDir, `${data.language}.json`);
-      
+      const filePath = resolve(
+        this._config.storageDir,
+        `${data.language}.json`
+      );
+
       // 读取现有翻译
       let existing = {};
       if (existsSync(filePath)) {
@@ -287,7 +297,10 @@ const FileStoragePlugin: I18nPlugin = {
     }
 
     try {
-      const filePath = resolve(this._config.storageDir, `${data.language}.json`);
+      const filePath = resolve(
+        this._config.storageDir,
+        `${data.language}.json`
+      );
 
       if (!existsSync(filePath)) {
         return {
@@ -326,7 +339,7 @@ const FileStoragePlugin: I18nPlugin = {
       };
     }
 
-    const languages = ['zh-CN', 'en-US', 'ja-JP'];  // 示例
+    const languages = ['zh-CN', 'en-US', 'ja-JP']; // 示例
     let total = 0;
     let translated = 0;
 
@@ -397,7 +410,7 @@ const CustomCommandPlugin: I18nPlugin = {
       .command('validate')
       .description('验证翻译文件的完整性')
       .option('-l, --language <lang>', '指定语言')
-      .action(async (options) => {
+      .action(async options => {
         console.log('执行验证...', options);
         // 实现验证逻辑
       });
@@ -420,7 +433,10 @@ export default CustomCommandPlugin;
 创建一个与翻译 API 集成的插件：
 
 ```typescript
-import type { I18nPlugin, PushTranslationsData } from '@translink/i18n-cli/plugins';
+import type {
+  I18nPlugin,
+  PushTranslationsData,
+} from '@translink/i18n-cli/plugins';
 import axios from 'axios';
 
 interface TranslationAPIConfig {
@@ -441,12 +457,12 @@ const TranslationAPIPlugin: I18nPlugin = {
 
   async init(context, config) {
     this._config = config as TranslationAPIConfig;
-    
+
     // 创建 HTTP 客户端
     this._client = axios.create({
       baseURL: this._config.endpoint,
       headers: {
-        'Authorization': `Bearer ${this._config.apiKey}`,
+        Authorization: `Bearer ${this._config.apiKey}`,
         'Content-Type': 'application/json',
       },
     });
@@ -521,7 +537,7 @@ async push(data) {
   } catch (error) {
     // 记录详细错误
     this._context?.logger.error(`推送失败: ${error.message}`);
-    
+
     return {
       success: false,
       message: `推送失败: ${error.message}`,
@@ -543,7 +559,7 @@ async push(data) {
 async init(context, config) {
   context.logger.info('初始化插件...');
   context.logger.debug(`配置: ${JSON.stringify(config)}`);
-  
+
   try {
     // 初始化逻辑
     context.logger.success('插件初始化成功');
@@ -561,13 +577,13 @@ async init(context, config) {
 ```typescript
 async init(context, config) {
   const requiredFields = ['apiKey', 'endpoint'];
-  
+
   for (const field of requiredFields) {
     if (!config[field]) {
       throw new Error(`缺少必需的配置字段: ${field}`);
     }
   }
-  
+
   this._config = config;
 }
 ```
@@ -585,7 +601,7 @@ interface MyPluginConfig {
 
 const MyPlugin: I18nPlugin = {
   // ...
-  
+
   async init(context, config) {
     const typedConfig = config as MyPluginConfig;
     // 现在 typedConfig 有完整的类型提示
@@ -603,7 +619,7 @@ async cleanup() {
   if (this._client) {
     await this._client.close();
   }
-  
+
   // 清理临时文件
   // 取消定时任务
   // 等等
@@ -622,7 +638,7 @@ async cleanup() {
 // i18n.config.ts
 export default {
   plugins: [
-    './my-plugin.ts',  // 开发时使用本地路径
+    './my-plugin.ts', // 开发时使用本地路径
   ],
 };
 ```
@@ -632,9 +648,9 @@ export default {
 ```typescript
 async push(data) {
   console.log('[DEBUG] Push data:', JSON.stringify(data, null, 2));
-  
+
   // 插件逻辑
-  
+
   console.log('[DEBUG] Push result:', result);
   return result;
 }
@@ -671,9 +687,7 @@ describe('MyPlugin', () => {
       endpoint: 'https://api.test.com',
     };
 
-    await expect(
-      MyPlugin.init(mockContext, config)
-    ).resolves.not.toThrow();
+    await expect(MyPlugin.init(mockContext, config)).resolves.not.toThrow();
   });
 
   it('should push translations', async () => {
@@ -700,15 +714,8 @@ describe('MyPlugin', () => {
   "description": "Your plugin description",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "keywords": [
-    "translink",
-    "i18n",
-    "plugin"
-  ],
+  "files": ["dist", "README.md"],
+  "keywords": ["translink", "i18n", "plugin"],
   "peerDependencies": {
     "@translink/i18n-cli": "^1.0.0"
   }
@@ -733,14 +740,14 @@ npm install -D @your-org/translink-plugin-xxx
 \`\`\`typescript
 // i18n.config.ts
 export default {
-  plugins: [
-    [
-      '@your-org/translink-plugin-xxx',
-      {
-        // 配置选项
-      },
-    ],
-  ],
+plugins: [
+[
+'@your-org/translink-plugin-xxx',
+{
+// 配置选项
+},
+],
+],
 };
 \`\`\`
 
@@ -795,4 +802,3 @@ A: 使用 `console.log` 或 `context.logger` 输出调试信息，配合 CLI 的
 
 **完成时间**: 2026-01-07  
 **更新记录**: 初始版本
-

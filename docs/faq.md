@@ -128,40 +128,43 @@ export default defineConfig({
 **A**: 检查以下几个方面：
 
 1. **文件模式匹配**：
+
 ```typescript
 // i18n.config.ts
 export default defineConfig({
   extract: {
     patterns: [
       'src/**/*.{vue,ts,js,tsx,jsx}', // 确保包含您的文件类型
-      'components/**/*.vue'
+      'components/**/*.vue',
     ],
     exclude: [
       'node_modules',
       'dist',
-      '**/*.test.*' // 确保没有意外排除
-    ]
-  }
+      '**/*.test.*', // 确保没有意外排除
+    ],
+  },
 });
 ```
 
 2. **函数名称**：
+
 ```typescript
 // 确保使用了配置中的函数名
-$tsl('需要翻译的文本') // ✅
-t('需要翻译的文本')   // ✅ 如果在 functions 中配置了
-translate('文本')     // ❌ 如果没有在 functions 中配置
+$tsl('需要翻译的文本'); // ✅
+t('需要翻译的文本'); // ✅ 如果在 functions 中配置了
+translate('文本'); // ❌ 如果没有在 functions 中配置
 ```
 
 3. **文本格式**：
+
 ```typescript
 // ✅ 正确的格式
-$tsl('这是需要翻译的文本')
-$tsl('用户名：{{username}}', { username })
+$tsl('这是需要翻译的文本');
+$tsl('用户名：{{username}}', { username });
 
 // ❌ 不会被提取
 const text = '这是变量中的文本';
-$tsl(text) // 动态文本无法提取
+$tsl(text); // 动态文本无法提取
 ```
 
 ### Q: 如何提取模板字符串中的文本？
@@ -170,11 +173,11 @@ $tsl(text) // 动态文本无法提取
 
 ```typescript
 // ✅ 支持的模板字符串
-$tsl(`欢迎 ${username} 使用我们的产品`)
+$tsl(`欢迎 ${username} 使用我们的产品`);
 // 会被转换为：$tsl('欢迎 {{username}} 使用我们的产品', { username })
 
 // ✅ 复杂的模板字符串
-$tsl(`您有 ${count} 条${type}消息`)
+$tsl(`您有 ${count} 条${type}消息`);
 // 会被转换为：$tsl('您有 {{count}} 条{{type}}消息', { count, type })
 ```
 
@@ -184,13 +187,13 @@ $tsl(`您有 ${count} 条${type}消息`)
 
 ```typescript
 // ❌ 不推荐
-$tsl(isVip ? '尊贵的VIP用户' : '普通用户')
+$tsl(isVip ? '尊贵的VIP用户' : '普通用户');
 
 // ✅ 推荐
 const userType = isVip ? $tsl('尊贵的VIP用户') : $tsl('普通用户');
 
 // 或者使用上下文
-$tsl('用户类型', {}, { context: isVip ? 'vip' : 'normal' })
+$tsl('用户类型', {}, { context: isVip ? 'vip' : 'normal' });
 ```
 
 ### Q: 提取后的文本在哪里？
@@ -216,24 +219,27 @@ npx translink-i18n analyze           # 分析报告
 **A**: 添加新语言需要几个步骤：
 
 1. **更新配置**：
+
 ```typescript
 // i18n.config.ts
 export default defineConfig({
   languages: {
     default: 'zh-CN',
     supported: ['zh-CN', 'en-US', 'ja-JP'], // 添加 ja-JP
-    fallback: 'en-US'
-  }
+    fallback: 'en-US',
+  },
 });
 ```
 
 2. **构建语言文件**：
+
 ```bash
 npx translink-i18n build
 # 会自动生成 src/locales/ja-JP.json
 ```
 
 3. **添加翻译内容**：
+
 ```json
 // src/locales/ja-JP.json
 {
@@ -270,20 +276,20 @@ $tsl('{{count}} 个项目', { count }, { count })
 export default defineConfig({
   hash: {
     includeContext: true,
-    contextFields: ['componentName', 'functionName']
-  }
+    contextFields: ['componentName', 'functionName'],
+  },
 });
 
 // 在不同组件中使用相同文本
 // UserProfile.vue
-$tsl('编辑') // 生成 hash_UserProfile_edit
+$tsl('编辑'); // 生成 hash_UserProfile_edit
 
 // ProductList.vue
-$tsl('编辑') // 生成 hash_ProductList_edit
+$tsl('编辑'); // 生成 hash_ProductList_edit
 
 // 手动指定上下文
-$tsl('删除', {}, { context: 'user' })
-$tsl('删除', {}, { context: 'product' })
+$tsl('删除', {}, { context: 'user' });
+$tsl('删除', {}, { context: 'product' });
 ```
 
 ### Q: 如何处理嵌套的翻译对象？
@@ -319,19 +325,21 @@ i18n.t('common:buttons.save')
 **A**: 检查以下配置：
 
 1. **Vite 插件配置**：
+
 ```typescript
 // vite.config.ts
 export default defineConfig({
   plugins: [
     createI18nPlugin({
       hotReload: true, // 确保启用
-      localesDir: 'src/locales' // 确保路径正确
-    })
-  ]
+      localesDir: 'src/locales', // 确保路径正确
+    }),
+  ],
 });
 ```
 
 2. **开发服务器设置**：
+
 ```typescript
 // 确保开发服务器正在运行
 npm run dev
@@ -341,6 +349,7 @@ npm run dev
 ```
 
 3. **文件监听**：
+
 ```bash
 # 确保文件系统支持监听
 # 在某些系统上可能需要增加监听限制
@@ -396,9 +405,9 @@ if (savedLang) {
 // 3. 开发工具面板
 if (process.env.NODE_ENV === 'development') {
   window.__i18n_debug__ = {
-    changeLanguage: (lang) => i18n.changeLanguage(lang),
+    changeLanguage: lang => i18n.changeLanguage(lang),
     getStats: () => i18n.getCacheStats(),
-    clearCache: () => i18n.clearCache()
+    clearCache: () => i18n.clearCache(),
   };
 }
 ```
@@ -447,27 +456,30 @@ const handleLanguageChange = async (newLang: string) => {
 **A**: 几个关键的优化策略：
 
 1. **启用缓存**：
+
 ```typescript
 const i18n = new I18nEngine({
   cache: {
     enabled: true,
-    maxSize: 1000,      // 根据应用大小调整
+    maxSize: 1000, // 根据应用大小调整
     ttl: 10 * 60 * 1000, // 10分钟
-    storage: 'memory'    // 或 'localStorage'
-  }
+    storage: 'memory', // 或 'localStorage'
+  },
 });
 ```
 
 2. **使用懒加载**：
+
 ```typescript
 // Vite 插件配置
 createI18nPlugin({
   lazyLoad: true,
-  preload: ['zh-CN'] // 只预加载默认语言
+  preload: ['zh-CN'], // 只预加载默认语言
 });
 ```
 
 3. **优化构建输出**：
+
 ```typescript
 // vite.config.ts
 export default defineConfig({
@@ -476,11 +488,11 @@ export default defineConfig({
       output: {
         manualChunks: {
           'i18n-zh': ['virtual:i18n-language-zh-CN'],
-          'i18n-en': ['virtual:i18n-language-en-US']
-        }
-      }
-    }
-  }
+          'i18n-en': ['virtual:i18n-language-en-US'],
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -489,6 +501,7 @@ export default defineConfig({
 **A**: 几种减小文件大小的方法：
 
 1. **移除未使用的翻译**：
+
 ```bash
 # 分析未使用的翻译
 npx translink-i18n analyze --unused
@@ -498,13 +511,14 @@ npx translink-i18n build --remove-unused
 ```
 
 2. **按功能模块分割**：
+
 ```typescript
 // 按命名空间分割
 // i18n.config.ts
 export default defineConfig({
   output: {
-    splitByNamespace: true // 生成多个文件
-  }
+    splitByNamespace: true, // 生成多个文件
+  },
 });
 
 // 结果：
@@ -514,12 +528,13 @@ export default defineConfig({
 ```
 
 3. **压缩翻译文件**：
+
 ```typescript
 // 生产环境压缩
 export default defineConfig({
   output: {
-    minify: process.env.NODE_ENV === 'production'
-  }
+    minify: process.env.NODE_ENV === 'production',
+  },
 });
 ```
 
@@ -536,28 +551,28 @@ class I18nPerformanceMonitor {
     const start = performance.now();
     const result = fn();
     const end = performance.now();
-    
+
     const times = this.metrics.get(key) || [];
     times.push(end - start);
     this.metrics.set(key, times);
-    
+
     return result;
   }
 
   getReport() {
     const report: Record<string, any> = {};
-    
+
     for (const [key, times] of this.metrics) {
       const avg = times.reduce((sum, time) => sum + time, 0) / times.length;
       const max = Math.max(...times);
-      
+
       report[key] = {
         count: times.length,
         avgTime: avg.toFixed(2),
-        maxTime: max.toFixed(2)
+        maxTime: max.toFixed(2),
       };
     }
-    
+
     return report;
   }
 }
@@ -567,7 +582,7 @@ const monitor = new I18nPerformanceMonitor();
 const originalT = i18n.t;
 
 i18n.t = (key, params, options) => {
-  return monitor.measureTranslation(key, () => 
+  return monitor.measureTranslation(key, () =>
     originalT.call(i18n, key, params, options)
   );
 };
@@ -580,6 +595,7 @@ i18n.t = (key, params, options) => {
 **A**: 生产环境的关键配置：
 
 1. **构建优化**：
+
 ```typescript
 // vite.config.ts
 export default defineConfig({
@@ -588,16 +604,17 @@ export default defineConfig({
       // 生产环境配置
       minify: true,
       removeUnusedKeys: true,
-      hotReload: false // 生产环境关闭
-    })
-  ]
+      hotReload: false, // 生产环境关闭
+    }),
+  ],
 });
 ```
 
 2. **错误处理**：
+
 ```typescript
 // 生产环境错误处理
-i18n.on('error', (error) => {
+i18n.on('error', error => {
   // 发送到错误监控服务
   errorReporting.captureException(error);
 });
@@ -609,17 +626,18 @@ i18n.on('translationMissing', (key, language) => {
 ```
 
 3. **CDN 部署**：
+
 ```typescript
 // 使用 CDN 加载翻译文件
 const i18n = new I18nEngine({
   loader: {
-    loadFunction: async (language) => {
+    loadFunction: async language => {
       const response = await fetch(
         `https://cdn.example.com/locales/${language}.json`
       );
       return response.json();
-    }
-  }
+    },
+  },
 });
 ```
 
@@ -645,7 +663,7 @@ const i18n = new I18nEngine({
 const checkTranslationVersion = async (language: string) => {
   const local = await getLocalTranslationVersion(language);
   const remote = await getRemoteTranslationVersion(language);
-  
+
   if (local !== remote) {
     console.log(`Translation update available for ${language}`);
     // 可选择性更新或提示用户
@@ -675,10 +693,10 @@ class I18nABTester {
 
   selectVariant(): string {
     if (this.currentVariant) return this.currentVariant;
-    
+
     const random = Math.random();
     let cumulative = 0;
-    
+
     for (const variant of this.variants) {
       cumulative += variant.weight;
       if (random <= cumulative) {
@@ -686,14 +704,14 @@ class I18nABTester {
         return variant.id;
       }
     }
-    
+
     return this.variants[0]?.id || 'default';
   }
 
   getTranslation(key: string, defaultValue: string): string {
     const variantId = this.selectVariant();
     const variant = this.variants.find(v => v.id === variantId);
-    
+
     return variant?.translations[key] || defaultValue;
   }
 }
@@ -704,15 +722,15 @@ abTester.addVariant({
   id: 'variant_a',
   weight: 0.5,
   translations: {
-    'hash_cta_button': '立即购买'
-  }
+    hash_cta_button: '立即购买',
+  },
 });
 abTester.addVariant({
   id: 'variant_b',
   weight: 0.5,
   translations: {
-    'hash_cta_button': '马上下单'
-  }
+    hash_cta_button: '马上下单',
+  },
 });
 ```
 
@@ -723,6 +741,7 @@ abTester.addVariant({
 **A**: Vue 3 集成的关键点：
 
 1. **正确的插件安装**：
+
 ```typescript
 // main.ts
 import { createApp } from 'vue';
@@ -740,6 +759,7 @@ app.mount('#app');
 ```
 
 2. **组合式 API 使用**：
+
 ```vue
 <script setup lang="ts">
 import { useI18n } from '@translink/i18n-runtime/vue';
@@ -747,13 +767,14 @@ import { useI18n } from '@translink/i18n-runtime/vue';
 const { t, locale, setLocale } = useI18n();
 
 // 响应式语言切换
-watch(locale, (newLocale) => {
+watch(locale, newLocale => {
   document.documentElement.lang = newLocale;
 });
 </script>
 ```
 
 3. **SSR 支持**：
+
 ```typescript
 // 服务端渲染配置
 import { createSSRApp } from 'vue';
@@ -764,9 +785,9 @@ export function createApp() {
   const i18n = createI18n({
     // SSR 特定配置
     ssr: true,
-    defaultLanguage: 'zh-CN'
+    defaultLanguage: 'zh-CN',
   });
-  
+
   app.use(i18n);
   return { app, i18n };
 }
@@ -777,6 +798,7 @@ export function createApp() {
 **A**: React 集成的注意事项：
 
 1. **Provider 设置**：
+
 ```tsx
 // App.tsx
 import { I18nProvider } from '@translink/i18n-runtime/react';
@@ -786,9 +808,7 @@ function App() {
   return (
     <I18nProvider engine={i18n}>
       <Router>
-        <Routes>
-          {/* 路由配置 */}
-        </Routes>
+        <Routes>{/* 路由配置 */}</Routes>
       </Router>
     </I18nProvider>
   );
@@ -796,14 +816,15 @@ function App() {
 ```
 
 2. **Hook 使用**：
+
 ```tsx
 // 组件中使用
 function MyComponent() {
   const { t, language, changeLanguage } = useTranslation();
-  
+
   // 处理异步语言切换
   const [loading, setLoading] = useState(false);
-  
+
   const handleLanguageChange = async (newLang: string) => {
     setLoading(true);
     try {
@@ -812,7 +833,7 @@ function MyComponent() {
       setLoading(false);
     }
   };
-  
+
   return (
     <div>
       <h1>{$tsl('欢迎使用')}</h1>
@@ -823,6 +844,7 @@ function MyComponent() {
 ```
 
 3. **Next.js 集成**：
+
 ```typescript
 // _app.tsx
 import type { AppProps } from 'next/app';
@@ -860,6 +882,7 @@ module.exports = {
    - 获取 API Token 和 Datasheet ID
 
 2. **配置环境变量**：
+
 ```bash
 # .env
 VIKA_API_KEY=your_api_key_here
@@ -867,6 +890,7 @@ VIKA_DATASHEET_ID=your_datasheet_id_here
 ```
 
 3. **更新配置文件**：
+
 ```typescript
 // i18n.config.ts
 export default defineConfig({
@@ -874,12 +898,13 @@ export default defineConfig({
     apiKey: process.env.VIKA_API_KEY!,
     datasheetId: process.env.VIKA_DATASHEET_ID!,
     autoSync: false, // 手动同步更安全
-    syncInterval: 0
-  }
+    syncInterval: 0,
+  },
 });
 ```
 
 4. **使用同步命令**：
+
 ```bash
 # 推送到云端
 npx translink-i18n push
@@ -897,6 +922,7 @@ npx translink-i18n pull --dry-run
 **A**: 常见的同步问题和解决方案：
 
 1. **认证失败**：
+
 ```bash
 # 检查 API 密钥
 echo $VIKA_API_KEY
@@ -906,18 +932,20 @@ npx translink-i18n test-connection
 ```
 
 2. **网络问题**：
+
 ```typescript
 // 配置代理
 export default defineConfig({
   vika: {
     apiKey: process.env.VIKA_API_KEY!,
     datasheetId: process.env.VIKA_DATASHEET_ID!,
-    proxy: 'http://proxy.company.com:8080' // 如果需要代理
-  }
+    proxy: 'http://proxy.company.com:8080', // 如果需要代理
+  },
 });
 ```
 
 3. **数据冲突**：
+
 ```bash
 # 强制覆盖云端数据
 npx translink-i18n push --force
@@ -934,6 +962,7 @@ npx translink-i18n pull --backup
 **A**: 团队协作的最佳实践：
 
 1. **建立工作流**：
+
 ```bash
 # 开发者工作流
 git checkout -b feature/new-texts
@@ -954,21 +983,22 @@ git commit -m "Update translations"
 ```
 
 2. **权限管理**：
+
 ```typescript
 // 不同环境使用不同的 API 密钥
 const vikaConfig = {
   development: {
     apiKey: process.env.VIKA_DEV_API_KEY,
-    datasheetId: process.env.VIKA_DEV_DATASHEET_ID
+    datasheetId: process.env.VIKA_DEV_DATASHEET_ID,
   },
   production: {
     apiKey: process.env.VIKA_PROD_API_KEY,
-    datasheetId: process.env.VIKA_PROD_DATASHEET_ID
-  }
+    datasheetId: process.env.VIKA_PROD_DATASHEET_ID,
+  },
 };
 
 export default defineConfig({
-  vika: vikaConfig[process.env.NODE_ENV] || vikaConfig.development
+  vika: vikaConfig[process.env.NODE_ENV] || vikaConfig.development,
 });
 ```
 
@@ -1012,7 +1042,7 @@ console.log(Object.keys(translations));
 // 解决方案：检查加载配置
 const i18n = new I18nEngine({
   loader: {
-    loadFunction: async (language) => {
+    loadFunction: async language => {
       try {
         const module = await import(`virtual:i18n-language-${language}`);
         return module.default;
@@ -1020,8 +1050,8 @@ const i18n = new I18nEngine({
         console.error(`Failed to load ${language}:`, error);
         throw error;
       }
-    }
-  }
+    },
+  },
 });
 ```
 
@@ -1078,6 +1108,7 @@ console.log('Memory usage:', process.memoryUsage());
 **A**: 报告 Bug 时请提供：
 
 1. **环境信息**：
+
 ```bash
 # 收集环境信息
 npx translink-i18n --version

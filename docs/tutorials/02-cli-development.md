@@ -5,6 +5,7 @@
 学习如何开发一个功能完整的命令行工具，包括文本提取、哈希生成、Excel 导入导出等核心功能。
 
 **学完本章，你将掌握**：
+
 - Commander.js 命令系统设计
 - AST 文本提取原理和实现
 - 哈希生成算法和冲突处理
@@ -60,6 +61,7 @@
 ### 基础用法
 
 **index.ts**:
+
 ```typescript
 import { Command } from 'commander';
 import { initCmd } from './commands/init.js';
@@ -69,10 +71,7 @@ import { buildCmd } from './commands/build.js';
 const program = new Command();
 
 // 程序信息
-program
-  .name('translink')
-  .description('TransLink I18n CLI')
-  .version('1.0.0');
+program.name('translink').description('TransLink I18n CLI').version('1.0.0');
 
 // 注册命令
 program.addCommand(initCmd);
@@ -86,6 +85,7 @@ program.parse(process.argv);
 ### 命令定义
 
 **commands/extract.ts**:
+
 ```typescript
 import { Command } from 'commander';
 
@@ -94,7 +94,7 @@ export const extractCmd = new Command('extract')
   .option('-c, --config <path>', '配置文件路径')
   .option('-v, --verbose', '显示详细输出')
   .option('--dry-run', '模拟运行')
-  .action(async (options) => {
+  .action(async options => {
     await extractCommand(options);
   });
 
@@ -107,13 +107,13 @@ interface ExtractOptions {
 async function extractCommand(options: ExtractOptions) {
   // 命令实现
   logger.title('提取翻译文本');
-  
+
   // 加载配置
   const config = await configManager.loadConfig(options.config);
-  
+
   // 执行提取
   const results = await extractor.extractFromProject();
-  
+
   // 输出结果
   logger.success(`✓ 提取了 ${results.length} 个文本`);
 }
@@ -128,12 +128,15 @@ program
   .addCommand(initCmd)
   .addCommand(extractCmd)
   .addCommand(buildCmd)
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 Examples:
   $ translink init          初始化配置
   $ translink extract       提取翻译文本
   $ translink build         构建语言包
-  `);
+  `
+  );
 ```
 
 #### 2. 全局选项
@@ -142,7 +145,7 @@ Examples:
 program
   .option('--debug', '启用调试模式')
   .option('--no-color', '禁用颜色输出')
-  .hook('preAction', (thisCommand) => {
+  .hook('preAction', thisCommand => {
     const options = thisCommand.opts();
     if (options.debug) {
       logger.setLevel('debug');
@@ -154,7 +157,7 @@ program
 
 ```typescript
 export const extractCmd = new Command('extract')
-  .alias('e')  // translink e
+  .alias('e') // translink e
   .description('提取翻译文本');
 ```
 
@@ -193,6 +196,7 @@ const text = $tsl('你好');
 ### 使用 GoGoCode
 
 **为什么选择 GoGoCode？**
+
 - 统一的 API（支持 JS/TS/Vue/JSX）
 - 简单的选择器语法
 - 良好的 TypeScript 支持
@@ -211,7 +215,7 @@ const code = `
 const ast = $(code);
 
 // 查找函数调用
-ast.find('CallExpression').each((node) => {
+ast.find('CallExpression').each(node => {
   const callee = node.attr('callee.name');
   if (callee === '$tsl' || callee === 't') {
     const arg = node.attr('arguments.0.value');
@@ -223,6 +227,7 @@ ast.find('CallExpression').each((node) => {
 ### AST Extractor 实现
 
 **ast-extractor.ts**:
+
 ```typescript
 import $ from 'gogocode';
 import { readFileSync } from 'fs';
@@ -231,30 +236,32 @@ import { glob } from 'glob';
 export class ASTExtractor {
   private config: ExtractConfig;
   private hashGenerator: HashGenerator;
-  
+
   constructor(config: ExtractConfig, hashGenerator: HashGenerator) {
     this.config = config;
     this.hashGenerator = hashGenerator;
   }
-  
+
   /**
    * 从项目中提取所有翻译文本
    */
-  async extractFromProject(cwd: string = process.cwd()): Promise<ExtractResult[]> {
+  async extractFromProject(
+    cwd: string = process.cwd()
+  ): Promise<ExtractResult[]> {
     // 1. 扫描文件
     const files = await this.scanFiles(cwd);
-    
+
     // 2. 提取文本
     const results: ExtractResult[] = [];
     for (const filePath of files) {
       const fileResults = await this.extractFromFile(filePath, cwd);
       results.push(...fileResults);
     }
-    
+
     // 3. 去重
     return this.deduplicateResults(results);
   }
-  
+
   /**
    * 从单个文件提取
    */
@@ -264,7 +271,7 @@ export class ASTExtractor {
   ): Promise<ExtractResult[]> {
     const content = readFileSync(filePath, 'utf-8');
     const fileExtension = this.getFileExtension(filePath);
-    
+
     // 根据文件类型选择解析策略
     switch (fileExtension) {
       case '.vue':
@@ -279,7 +286,7 @@ export class ASTExtractor {
         return [];
     }
   }
-  
+
   /**
    * 提取 Vue 文件
    */
@@ -288,9 +295,11 @@ export class ASTExtractor {
     filePath: string
   ): ExtractResult[] {
     const results: ExtractResult[] = [];
-    
+
     // 方法 1: 使用正则提取 <template> 内容
-    const templateMatch = content.match(/<template[^>]*>([\s\S]*?)<\/template>/);
+    const templateMatch = content.match(
+      /<template[^>]*>([\s\S]*?)<\/template>/
+    );
     if (templateMatch && templateMatch[1]) {
       const templateContent = templateMatch[1];
       const templateResults = this.extractFromTemplateContent(
@@ -299,21 +308,18 @@ export class ASTExtractor {
       );
       results.push(...templateResults);
     }
-    
+
     // 方法 2: 提取 <script> 内容
     const scriptMatch = content.match(/<script[^>]*>([\s\S]*?)<\/script>/);
     if (scriptMatch && scriptMatch[1]) {
       const scriptContent = scriptMatch[1];
-      const scriptResults = this.extractFromJSContent(
-        scriptContent,
-        filePath
-      );
+      const scriptResults = this.extractFromJSContent(scriptContent, filePath);
       results.push(...scriptResults);
     }
-    
+
     return results;
   }
-  
+
   /**
    * 从模板内容提取（正则方式）
    */
@@ -322,7 +328,7 @@ export class ASTExtractor {
     filePath: string
   ): ExtractResult[] {
     const results: ExtractResult[] = [];
-    
+
     // 正则表达式模式
     const patterns = [
       // {{ $tsl('文本') }}
@@ -332,7 +338,7 @@ export class ASTExtractor {
       // v-t="文本"
       /v-t\s*=\s*['"`]([^'"`]+)['"`]/g,
     ];
-    
+
     patterns.forEach(pattern => {
       let match;
       while ((match = pattern.exec(templateContent)) !== null) {
@@ -343,7 +349,7 @@ export class ASTExtractor {
             componentName: this.extractComponentName(filePath),
             functionName: 'template',
           });
-          
+
           results.push({
             key,
             text,
@@ -357,10 +363,10 @@ export class ASTExtractor {
         }
       }
     });
-    
+
     return results;
   }
-  
+
   /**
    * 从 JavaScript 内容提取（AST 方式）
    */
@@ -376,30 +382,30 @@ export class ASTExtractor {
       return [];
     }
   }
-  
+
   /**
    * 从 AST 中提取翻译函数调用
    */
   private extractFromAST(ast: any, filePath: string): ExtractResult[] {
     const results: ExtractResult[] = [];
-    
+
     // 查找所有函数调用
     ast.find('CallExpression').each((node: any) => {
       const callee = node.attr('callee');
       const functionName = this.getFunctionName(callee);
-      
+
       // 检查是否是翻译函数
       if (this.config.functions.includes(functionName)) {
         const args = node.attr('arguments');
         const textArg = args?.[0];
-        
+
         if (textArg && this.isStringLiteral(textArg)) {
           const text = textArg.value;
-          
+
           if (this.isChineseText(text)) {
             const context = this.extractContext(node, filePath);
             const key = this.hashGenerator.generate(text, context);
-            
+
             results.push({
               key,
               text,
@@ -415,17 +421,17 @@ export class ASTExtractor {
         }
       }
     });
-    
+
     return results;
   }
-  
+
   /**
    * 判断是否包含中文
    */
   private isChineseText(text: string): boolean {
     return /[\u4e00-\u9fa5]/.test(text);
   }
-  
+
   /**
    * 提取上下文信息
    */
@@ -446,7 +452,7 @@ export class ASTExtractor {
 ```typescript
 private async scanFiles(cwd: string): Promise<string[]> {
   const allFiles: string[] = [];
-  
+
   for (const pattern of this.config.patterns) {
     const files = await glob(pattern, {
       cwd,
@@ -455,7 +461,7 @@ private async scanFiles(cwd: string): Promise<string[]> {
     });
     allFiles.push(...files);
   }
-  
+
   // 去重并过滤扩展名
   const uniqueFiles = [...new Set(allFiles)];
   return uniqueFiles.filter(file =>
@@ -467,6 +473,7 @@ private async scanFiles(cwd: string): Promise<string[]> {
 #### 2. Vue 文件处理
 
 **两种策略**：
+
 - **模板部分**：使用正则表达式（GoGoCode 对 Vue 模板支持有限）
 - **脚本部分**：使用 AST 解析（精确、可靠）
 
@@ -475,14 +482,14 @@ private async scanFiles(cwd: string): Promise<string[]> {
 ```typescript
 private deduplicateResults(results: ExtractResult[]): ExtractResult[] {
   const seen = new Map<string, ExtractResult>();
-  
+
   for (const result of results) {
     const existing = seen.get(result.key);
     if (!existing || result.text.length > existing.text.length) {
       seen.set(result.key, result);
     }
   }
-  
+
   return Array.from(seen.values());
 }
 ```
@@ -494,6 +501,7 @@ private deduplicateResults(results: ExtractResult[]): ExtractResult[] {
 ### 为什么使用哈希？
 
 **传统方案**：
+
 ```json
 {
   "welcome_message": "欢迎使用",
@@ -502,11 +510,13 @@ private deduplicateResults(results: ExtractResult[]): ExtractResult[] {
 ```
 
 **问题**：
+
 - ❌ Key 需要手动维护
 - ❌ 重构时 Key 可能失效
 - ❌ 多人协作容易冲突
 
 **哈希方案**：
+
 ```json
 {
   "12345678": "欢迎使用",
@@ -515,6 +525,7 @@ private deduplicateResults(results: ExtractResult[]): ExtractResult[] {
 ```
 
 **优势**：
+
 - ✅ 自动生成，无需维护
 - ✅ 基于内容，重构友好
 - ✅ 冲突概率极低
@@ -522,6 +533,7 @@ private deduplicateResults(results: ExtractResult[]): ExtractResult[] {
 ### 哈希生成器实现
 
 **hash-generator.ts**:
+
 ```typescript
 import crypto from 'crypto';
 
@@ -532,11 +544,11 @@ export class HashGenerator {
     totalHashes: 0,
     collisions: 0,
   };
-  
+
   constructor(config: HashConfig) {
     this.config = config;
   }
-  
+
   /**
    * 生成哈希键
    */
@@ -545,7 +557,7 @@ export class HashGenerator {
     const input = this.config.includeContext
       ? this.buildInputWithContext(text, context)
       : text;
-    
+
     // 2. 生成哈希
     const hash = this.generateContentHash(
       input,
@@ -553,7 +565,7 @@ export class HashGenerator {
       this.config.length,
       this.config.numericOnly
     );
-    
+
     // 3. 检测冲突
     if (this.collisionMap.has(hash)) {
       const existing = this.collisionMap.get(hash)!;
@@ -562,19 +574,19 @@ export class HashGenerator {
         logger.warn(`哈希冲突: ${hash}`);
         logger.warn(`  现有: ${existing}`);
         logger.warn(`  新增: ${text}`);
-        
+
         // 冲突解决：增加长度重新生成
         return this.generate(text, context);
       }
     }
-    
+
     // 4. 记录哈希
     this.collisionMap.set(hash, text);
     this.stats.totalHashes++;
-    
+
     return hash;
   }
-  
+
   /**
    * 生成内容哈希
    */
@@ -590,62 +602,66 @@ export class HashGenerator {
       .update(content, 'utf-8')
       .digest('hex')
       .substring(0, length * 2); // 预留空间
-    
+
     // 2. 转换为纯数字（如果需要）
     if (numericOnly) {
       // 将十六进制转换为十进制数字
       let numericHash = parseInt(hash, 16).toString();
-      
+
       // 确保长度
       if (numericHash.length > length) {
         numericHash = numericHash.substring(0, length);
       } else if (numericHash.length < length) {
         numericHash = numericHash.padStart(length, '0');
       }
-      
+
       return numericHash;
     }
-    
+
     return hash.substring(0, length);
   }
-  
+
   /**
    * 构建包含上下文的输入
    */
-  private buildInputWithContext(
-    text: string,
-    context?: HashContext
-  ): string {
+  private buildInputWithContext(text: string, context?: HashContext): string {
     if (!context) {
       return text;
     }
-    
+
     const parts = [text];
-    
-    if (this.config.contextFields?.includes('componentName') && context.componentName) {
+
+    if (
+      this.config.contextFields?.includes('componentName') &&
+      context.componentName
+    ) {
       parts.push(context.componentName);
     }
-    
-    if (this.config.contextFields?.includes('functionName') && context.functionName) {
+
+    if (
+      this.config.contextFields?.includes('functionName') &&
+      context.functionName
+    ) {
       parts.push(context.functionName);
     }
-    
+
     if (this.config.contextFields?.includes('filePath') && context.filePath) {
       parts.push(context.filePath);
     }
-    
+
     return parts.join('|');
   }
-  
+
   /**
    * 获取冲突统计
    */
   getCollisionStats() {
     return {
       ...this.stats,
-      collisionRate: this.stats.totalHashes > 0
-        ? (this.stats.collisions / this.stats.totalHashes) * 100
-        : 0,
+      collisionRate:
+        this.stats.totalHashes > 0
+          ? (this.stats.collisions / this.stats.totalHashes) * 100
+          : 0,
     };
   }
 }
@@ -671,6 +687,7 @@ const numericHash = parseInt(hexHash, 16).toString();
 ```
 
 **优势**：
+
 - 更短的键长度
 - 更好的可读性
 - 兼容数字键场景
@@ -678,6 +695,7 @@ const numericHash = parseInt(hexHash, 16).toString();
 #### 3. 冲突处理
 
 **策略 1：增加长度**
+
 ```typescript
 if (collision) {
   this.config.length += 2;
@@ -686,6 +704,7 @@ if (collision) {
 ```
 
 **策略 2：添加后缀**
+
 ```typescript
 if (collision) {
   return `${hash}_${Date.now()}`;
@@ -693,6 +712,7 @@ if (collision) {
 ```
 
 **策略 3：使用上下文**
+
 ```typescript
 // 包含文件路径和组件名，降低冲突概率
 const input = `${text}|${filePath}|${componentName}`;
@@ -705,6 +725,7 @@ const input = `${text}|${filePath}|${componentName}`;
 ### ExcelJS 库
 
 **安装**：
+
 ```bash
 pnpm add exceljs
 ```
@@ -712,6 +733,7 @@ pnpm add exceljs
 ### 导出到 Excel
 
 **export.ts**:
+
 ```typescript
 import ExcelJS from 'exceljs';
 
@@ -722,17 +744,17 @@ async function exportToExcel(
 ) {
   // 动态导入 exceljs
   const ExcelJS = await import('exceljs');
-  
+
   // 创建工作簿
   const workbook = new ExcelJS.default.Workbook();
   const worksheet = workbook.addWorksheet('Translations');
-  
+
   // 定义列
   const columns = [
     { header: 'Key', key: 'key', width: 15 },
     { header: 'Status', key: 'status', width: 10 },
   ];
-  
+
   // 添加语言列
   languages.forEach(lang => {
     columns.push({
@@ -741,24 +763,24 @@ async function exportToExcel(
       width: 30,
     });
   });
-  
+
   worksheet.columns = columns;
-  
+
   // 添加数据行
   translations.forEach(item => {
     const row: any = {
       key: item.key,
       status: item.status || 'pending',
     };
-    
+
     // 添加各语言翻译
     languages.forEach(lang => {
       row[lang] = item.translations[lang] || '';
     });
-    
+
     worksheet.addRow(row);
   });
-  
+
   // 样式设置
   const headerRow = worksheet.getRow(1);
   headerRow.font = { bold: true };
@@ -767,12 +789,10 @@ async function exportToExcel(
     pattern: 'solid',
     fgColor: { argb: 'FFE0E0E0' },
   };
-  
+
   // 冻结首行
-  worksheet.views = [
-    { state: 'frozen', xSplit: 0, ySplit: 1 }
-  ];
-  
+  worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+
   // 保存文件
   await workbook.xlsx.writeFile(outputFile);
   logger.success(`✓ Excel 文件已生成: ${outputFile}`);
@@ -782,59 +802,60 @@ async function exportToExcel(
 ### 从 Excel 导入
 
 **import.ts**:
+
 ```typescript
 async function importFromExcel(
   inputPath: string
 ): Promise<ImportedTranslation[]> {
   const ExcelJS = await import('exceljs');
-  
+
   // 读取工作簿
   const workbook = new ExcelJS.default.Workbook();
   await workbook.xlsx.readFile(inputPath);
-  
+
   // 获取第一个工作表
   const worksheet = workbook.worksheets[0];
   if (!worksheet) {
     throw new Error('Excel 文件为空');
   }
-  
+
   // 读取表头
   const headerRow = worksheet.getRow(1);
   const headers: string[] = [];
   headerRow.eachCell((cell, colNumber) => {
     headers[colNumber - 1] = cell.value?.toString() || '';
   });
-  
+
   // 找到语言列
   const keyIndex = headers.indexOf('Key');
   const statusIndex = headers.indexOf('Status');
   const languageIndices = headers
     .map((h, i) => ({ lang: h, index: i }))
     .filter(({ lang }) => !['Key', 'Status'].includes(lang));
-  
+
   // 读取数据行
   const translations: ImportedTranslation[] = [];
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return; // 跳过表头
-    
+
     const key = row.getCell(keyIndex + 1).value?.toString();
     if (!key) return;
-    
+
     const status = row.getCell(statusIndex + 1).value?.toString();
     const translationsMap: Record<string, string> = {};
-    
+
     languageIndices.forEach(({ lang, index }) => {
       const value = row.getCell(index + 1).value?.toString() || '';
       translationsMap[lang] = value;
     });
-    
+
     translations.push({
       key,
       status,
       translations: translationsMap,
     });
   });
-  
+
   return translations;
 }
 ```
@@ -856,12 +877,12 @@ function exportToCSV(
     status: item.status || 'pending',
     ...item.translations,
   }));
-  
+
   const csv = stringify(records, {
     header: true,
     columns: ['key', 'status', ...languages],
   });
-  
+
   writeFileSync(outputFile, csv, 'utf-8');
 }
 
@@ -872,7 +893,7 @@ function importFromCSV(inputPath: string): ImportedTranslation[] {
     columns: true,
     skip_empty_lines: true,
   });
-  
+
   return records.map((record: any) => {
     const { key, status, ...translations } = record;
     return {
@@ -903,18 +924,18 @@ export class ConfigManager {
       'i18n.config.ts',
       'i18n.config.js',
     ];
-    
+
     for (const file of configFiles) {
       const configPath = resolve(cwd, file);
       if (existsSync(configPath)) {
         return this.loadConfigFile(configPath);
       }
     }
-    
+
     // 使用默认配置
     return DEFAULT_CONFIG;
   }
-  
+
   private async loadConfigFile(configPath: string): Promise<I18nConfig> {
     if (configPath.endsWith('.ts')) {
       // 使用 jiti 加载 TypeScript 配置
@@ -922,7 +943,7 @@ export class ConfigManager {
         interopDefault: true,
         esmResolve: true,
       });
-      
+
       const config = jiti(configPath);
       return config?.default || config;
     } else {
@@ -948,44 +969,44 @@ import ora from 'ora';
 export class Logger {
   private spinner: any;
   private verbose = false;
-  
+
   setVerbose(verbose: boolean) {
     this.verbose = verbose;
   }
-  
+
   title(text: string) {
     console.log();
     console.log(chalk.cyan.bold('🔗 TransLink I18n'));
     console.log(chalk.gray(text));
     console.log();
   }
-  
+
   success(text: string) {
     console.log(chalk.green('✓'), text);
   }
-  
+
   error(text: string) {
     console.log(chalk.red('✗'), text);
   }
-  
+
   warn(text: string) {
     console.log(chalk.yellow('⚠'), text);
   }
-  
+
   info(text: string) {
     console.log(chalk.blue('ℹ'), text);
   }
-  
+
   debug(text: string) {
     if (this.verbose) {
       console.log(chalk.gray('🐛'), text);
     }
   }
-  
+
   startSpinner(text: string) {
     this.spinner = ora(text).start();
   }
-  
+
   stopSpinner(text: string, success = true) {
     if (success) {
       this.spinner.succeed(text);
@@ -993,7 +1014,7 @@ export class Logger {
       this.spinner.fail(text);
     }
   }
-  
+
   br() {
     console.log();
   }
@@ -1009,13 +1030,14 @@ export const logger = new Logger();
 ### 步骤 1：创建命令文件
 
 **commands/validate.ts**:
+
 ```typescript
 import { Command } from 'commander';
 
 export const validateCmd = new Command('validate')
   .description('验证翻译文件')
   .option('-f, --fix', '自动修复问题')
-  .action(async (options) => {
+  .action(async options => {
     await validateCommand(options);
   });
 
@@ -1025,20 +1047,20 @@ interface ValidateOptions {
 
 async function validateCommand(options: ValidateOptions) {
   logger.title('验证翻译文件');
-  
+
   const config = await configManager.loadConfig();
   const issues = await validateTranslations(config);
-  
+
   if (issues.length === 0) {
     logger.success('✓ 所有翻译文件验证通过');
     return;
   }
-  
+
   logger.error(`发现 ${issues.length} 个问题:`);
   issues.forEach((issue, i) => {
     logger.info(`  ${i + 1}. ${issue}`);
   });
-  
+
   if (options.fix) {
     logger.info('正在修复...');
     await fixTranslations(config, issues);
@@ -1050,6 +1072,7 @@ async function validateCommand(options: ValidateOptions) {
 ### 步骤 2：注册命令
 
 **index.ts**:
+
 ```typescript
 import { validateCmd } from './commands/validate.js';
 
@@ -1081,4 +1104,3 @@ program.addCommand(validateCmd);
 - [GoGoCode 文档](https://github.com/thx/gogocode)
 - [ExcelJS 文档](https://github.com/exceljs/exceljs)
 - [AST Explorer](https://astexplorer.net/) - 在线 AST 查看工具
-

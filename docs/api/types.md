@@ -14,7 +14,7 @@ import type {
   OutputConfig,
   VikaConfig,
   ExtractionResult,
-  ExtractionContext
+  ExtractionContext,
 } from '@translink/i18n-cli';
 
 // Runtime 类型
@@ -25,7 +25,7 @@ import type {
   TranslationOptions,
   CacheOptions,
   LoaderOptions,
-  InterpolationOptions
+  InterpolationOptions,
 } from '@translink/i18n-runtime';
 
 // Vite Plugin 类型
@@ -33,7 +33,7 @@ import type {
   I18nPluginOptions,
   ResolvedI18nPluginOptions,
   TransformContext,
-  LanguageModule
+  LanguageModule,
 } from '@translink/vite-plugin-i18n';
 ```
 
@@ -481,7 +481,7 @@ interface I18nEventMap {
 }
 
 // 类型安全的事件监听
-i18n.on<'languageChanged'>('languageChanged', (language) => {
+i18n.on<'languageChanged'>('languageChanged', language => {
   // language 的类型是 string
   console.log(`Language changed to: ${language}`);
 });
@@ -577,12 +577,14 @@ type TranslationKeys = KeyPath<TypedTranslations>;
 提取参数类型。
 
 ```typescript
-type ExtractParams<T extends string> = T extends `${infer _Start}{{${infer Param}}}${infer Rest}`
-  ? Param | ExtractParams<Rest>
-  : never;
+type ExtractParams<T extends string> =
+  T extends `${infer _Start}{{${infer Param}}}${infer Rest}`
+    ? Param | ExtractParams<Rest>
+    : never;
 
 // 使用示例
-type GreetingParams = ExtractParams<"Hello, {{name}}! You have {{count}} messages.">;
+type GreetingParams =
+  ExtractParams<'Hello, {{name}}! You have {{count}} messages.'>;
 // 结果: "name" | "count"
 ```
 
@@ -649,16 +651,13 @@ function createTranslationKey(key: string): TranslationKey {
 
 ```typescript
 // 根据配置决定返回类型
-type TranslationResult<T extends TranslationOptions> = 
-  T['returnObjects'] extends true 
-    ? Record<string, any>
-    : string;
+type TranslationResult<T extends TranslationOptions> =
+  T['returnObjects'] extends true ? Record<string, any> : string;
 
 // 根据缓存配置决定存储类型
-type CacheStorage<T extends CacheOptions> = 
-  T['storage'] extends 'localStorage' 
-    ? Storage
-    : T['storage'] extends 'sessionStorage'
+type CacheStorage<T extends CacheOptions> = T['storage'] extends 'localStorage'
+  ? Storage
+  : T['storage'] extends 'sessionStorage'
     ? Storage
     : Map<string, any>;
 ```
@@ -684,10 +683,10 @@ type StringKeys<T> = {
 ### 完整的类型化配置
 
 ```typescript
-import type { 
-  I18nConfig, 
-  I18nOptions, 
-  I18nPluginOptions 
+import type {
+  I18nConfig,
+  I18nOptions,
+  I18nPluginOptions,
 } from '@translink/i18n-cli';
 
 // CLI 配置
@@ -696,25 +695,25 @@ const cliConfig: I18nConfig = {
     patterns: ['src/**/*.{vue,ts,js}'],
     exclude: ['node_modules', 'dist'],
     functions: ['t', '$tsl'],
-    extensions: ['.vue', '.ts', '.js']
+    extensions: ['.vue', '.ts', '.js'],
   },
   hash: {
     algorithm: 'md5',
     length: 8,
     includeContext: false,
-    contextFields: []
+    contextFields: [],
   },
   languages: {
     default: 'zh-CN',
     supported: ['zh-CN', 'en-US', 'ja-JP'],
-    fallback: 'en-US'
+    fallback: 'en-US',
   },
   output: {
     directory: 'src/locales',
     format: 'json',
     splitByNamespace: false,
-    flattenKeys: false
-  }
+    flattenKeys: false,
+  },
 };
 
 // Runtime 配置
@@ -723,13 +722,13 @@ const runtimeConfig: I18nOptions = {
   fallbackLanguage: 'en-US',
   resources: {
     'zh-CN': { greeting: '你好，{{name}}！' },
-    'en-US': { greeting: 'Hello, {{name}}!' }
+    'en-US': { greeting: 'Hello, {{name}}!' },
   },
   cache: {
     enabled: true,
     maxSize: 1000,
-    ttl: 5 * 60 * 1000
-  }
+    ttl: 5 * 60 * 1000,
+  },
 };
 
 // Vite 插件配置
@@ -740,7 +739,7 @@ const pluginConfig: I18nPluginOptions = {
   lazyLoad: true,
   keyGenerator: (content, context) => {
     return `${context?.componentName || 'global'}_${content.slice(0, 8)}`;
-  }
+  },
 };
 ```
 
@@ -769,8 +768,8 @@ interface AppTranslations {
 // 类型安全的翻译函数
 type TypedTranslationFunction = <K extends KeyPath<AppTranslations>>(
   key: K,
-  params?: ExtractParams<AppTranslations[K]> extends never 
-    ? never 
+  params?: ExtractParams<AppTranslations[K]> extends never
+    ? never
     : Record<ExtractParams<AppTranslations[K]>, any>,
   options?: TranslationOptions
 ) => string;
@@ -780,8 +779,8 @@ const t: TypedTranslationFunction = useI18n().t;
 
 // 类型安全的调用
 t('common.greeting'); // ✅ 正确
-t('user.profile');    // ✅ 正确
-t('invalid.key');     // ❌ 类型错误
+t('user.profile'); // ✅ 正确
+t('invalid.key'); // ❌ 类型错误
 
 // 带参数的调用
 t('user.greeting', { name: 'Alice' }); // ✅ 正确（如果 greeting 包含 {{name}}）

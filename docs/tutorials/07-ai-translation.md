@@ -17,12 +17,14 @@
 ## 📋 前置知识
 
 ### 必需
+
 - ✅ TypeScript 高级特性（泛型、抽象类）
 - ✅ 异步编程（Promise、async/await）
 - ✅ HTTP API 调用
 - ✅ Node.js 文件操作
 
 ### 推荐
+
 - 📚 大语言模型基本概念
 - 📚 官方SDK使用经验
 - 📚 设计模式（策略模式、工厂模式）
@@ -90,7 +92,7 @@
 export interface AIProvider {
   /** Provider 名称 */
   name: string;
-  
+
   /** Provider 能力声明 */
   capabilities: ProviderCapabilities;
 
@@ -218,13 +220,18 @@ export interface AIProviderConfig {
 ```typescript
 // packages/cli/src/ai/providers/base.ts
 
-import { AIProvider, AIProviderConfig, TranslateParams, TranslateResult } from '../types.js';
+import {
+  AIProvider,
+  AIProviderConfig,
+  TranslateParams,
+  TranslateResult,
+} from '../types.js';
 import { logger } from '../../utils/logger.js';
 
 export abstract class BaseAIProvider implements AIProvider {
   abstract name: string;
   abstract capabilities: ProviderCapabilities;
-  
+
   protected config: AIProviderConfig;
 
   constructor(config: AIProviderConfig) {
@@ -286,9 +293,11 @@ export abstract class BaseAIProvider implements AIProvider {
   protected buildPrompt(params: TranslateParams): string {
     const { text, sourceLang, targetLang, context, glossary } = params;
 
-    let prompt = context || this.config.contextPrompt || 
+    let prompt =
+      context ||
+      this.config.contextPrompt ||
       'You are a professional translator. Translate accurately and naturally.';
-    
+
     prompt += `\n\nSource Language: ${sourceLang}`;
     prompt += `\nTarget Language: ${targetLang}`;
 
@@ -657,7 +666,7 @@ export class ErrorFactory {
         provider
       );
     }
-    
+
     if (error.status === 401) {
       return new AuthenticationError(error.message, provider);
     }
@@ -674,7 +683,7 @@ export class ErrorFactory {
     if (error.message?.includes('quota')) {
       return new RateLimitError(error.message, undefined, provider);
     }
-    
+
     if (error.message?.includes('API key')) {
       return new AuthenticationError(error.message, provider);
     }
@@ -687,7 +696,7 @@ export class ErrorFactory {
     if (error.status === 429) {
       return new RateLimitError(error.message, undefined, provider);
     }
-    
+
     if (error.status === 401) {
       return new AuthenticationError(error.message, provider);
     }
@@ -775,10 +784,7 @@ export class RetryStrategy {
   /**
    * 执行带重试的操作
    */
-  async execute<T>(
-    fn: () => Promise<T>,
-    context?: string
-  ): Promise<T> {
+  async execute<T>(fn: () => Promise<T>, context?: string): Promise<T> {
     let lastError: unknown;
 
     for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
@@ -924,13 +930,14 @@ export class AITranslationEngine {
       try {
         // 使用重试策略
         const result = await this.retryStrategy.execute(
-          () => aiProvider.translateBatch({
-            items: batch,
-            sourceLang,
-            targetLang,
-            glossary: this.config.options.glossary,
-            context: this.config.options.contextPrompt,
-          }),
+          () =>
+            aiProvider.translateBatch({
+              items: batch,
+              sourceLang,
+              targetLang,
+              glossary: this.config.options.glossary,
+              context: this.config.options.contextPrompt,
+            }),
           `Batch ${i + 1}`
         );
 
@@ -1145,11 +1152,11 @@ private parseBatchResult(
 
 ### 🎓 优化效果
 
-| 指标 | 未优化 | 优化后 | 提升 |
-|------|--------|--------|------|
-| API调用 | 20次 | 1次 | ↓95% |
-| 处理时间 | 20秒 | 2秒 | ↑10倍 |
-| 翻译成本 | $0.002 | $0.0001 | ↓95% |
+| 指标     | 未优化 | 优化后  | 提升  |
+| -------- | ------ | ------- | ----- |
+| API调用  | 20次   | 1次     | ↓95%  |
+| 处理时间 | 20秒   | 2秒     | ↑10倍 |
+| 翻译成本 | $0.002 | $0.0001 | ↓95%  |
 
 ## 🎯 实践任务
 
@@ -1184,12 +1191,12 @@ private parseBatchResult(
 
 **场景**：1000条翻译文本，700条已翻译，100条缓存命中
 
-| 指标 | 未优化 | 优化后 | 提升 |
-|------|--------|--------|------|
-| 需要翻译 | 300条 | 200条 | ↓33% (缓存) |
-| API调用 | 300次 | 10次 | ↓97% (批量) |
-| 处理时间 | 90秒 | 10秒 | ↑9倍 (并发) |
-| 翻译成本 | $0.42 | $0.028 | ↓93% (综合) |
+| 指标     | 未优化 | 优化后 | 提升        |
+| -------- | ------ | ------ | ----------- |
+| 需要翻译 | 300条  | 200条  | ↓33% (缓存) |
+| API调用  | 300次  | 10次   | ↓97% (批量) |
+| 处理时间 | 90秒   | 10秒   | ↑9倍 (并发) |
+| 翻译成本 | $0.42  | $0.028 | ↓93% (综合) |
 
 ## 💡 最佳实践
 
@@ -1211,7 +1218,7 @@ private parseBatchResult(
       batchSize: 20,        // 每批20条
       concurrency: 3,       // 并发3个批次
       maxRetries: 3,        // 重试3次
-      
+
       // 术语表
       glossary: {
         '应用': 'Application',
@@ -1244,7 +1251,7 @@ private parseBatchResult(
 ✅ **批量优化** - 降低95%成本  
 ✅ **智能缓存** - 提升效率，避免重复  
 ✅ **错误处理** - 统一错误系统 + 智能重试  
-✅ **质量保证** - 多维度验证机制  
+✅ **质量保证** - 多维度验证机制
 
 通过这些技术的组合应用，实现了一个高效、可靠、低成本的AI翻译系统。
 

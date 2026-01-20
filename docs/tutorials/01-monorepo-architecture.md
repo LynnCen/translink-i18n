@@ -5,6 +5,7 @@
 学习如何使用 pnpm + Turborepo + TypeScript 搭建现代化的 Monorepo 项目。
 
 **学完本章，你将掌握**：
+
 - pnpm Workspace 配置
 - Turborepo 构建优化
 - TypeScript 项目引用
@@ -53,14 +54,15 @@ translink-i18n/
 
 ### pnpm vs npm/yarn
 
-| 特性 | pnpm | npm | yarn |
-|------|------|-----|------|
-| 磁盘空间 | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-| 安装速度 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
+| 特性      | pnpm       | npm    | yarn     |
+| --------- | ---------- | ------ | -------- |
+| 磁盘空间  | ⭐⭐⭐⭐⭐ | ⭐⭐   | ⭐⭐⭐   |
+| 安装速度  | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
 | Workspace | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
-| 严格性 | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
+| 严格性    | ⭐⭐⭐⭐⭐ | ⭐⭐   | ⭐⭐⭐   |
 
 **选择 pnpm 的原因**：
+
 - 硬链接机制，节省磁盘空间
 - 天然防止幽灵依赖
 - Workspace 功能强大
@@ -143,18 +145,19 @@ packages:
   # 核心包
   - 'packages/*'
   - 'packages/plugins/*'
-  
+
   # 应用和示例
   - 'apps/*'
   - 'apps/playground/*'
-  
+
   # 工具
   - 'tools/*'
 ```
 
 **关键点**：
+
 - 使用 glob 模式匹配包路径
-- 支持嵌套包（plugins/*）
+- 支持嵌套包（plugins/\*）
 - 可以排除特定目录
 
 ### 根 package.json
@@ -178,6 +181,7 @@ packages:
 ```
 
 **关键点**：
+
 - `"private": true` 防止误发布
 - 使用 `turbo run` 执行任务
 - 共享的 devDependencies
@@ -215,6 +219,7 @@ packages:
 ```
 
 **关键点**：
+
 - `"type": "module"` 使用 ESM
 - `exports` 字段定义导出
 - `files` 字段控制发布内容
@@ -259,12 +264,13 @@ packages:
 ```json
 {
   "build": {
-    "dependsOn": ["^build"]  // ^ 表示依赖包的 build 先执行
+    "dependsOn": ["^build"] // ^ 表示依赖包的 build 先执行
   }
 }
 ```
 
 **示例**：
+
 ```
 vite-plugin 依赖 runtime
 → 执行 vite-plugin:build 前
@@ -276,12 +282,13 @@ vite-plugin 依赖 runtime
 ```json
 {
   "build": {
-    "outputs": ["dist/**"]  // 缓存 dist 目录
+    "outputs": ["dist/**"] // 缓存 dist 目录
   }
 }
 ```
 
 **效果**：
+
 - 首次构建：正常执行
 - 二次构建（无变更）：使用缓存，秒级完成
 
@@ -291,12 +298,13 @@ vite-plugin 依赖 runtime
 {
   "dev": {
     "cache": false,
-    "persistent": true  // 长期运行的任务
+    "persistent": true // 长期运行的任务
   }
 }
 ```
 
 **用于**：
+
 - 开发服务器
 - Watch 模式
 
@@ -337,6 +345,7 @@ packages/*/tsconfig.json  ← 包配置（继承 + 自定义）
 ```
 
 **关键选项**：
+
 - `composite: true` - 启用项目引用
 - `declaration: true` - 生成 .d.ts
 - `strict: true` - 严格模式
@@ -356,6 +365,7 @@ packages/*/tsconfig.json  ← 包配置（继承 + 自定义）
 ```
 
 **作用**：
+
 - 定义包之间的引用关系
 - 支持增量编译
 - IDE 智能提示
@@ -390,6 +400,7 @@ packages/*/tsconfig.json  ← 包配置（继承 + 自定义）
 ```
 
 **分离原因**：
+
 - `tsconfig.json` - 开发时类型检查（noEmit: true）
 - `tsconfig.build.json` - 构建时生成文件
 
@@ -409,6 +420,7 @@ packages/*/tsconfig.json  ← 包配置（继承 + 自定义）
 ```
 
 **优势**：
+
 - 始终使用本地最新版本
 - 避免版本不一致
 - 发布时自动替换为实际版本
@@ -450,6 +462,7 @@ import axios from 'axios'; // axios 只在其他包中安装
 ```
 
 **pnpm 的防护**：
+
 - 严格的 node_modules 结构
 - 只能访问声明的依赖
 - 编译时报错，而不是运行时
@@ -538,6 +551,7 @@ pnpm init
 ### 步骤 3：配置 TypeScript
 
 **tsconfig.json**:
+
 ```json
 {
   "extends": "../../tsconfig.base.json",
@@ -551,6 +565,7 @@ pnpm init
 ```
 
 **tsconfig.build.json**:
+
 ```json
 {
   "extends": "./tsconfig.json",
@@ -563,6 +578,7 @@ pnpm init
 ### 步骤 4：配置构建工具
 
 **tsup.config.ts**:
+
 ```typescript
 import { defineConfig } from 'tsup';
 
@@ -578,6 +594,7 @@ export default defineConfig({
 ### 步骤 5：编写代码
 
 **src/index.ts**:
+
 ```typescript
 export const myPlugin = {
   name: 'my-plugin',
@@ -588,6 +605,7 @@ export const myPlugin = {
 ### 步骤 6：更新根配置
 
 **tsconfig.json**:
+
 ```json
 {
   "references": [
@@ -618,12 +636,12 @@ turbo run build --filter=@translink/my-plugin
 
 **回答**：
 
-| 特性 | tsup | tsc |
-|------|------|-----|
-| 速度 | ⚡⚡⚡⚡⚡ (esbuild) | ⚡⚡ |
-| 配置 | 简单 | 复杂 |
-| 打包 | 支持 | 不支持 |
-| Tree-shaking | 支持 | 不支持 |
+| 特性         | tsup                 | tsc    |
+| ------------ | -------------------- | ------ |
+| 速度         | ⚡⚡⚡⚡⚡ (esbuild) | ⚡⚡   |
+| 配置         | 简单                 | 复杂   |
+| 打包         | 支持                 | 不支持 |
+| Tree-shaking | 支持                 | 不支持 |
 
 ```typescript
 // tsup 一行配置
@@ -636,23 +654,27 @@ export default defineConfig({
 // vs tsc 需要复杂配置 + Rollup/Webpack
 ```
 
-### Q2: workspace:* 和具体版本的区别？
+### Q2: workspace:\* 和具体版本的区别？
 
-**workspace:***:
+**workspace:\***:
+
 ```json
 "dependencies": {
   "@translink/runtime": "workspace:*"
 }
 ```
+
 - 开发时：链接到本地最新代码
 - 发布时：自动替换为实际版本（如 1.0.0）
 
 **具体版本**:
+
 ```json
 "dependencies": {
   "@translink/runtime": "^1.0.0"
 }
 ```
+
 - 始终使用 npm 发布的版本
 - 本地开发不便
 
@@ -666,6 +688,7 @@ npx madge --circular packages/**/src
 ```
 
 **解决方案**：
+
 1. **提取共享代码** - 创建独立的 shared 包
 2. **接口抽象** - 使用依赖注入
 3. **重新设计** - 调整包的职责划分
@@ -677,11 +700,13 @@ npx madge --circular packages/**/src
 ### ✅ DO
 
 1. **使用 workspace 协议**
+
    ```json
    "@translink/runtime": "workspace:*"
    ```
 
 2. **明确声明依赖**
+
    ```json
    "dependencies": {
      "commander": "^11.0.0"  // 不要依赖幽灵依赖
@@ -700,11 +725,13 @@ npx madge --circular packages/**/src
 ### ❌ DON'T
 
 1. **不要在包之间创建循环依赖**
+
    ```
    ❌ cli → runtime → cli
    ```
 
 2. **不要在 devDependencies 中放运行时依赖**
+
    ```json
    ❌ "devDependencies": {
         "axios": "^1.0.0"  // 运行时需要
@@ -743,4 +770,3 @@ npx madge --circular packages/**/src
 - [Turborepo 手册](https://turbo.build/repo/docs)
 - [TypeScript Project References](https://www.typescriptlang.org/docs/handbook/project-references.html)
 - [Monorepo 最佳实践](https://monorepo.tools/)
-

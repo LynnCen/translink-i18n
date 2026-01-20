@@ -21,9 +21,9 @@ export default defineConfig({
       localesDir: 'src/locales',
       defaultLanguage: 'zh-CN',
       hotReload: true,
-      lazyLoad: true
-    })
-  ]
+      lazyLoad: true,
+    }),
+  ],
 });
 ```
 
@@ -71,7 +71,10 @@ interface I18nPluginOptions {
 键生成器函数类型。
 
 ```typescript
-type KeyGeneratorFunction = (content: string, context?: TransformContext) => string;
+type KeyGeneratorFunction = (
+  content: string,
+  context?: TransformContext
+) => string;
 ```
 
 #### ResolveLanguageFileFunction
@@ -79,7 +82,10 @@ type KeyGeneratorFunction = (content: string, context?: TransformContext) => str
 语言文件解析器函数类型。
 
 ```typescript
-type ResolveLanguageFileFunction = (language: string, localesDir: string) => string;
+type ResolveLanguageFileFunction = (
+  language: string,
+  localesDir: string
+) => string;
 ```
 
 #### TransformContext
@@ -112,9 +118,9 @@ export default defineConfig({
   plugins: [
     createI18nPlugin({
       localesDir: 'src/locales',
-      defaultLanguage: 'zh-CN'
-    })
-  ]
+      defaultLanguage: 'zh-CN',
+    }),
+  ],
 });
 ```
 
@@ -140,16 +146,16 @@ export default defineConfig({
       keyGenerator: (content, context) => {
         // 自定义键生成逻辑
         const hash = crypto.createHash('md5').update(content).digest('hex');
-        return context?.componentName 
+        return context?.componentName
           ? `${context.componentName}_${hash.slice(0, 8)}`
           : hash.slice(0, 8);
       },
       resolveLanguageFile: (language, localesDir) => {
         // 自定义语言文件路径解析
         return `${localesDir}/${language}/index.json`;
-      }
-    })
-  ]
+      },
+    }),
+  ],
 });
 ```
 
@@ -161,10 +167,7 @@ export default defineConfig({
 
 ```typescript
 class I18nTransformer {
-  constructor(
-    options: ResolvedI18nPluginOptions,
-    config: ResolvedConfig
-  );
+  constructor(options: ResolvedI18nPluginOptions, config: ResolvedConfig);
 
   /** 转换代码 */
   transform(code: string, id: string): Promise<TransformResult | null>;
@@ -193,8 +196,14 @@ const message = $tsl('欢迎使用 TransLink I18n');
 const greeting = t('你好，{{name}}！', { name: 'World' });
 
 // 转换后 (开发模式)
-const message = t('hash_12345678', undefined, { defaultValue: '欢迎使用 TransLink I18n' });
-const greeting = t('hash_87654321', { name: 'World' }, { defaultValue: '你好，{{name}}！' });
+const message = t('hash_12345678', undefined, {
+  defaultValue: '欢迎使用 TransLink I18n',
+});
+const greeting = t(
+  'hash_87654321',
+  { name: 'World' },
+  { defaultValue: '你好，{{name}}！' }
+);
 
 // 转换后 (生产模式)
 const message = t('hash_12345678');
@@ -207,10 +216,7 @@ const greeting = t('hash_87654321', { name: 'World' });
 
 ```typescript
 class LanguageLoader {
-  constructor(
-    options: ResolvedI18nPluginOptions,
-    config: ResolvedConfig
-  );
+  constructor(options: ResolvedI18nPluginOptions, config: ResolvedConfig);
 
   /** 检查是否为虚拟模块 */
   isVirtualModule(id: string): boolean;
@@ -249,8 +255,8 @@ import enUS from 'virtual:i18n-language-en-US';
 // 虚拟模块内容 (由插件生成)
 // virtual:i18n-language-zh-CN
 export default {
-  "hash_12345678": "欢迎使用 TransLink I18n",
-  "hash_87654321": "你好，{{name}}！"
+  hash_12345678: '欢迎使用 TransLink I18n',
+  hash_87654321: '你好，{{name}}！',
 };
 ```
 
@@ -306,10 +312,7 @@ interface HMRUpdate {
 
 ```typescript
 class ConfigManager {
-  constructor(
-    root: string,
-    options: I18nPluginOptions
-  );
+  constructor(root: string, options: I18nPluginOptions);
 
   /** 解析配置选项 */
   resolveOptions(): Promise<ResolvedI18nPluginOptions>;
@@ -400,7 +403,7 @@ outputOptions(options: OutputOptions): OutputOptions
 ```typescript
 // 在应用中启用 HMR
 if (import.meta.hot) {
-  import.meta.hot.accept((newModule) => {
+  import.meta.hot.accept(newModule => {
     // 处理模块更新
     console.log('I18n module updated');
   });
@@ -422,9 +425,9 @@ export default defineConfig({
       onHotUpdate: (updates, server) => {
         console.log('I18n files updated:', updates);
         // 自定义更新逻辑
-      }
-    })
-  ]
+      },
+    }),
+  ],
 });
 ```
 
@@ -452,7 +455,7 @@ dist/
 ```typescript
 // 只有实际使用的翻译会被包含在最终构建中
 const usedTranslations = {
-  "hash_12345678": "欢迎使用 TransLink I18n",
+  hash_12345678: '欢迎使用 TransLink I18n',
   // 未使用的翻译会被移除
 };
 ```
@@ -467,22 +470,22 @@ export default defineConfig({
       // 生产模式下的优化选项
       minify: true,
       removeUnusedKeys: true,
-      compressTranslations: true
-    })
+      compressTranslations: true,
+    }),
   ],
   build: {
     rollupOptions: {
       output: {
         // 自定义 chunk 命名
-        chunkFileNames: (chunkInfo) => {
+        chunkFileNames: chunkInfo => {
           if (chunkInfo.name?.startsWith('i18n-language-')) {
             return 'locales/[name].[hash].js';
           }
           return 'assets/[name].[hash].js';
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -501,12 +504,12 @@ export default defineConfig({
       // 测试环境配置
       localesDir: 'src/locales',
       defaultLanguage: 'zh-CN',
-      hotReload: false // 测试时禁用 HMR
-    })
+      hotReload: false, // 测试时禁用 HMR
+    }),
   ],
   test: {
-    environment: 'jsdom'
-  }
+    environment: 'jsdom',
+  },
 });
 ```
 
@@ -516,8 +519,8 @@ export default defineConfig({
 // 在测试中模拟虚拟模块
 vi.mock('virtual:i18n-language-zh-CN', () => ({
   default: {
-    'hash_12345678': '测试翻译'
-  }
+    hash_12345678: '测试翻译',
+  },
 }));
 ```
 
@@ -535,9 +538,9 @@ export default defineConfig({
       // 调试回调
       onTransform: (code, id, result) => {
         console.log(`Transformed ${id}:`, result);
-      }
-    })
-  ]
+      },
+    }),
+  ],
 });
 ```
 
@@ -561,8 +564,8 @@ createI18nPlugin({
   performance: {
     enabled: true,
     logSlowTransforms: true,
-    threshold: 100 // 记录超过 100ms 的转换
-  }
+    threshold: 100, // 记录超过 100ms 的转换
+  },
 });
 ```
 
@@ -589,9 +592,9 @@ export default defineConfig({
     createI18nPlugin({
       localesDir: 'src/locales',
       defaultLanguage: 'zh-CN',
-      include: ['src/**/*.vue', 'src/**/*.ts']
-    })
-  ]
+      include: ['src/**/*.vue', 'src/**/*.ts'],
+    }),
+  ],
 });
 ```
 
@@ -609,9 +612,9 @@ export default defineConfig({
     createI18nPlugin({
       localesDir: 'src/locales',
       defaultLanguage: 'zh-CN',
-      include: ['src/**/*.{tsx,jsx,ts,js}']
-    })
-  ]
+      include: ['src/**/*.{tsx,jsx,ts,js}'],
+    }),
+  ],
 });
 ```
 
@@ -629,7 +632,7 @@ import type { I18nPluginOptions } from '@translink/vite-plugin-i18n';
 
 const pluginOptions: I18nPluginOptions = {
   localesDir: 'src/locales',
-  defaultLanguage: 'zh-CN'
+  defaultLanguage: 'zh-CN',
 };
 ```
 

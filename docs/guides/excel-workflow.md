@@ -104,25 +104,25 @@ npx translink build
 
 ### Translations 表结构
 
-| 列名 | 说明 | 是否必填 | 示例 |
-|------|------|---------|------|
-| key | 翻译键（哈希值） | ✅ 是 | `a1b2c3d4` |
-| zh-CN | 中文（原文） | ✅ 是 | `欢迎使用` |
-| en-US | 英文翻译 | ⚠️ 建议 | `Welcome` |
-| ja-JP | 日文翻译 | ⚠️ 建议 | `ようこそ` |
-| ... | 其他语言 | ⚠️ 建议 | ... |
-| context | 上下文 | ❌ 否 | `按钮文本` |
-| file | 文件路径 | ❌ 否 | `src/App.vue` |
-| line | 行号 | ❌ 否 | `42` |
-| status | 状态 | ❌ 否 | `pending` |
+| 列名    | 说明             | 是否必填 | 示例          |
+| ------- | ---------------- | -------- | ------------- |
+| key     | 翻译键（哈希值） | ✅ 是    | `a1b2c3d4`    |
+| zh-CN   | 中文（原文）     | ✅ 是    | `欢迎使用`    |
+| en-US   | 英文翻译         | ⚠️ 建议  | `Welcome`     |
+| ja-JP   | 日文翻译         | ⚠️ 建议  | `ようこそ`    |
+| ...     | 其他语言         | ⚠️ 建议  | ...           |
+| context | 上下文           | ❌ 否    | `按钮文本`    |
+| file    | 文件路径         | ❌ 否    | `src/App.vue` |
+| line    | 行号             | ❌ 否    | `42`          |
+| status  | 状态             | ❌ 否    | `pending`     |
 
 ### 示例
 
-|  key | zh-CN | en-US | ja-JP | context | file | line | status |
-|------|-------|-------|-------|---------|------|------|--------|
-| a1b2c3d4 | 欢迎使用 | Welcome | ようこそ | 标题 | src/App.vue | 10 | pending |
-| e5f6g7h8 | 用户名 | Username | ユーザー名 | 表单标签 | src/Login.vue | 25 | pending |
-| i9j0k1l2 | 提交 | Submit | 送信 | 按钮 | src/Form.vue | 50 | translated |
+| key      | zh-CN    | en-US    | ja-JP      | context  | file          | line | status     |
+| -------- | -------- | -------- | ---------- | -------- | ------------- | ---- | ---------- |
+| a1b2c3d4 | 欢迎使用 | Welcome  | ようこそ   | 标题     | src/App.vue   | 10   | pending    |
+| e5f6g7h8 | 用户名   | Username | ユーザー名 | 表单标签 | src/Login.vue | 25   | pending    |
+| i9j0k1l2 | 提交     | Submit   | 送信       | 按钮     | src/Form.vue  | 50   | translated |
 
 ### 状态说明
 
@@ -276,11 +276,13 @@ npx translink import --input translations.xlsx
 在 Excel 中可以使用一些技巧：
 
 1. **查找替换**:
+
    ```
    将所有 "用户" 替换为 "User"
    ```
 
 2. **填充序列**:
+
    ```
    对于编号类文本，可以使用填充功能
    ```
@@ -398,23 +400,23 @@ npx translink import --input translations/current.xlsx
 
 在 Excel 中充分利用 `status` 列：
 
-| 状态 | 说明 | 责任人 |
-|------|------|--------|
-| pending | 待翻译 | 翻译人员 |
+| 状态       | 说明   | 责任人   |
+| ---------- | ------ | -------- |
+| pending    | 待翻译 | 翻译人员 |
 | translated | 已翻译 | 审核人员 |
-| reviewed | 已审核 | QA |
-| approved | 已批准 | 项目经理 |
-| rejected | 需修改 | 翻译人员 |
+| reviewed   | 已审核 | QA       |
+| approved   | 已批准 | 项目经理 |
+| rejected   | 需修改 | 翻译人员 |
 
 ### 3. 建立术语表
 
 创建一个单独的 Excel 文件作为术语表：
 
-| 中文 | 英文 | 日文 | 说明 |
-|------|------|------|------|
-| 用户 | User | ユーザー | 统一使用 |
-| 提交 | Submit | 送信 | 按钮用 |
-| 确认 | Confirm | 確認 | 对话框用 |
+| 中文 | 英文    | 日文     | 说明     |
+| ---- | ------- | -------- | -------- |
+| 用户 | User    | ユーザー | 统一使用 |
+| 提交 | Submit  | 送信     | 按钮用   |
+| 确认 | Confirm | 確認     | 对话框用 |
 
 **使用方式**:
 
@@ -497,11 +499,13 @@ npm run i18n:update
 **A**: 可以使用以下方法：
 
 1. **分批导出**:
+
    ```bash
    npx translink export --filter new --output new-translations.xlsx
    ```
 
 2. **使用 CSV 格式**:
+
    ```bash
    npx translink export --format csv --output translations.csv
    ```
@@ -516,6 +520,7 @@ npm run i18n:update
 **A**: 如果多人编辑同一个翻译：
 
 1. **使用 --force 强制覆盖**:
+
    ```bash
    npx translink import --input translations.xlsx --force
    ```
@@ -541,7 +546,7 @@ npx translink export --format excel --output translations-fixed.xlsx
 
 ### Q: 如何只更新特定语言？
 
-**A**: 
+**A**:
 
 ```bash
 # 导出时只包含特定语言
@@ -563,13 +568,14 @@ npx translink import --input translations.xlsx
 
 ### Q: 翻译的上下文信息不够怎么办？
 
-**A**: 
+**A**:
 
 1. **查看源代码**:
    - Excel 中有 `file` 和 `line` 列
    - 直接定位到源代码查看
 
 2. **添加注释**:
+
    ```vue
    <!-- i18n-context: 这是登录页面的标题 -->
    <h1>{{ $tsl('欢迎登录') }}</h1>
@@ -591,4 +597,3 @@ npx translink import --input translations.xlsx
 
 **更新时间**: 2026-01-07  
 **版本**: 1.0.0
-

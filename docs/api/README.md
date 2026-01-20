@@ -14,35 +14,39 @@ TransLink I18n 工具集包含以下核心包：
 
 ### 按使用场景
 
-| 场景 | 相关 API |
-|------|----------|
-| 项目初始化 | [CLI - init](./cli.md#init) |
-| 文本提取 | [CLI - extract](./cli.md#extract) |
-| 语言文件构建 | [CLI - build](./cli.md#build) |
-| 云端同步 | [CLI - push/pull](./cli.md#push--pull) |
-| 运行时翻译 | [Runtime - I18nEngine](./runtime.md#i18nengine) |
-| Vue 集成 | [Runtime - Vue Adapter](./runtime.md#vue-adapter) |
-| React 集成 | [Runtime - React Adapter](./runtime.md#react-adapter) |
-| Vite 构建 | [Vite Plugin](./vite-plugin.md) |
+| 场景         | 相关 API                                              |
+| ------------ | ----------------------------------------------------- |
+| 项目初始化   | [CLI - init](./cli.md#init)                           |
+| 文本提取     | [CLI - extract](./cli.md#extract)                     |
+| 语言文件构建 | [CLI - build](./cli.md#build)                         |
+| 云端同步     | [CLI - push/pull](./cli.md#push--pull)                |
+| 运行时翻译   | [Runtime - I18nEngine](./runtime.md#i18nengine)       |
+| Vue 集成     | [Runtime - Vue Adapter](./runtime.md#vue-adapter)     |
+| React 集成   | [Runtime - React Adapter](./runtime.md#react-adapter) |
+| Vite 构建    | [Vite Plugin](./vite-plugin.md)                       |
 
 ### 按功能分类
 
 #### 🔧 开发工具
+
 - [CLI 命令](./cli.md#commands)
 - [配置文件](./cli.md#configuration)
 - [Vite 插件配置](./vite-plugin.md#configuration)
 
 #### 🌐 国际化核心
+
 - [I18n 引擎](./runtime.md#i18nengine)
 - [翻译函数](./runtime.md#translation-functions)
 - [语言管理](./runtime.md#language-management)
 
 #### ⚡ 性能优化
+
 - [缓存管理](./runtime.md#cache-manager)
 - [懒加载](./runtime.md#lazy-loading)
 - [热更新](./vite-plugin.md#hot-module-replacement)
 
 #### 🔌 框架集成
+
 - [Vue 3 适配器](./runtime.md#vue-adapter)
 - [React 适配器](./runtime.md#react-adapter)
 - [TypeScript 支持](./typescript.md)
@@ -52,26 +56,31 @@ TransLink I18n 工具集包含以下核心包：
 每个包的 API 文档都包含以下部分：
 
 ### 1. 概述 (Overview)
+
 - 包的主要功能和用途
 - 安装和基本使用方法
 - 核心概念介绍
 
 ### 2. API 参考 (API Reference)
+
 - 类和接口的详细说明
 - 方法和属性的完整列表
 - 参数类型和返回值说明
 
 ### 3. 类型定义 (Type Definitions)
+
 - TypeScript 类型定义
 - 接口和枚举说明
 - 泛型参数说明
 
 ### 4. 示例代码 (Examples)
+
 - 基本使用示例
 - 高级功能演示
 - 最佳实践代码
 
 ### 5. 配置选项 (Configuration)
+
 - 配置对象结构
 - 选项详细说明
 - 默认值和推荐设置
@@ -80,24 +89,24 @@ TransLink I18n 工具集包含以下核心包：
 
 ### 按关键词搜索
 
-| 关键词 | 相关 API |
-|--------|----------|
-| `extract` | [CLI.extract()](./cli.md#extract), [ASTExtractor](./cli.md#astextractor) |
-| `translate` | [I18nEngine.t()](./runtime.md#t), [useI18n()](./runtime.md#usei18n) |
-| `cache` | [CacheManager](./runtime.md#cache-manager), [缓存配置](./runtime.md#cache-options) |
-| `language` | [changeLanguage()](./runtime.md#changelanguage), [loadLanguage()](./runtime.md#loadlanguage) |
-| `plugin` | [createI18nPlugin()](./vite-plugin.md#createi18nplugin) |
-| `config` | [I18nConfig](./cli.md#i18nconfig), [插件配置](./vite-plugin.md#configuration) |
+| 关键词      | 相关 API                                                                                     |
+| ----------- | -------------------------------------------------------------------------------------------- |
+| `extract`   | [CLI.extract()](./cli.md#extract), [ASTExtractor](./cli.md#astextractor)                     |
+| `translate` | [I18nEngine.t()](./runtime.md#t), [useI18n()](./runtime.md#usei18n)                          |
+| `cache`     | [CacheManager](./runtime.md#cache-manager), [缓存配置](./runtime.md#cache-options)           |
+| `language`  | [changeLanguage()](./runtime.md#changelanguage), [loadLanguage()](./runtime.md#loadlanguage) |
+| `plugin`    | [createI18nPlugin()](./vite-plugin.md#createi18nplugin)                                      |
+| `config`    | [I18nConfig](./cli.md#i18nconfig), [插件配置](./vite-plugin.md#configuration)                |
 
 ### 按类型搜索
 
-| 类型 | 描述 | 文档链接 |
-|------|------|----------|
-| `class` | 主要的类定义 | 各包的主要类 |
-| `interface` | TypeScript 接口 | [类型定义](./typescript.md) |
-| `function` | 函数和方法 | 各包的方法列表 |
-| `type` | 类型别名 | [类型定义](./typescript.md) |
-| `enum` | 枚举类型 | [枚举定义](./typescript.md#enums) |
+| 类型        | 描述            | 文档链接                          |
+| ----------- | --------------- | --------------------------------- |
+| `class`     | 主要的类定义    | 各包的主要类                      |
+| `interface` | TypeScript 接口 | [类型定义](./typescript.md)       |
+| `function`  | 函数和方法      | 各包的方法列表                    |
+| `type`      | 类型别名        | [类型定义](./typescript.md)       |
+| `enum`      | 枚举类型        | [枚举定义](./typescript.md#enums) |
 
 ## 📚 相关文档
 
@@ -118,6 +127,7 @@ TransLink I18n 工具集包含以下核心包：
 ## 📝 API 变更日志
 
 ### v1.0.0 (初始版本)
+
 - 发布核心 API
 - CLI 工具完整功能
 - Runtime 库基础功能

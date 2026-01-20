@@ -5,6 +5,7 @@
 学习如何优化构建流程,减小包体积,提升运行性能。
 
 **学完本章,你将掌握**:
+
 - tsup 构建配置优化
 - Tree-shaking 策略
 - 类型声明生成
@@ -19,37 +20,38 @@
 ### 基础配置
 
 **tsup.config.ts**:
+
 ```typescript
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
   // 入口文件
   entry: ['src/index.ts'],
-  
+
   // 输出格式
   format: ['cjs', 'esm'],
-  
+
   // 目标环境
   target: 'node16',
-  
+
   // 类型声明
   dts: true,
-  
+
   // 清理输出目录
   clean: true,
-  
+
   // Source Map
   sourcemap: true,
-  
+
   // 代码分割
   splitting: false,
-  
+
   // 压缩
   minify: false,
-  
+
   // Tree-shaking
   treeshake: true,
-  
+
   // 外部依赖
   external: ['gogocode', 'vue', 'react'],
 });
@@ -66,7 +68,7 @@ export default defineConfig([
     dts: true,
     outDir: 'dist',
   },
-  
+
   // Vue 适配器
   {
     entry: ['src/vue.ts'],
@@ -75,7 +77,7 @@ export default defineConfig([
     external: ['vue'],
     outDir: 'dist',
   },
-  
+
   // React 适配器
   {
     entry: ['src/react.ts'],
@@ -212,11 +214,11 @@ const ExcelJS = await import('exceljs');
 class LRUCache<K, V> {
   private cache = new Map<K, V>();
   private maxSize: number;
-  
+
   constructor(maxSize: number) {
     this.maxSize = maxSize;
   }
-  
+
   get(key: K): V | undefined {
     const value = this.cache.get(key);
     if (value !== undefined) {
@@ -226,7 +228,7 @@ class LRUCache<K, V> {
     }
     return value;
   }
-  
+
   set(key: K, value: V): void {
     this.cache.delete(key);
     if (this.cache.size >= this.maxSize) {
@@ -246,16 +248,16 @@ class LRUCache<K, V> {
 class BatchUpdater {
   private pending: Set<Function> = new Set();
   private scheduled = false;
-  
+
   schedule(callback: Function) {
     this.pending.add(callback);
-    
+
     if (!this.scheduled) {
       this.scheduled = true;
       requestIdleCallback(() => this.flush());
     }
   }
-  
+
   flush() {
     this.pending.forEach(cb => cb());
     this.pending.clear();
@@ -284,7 +286,7 @@ describe('I18nEngine', () => {
         'en-US': { hello: 'Hello' },
       },
     });
-    
+
     expect(engine.translate('hello')).toBe('你好');
   });
 });
@@ -295,9 +297,13 @@ describe('I18nEngine', () => {
 ```typescript
 import { bench } from 'vitest';
 
-bench('translate performance', () => {
-  engine.translate('hello');
-}, { iterations: 10000 });
+bench(
+  'translate performance',
+  () => {
+    engine.translate('hello');
+  },
+  { iterations: 10000 }
+);
 ```
 
 ---
@@ -316,23 +322,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - uses: pnpm/action-setup@v2
         with:
           version: 8
-      
+
       - name: Install
         run: pnpm install
-      
+
       - name: Type Check
         run: pnpm type-check
-      
+
       - name: Test
         run: pnpm test
-      
+
       - name: Build
         run: pnpm build
-      
+
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
 ```
@@ -364,6 +370,7 @@ jobs:
 6. 构建与优化
 
 **下一步建议**:
+
 - 查看 [API 文档](../api/)
 - 阅读 [最佳实践](../best-practices.md)
 - 参与 [项目贡献](https://github.com/lynncen/translink-i18n)

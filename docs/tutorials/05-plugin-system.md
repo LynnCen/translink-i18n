@@ -5,6 +5,7 @@
 学习如何设计和实现可扩展的插件系统,支持第三方翻译管理平台集成。
 
 **学完本章,你将掌握**:
+
 - 插件接口设计原则
 - 插件生命周期管理
 - 插件加载和注册机制
@@ -26,23 +27,24 @@
 ### 插件接口设计
 
 **plugins/types.ts**:
+
 ```typescript
 export interface I18nPlugin {
   // 元数据
   metadata: PluginMetadata;
-  
+
   // 生命周期
   init?(context: PluginContext, config: PluginConfig): Promise<void> | void;
   cleanup?(): Promise<void> | void;
-  
+
   // 核心功能
   push?(data: PushTranslationsData): Promise<PushResult>;
   pull?(data: PullTranslationsData): Promise<PullResult>;
-  
+
   // 统计分析
   getStats?(): Promise<TranslationStats>;
   testConnection?(): Promise<boolean>;
-  
+
   // CLI 命令扩展
   registerCommands?(program: Command): void;
 }
@@ -69,11 +71,12 @@ export interface PluginContext {
 ### PluginLoader 实现
 
 **plugins/loader.ts**:
+
 ```typescript
 export class PluginLoader {
   private plugins: Map<string, I18nPlugin> = new Map();
   private context: PluginContext | null = null;
-  
+
   /**
    * 加载单个插件
    */
@@ -83,27 +86,27 @@ export class PluginLoader {
   ): Promise<I18nPlugin> {
     // 1. 解析插件路径
     const pluginPath = this.resolvePluginPath(pluginName);
-    
+
     // 2. 动态导入插件
     const pluginModule = await import(pluginPath);
     const plugin: I18nPlugin = pluginModule.default || pluginModule;
-    
+
     // 3. 验证插件接口
     this.validatePlugin(plugin);
-    
+
     // 4. 初始化插件
     if (plugin.init && this.context) {
       await plugin.init(this.context, pluginConfig || {});
     }
-    
+
     // 5. 注册插件
     this.plugins.set(plugin.metadata.name, plugin);
-    
+
     logger.success(`✓ 插件已加载: ${plugin.metadata.name}`);
-    
+
     return plugin;
   }
-  
+
   /**
    * 解析插件路径
    */
@@ -112,16 +115,16 @@ export class PluginLoader {
     if (pluginName.startsWith('.') || pluginName.startsWith('/')) {
       return resolve(process.cwd(), pluginName);
     }
-    
+
     // 2. npm 包名
     if (pluginName.startsWith('@translink/')) {
       return pluginName;
     }
-    
+
     // 3. 简写形式
     return `@translink/i18n-plugin-${pluginName}`;
   }
-  
+
   /**
    * 验证插件接口
    */
@@ -129,33 +132,33 @@ export class PluginLoader {
     if (!plugin.metadata) {
       throw new Error('插件缺少 metadata');
     }
-    
+
     if (!plugin.metadata.name) {
       throw new Error('插件缺少 name');
     }
-    
+
     if (!plugin.metadata.version) {
       throw new Error('插件缺少 version');
     }
   }
-  
+
   /**
    * 获取插件
    */
   getPlugin(name: string): I18nPlugin | undefined {
     return this.plugins.get(name);
   }
-  
+
   /**
    * 卸载插件
    */
   async unloadPlugin(name: string): Promise<void> {
     const plugin = this.plugins.get(name);
-    
+
     if (plugin && plugin.cleanup) {
       await plugin.cleanup();
     }
-    
+
     this.plugins.delete(name);
   }
 }
@@ -168,15 +171,16 @@ export class PluginLoader {
 ### PluginManager 实现
 
 **plugins/manager.ts**:
+
 ```typescript
 export class PluginManager {
   private loader: PluginLoader;
   private context: PluginContext | null = null;
-  
+
   constructor() {
     this.loader = new PluginLoader();
   }
-  
+
   /**
    * 初始化插件系统
    */
@@ -186,11 +190,11 @@ export class PluginManager {
   ): Promise<void> {
     this.context = context;
     this.loader.setContext(context);
-    
+
     // 加载所有插件
     for (const config of pluginConfigs) {
       const [name, options] = Array.isArray(config) ? config : [config, {}];
-      
+
       try {
         await this.loader.loadPlugin(name, options);
       } catch (error) {
@@ -199,41 +203,47 @@ export class PluginManager {
       }
     }
   }
-  
+
   /**
    * 推送翻译
    */
-  async push(pluginName: string, data: PushTranslationsData): Promise<PushResult> {
+  async push(
+    pluginName: string,
+    data: PushTranslationsData
+  ): Promise<PushResult> {
     const plugin = this.loader.getPlugin(pluginName);
-    
+
     if (!plugin) {
       throw new Error(`插件未找到: ${pluginName}`);
     }
-    
+
     if (!plugin.push) {
       throw new Error(`插件 ${pluginName} 不支持 push 操作`);
     }
-    
+
     return await plugin.push(data);
   }
-  
+
   /**
    * 拉取翻译
    */
-  async pull(pluginName: string, data: PullTranslationsData): Promise<PullResult> {
+  async pull(
+    pluginName: string,
+    data: PullTranslationsData
+  ): Promise<PullResult> {
     const plugin = this.loader.getPlugin(pluginName);
-    
+
     if (!plugin) {
       throw new Error(`插件未找到: ${pluginName}`);
     }
-    
+
     if (!plugin.pull) {
       throw new Error(`插件 ${pluginName} 不支持 pull 操作`);
     }
-    
+
     return await plugin.pull(data);
   }
-  
+
   /**
    * 注册插件命令
    */
@@ -244,7 +254,7 @@ export class PluginManager {
       }
     }
   }
-  
+
   /**
    * 清理资源
    */
@@ -273,6 +283,7 @@ export class PluginManager {
 ### 插件实现
 
 **src/index.ts**:
+
 ```typescript
 import type { I18nPlugin } from '@translink/i18n-cli/plugins/types';
 import { VikaClient } from './vika-client.js';
@@ -285,39 +296,39 @@ const VikaPlugin: I18nPlugin = {
     description: 'Vika 云端翻译管理插件',
     author: 'lynncen',
   },
-  
+
   // 私有变量
   privateClient: null as VikaClient | null,
   privateConfig: null as VikaConfig | null,
-  
+
   /**
    * 初始化
    */
   async init(context, config) {
     this.privateConfig = config as VikaConfig;
-    
+
     // 验证配置
     if (!this.privateConfig.apiKey) {
       throw new Error('缺少 Vika API Key');
     }
-    
+
     if (!this.privateConfig.datasheetId) {
       throw new Error('缺少 Vika Datasheet ID');
     }
-    
+
     // 创建客户端
     this.privateClient = new VikaClient(
       this.privateConfig.apiKey,
       this.privateConfig.datasheetId
     );
-    
+
     // 测试连接
     const isConnected = await this.privateClient.testConnection();
     if (!isConnected) {
       context.logger.warn('Vika 连接失败');
     }
   },
-  
+
   /**
    * 推送翻译
    */
@@ -325,13 +336,13 @@ const VikaPlugin: I18nPlugin = {
     if (!this.privateClient) {
       throw new Error('Vika 客户端未初始化');
     }
-    
+
     const result = await this.privateClient.pushTranslations({
       translations: data.translations,
       languages: data.languages,
       sourceLanguage: data.sourceLanguage,
     });
-    
+
     return {
       success: result.success,
       pushed: result.created + result.updated,
@@ -339,7 +350,7 @@ const VikaPlugin: I18nPlugin = {
       errors: result.errors,
     };
   },
-  
+
   /**
    * 拉取翻译
    */
@@ -347,19 +358,19 @@ const VikaPlugin: I18nPlugin = {
     if (!this.privateClient) {
       throw new Error('Vika 客户端未初始化');
     }
-    
+
     const result = await this.privateClient.pullTranslations({
       languages: data.languages,
       status: data.status,
     });
-    
+
     return {
       success: true,
       translations: result.records,
       total: result.total,
     };
   },
-  
+
   /**
    * 获取统计
    */
@@ -367,10 +378,10 @@ const VikaPlugin: I18nPlugin = {
     if (!this.privateClient) {
       throw new Error('Vika 客户端未初始化');
     }
-    
+
     return await this.privateClient.getTranslationStats();
   },
-  
+
   /**
    * 测试连接
    */
@@ -378,10 +389,10 @@ const VikaPlugin: I18nPlugin = {
     if (!this.privateClient) {
       return false;
     }
-    
+
     return await this.privateClient.testConnection();
   },
-  
+
   /**
    * 注册命令
    */
@@ -393,7 +404,7 @@ const VikaPlugin: I18nPlugin = {
       .action(async () => {
         // 命令实现
       });
-    
+
     // pull 命令
     program
       .command('vika:pull')
@@ -414,10 +425,11 @@ export default VikaPlugin;
 ### 在 CLI 中使用插件
 
 **translink.config.ts**:
+
 ```typescript
 export default {
   // ... 其他配置
-  
+
   plugins: [
     // 使用 npm 包
     '@translink/i18n-plugin-vika',
@@ -425,7 +437,7 @@ export default {
       apiKey: process.env.VIKA_API_KEY,
       datasheetId: process.env.VIKA_DATASHEET_ID,
     }],
-    
+
     // 使用本地插件
     [
       './my-plugin.ts',

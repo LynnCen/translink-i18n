@@ -53,6 +53,7 @@
 #### 问题1：怎么找到所有需要翻译的文字？
 
 你的代码可能有几百个文件，每个文件都有中文：
+
 - `Login.vue`: "登录"、"用户名"、"密码"
 - `Dashboard.vue`: "欢迎回来"、"今日数据"
 - `Settings.vue`: "设置"、"保存"、"取消"
@@ -64,6 +65,7 @@
 #### 问题2：翻译后的文字怎么管理？
 
 翻译完成后，你需要：
+
 - 保存中文版本
 - 保存英文版本
 - 保存日文版本
@@ -73,6 +75,7 @@
 **用JSON？** 开发者方便，但运营人员不会用。
 
 **我们的解决方案**：
+
 - 给开发者：生成JSON文件（像字典一样）
 - 给运营人员：生成Excel表格（像表格一样）
 - 两者可以互相转换
@@ -99,6 +102,7 @@
 ### 🏗️ 把复杂问题拆成简单模块
 
 想象你要建一栋房子，需要：
+
 1. **工具包（CLI）**：像工具箱，用来"找文字"、"生成翻译文件"
 2. **运行引擎（Runtime）**：像房子的水电系统，让翻译在运行时工作
 3. **构建插件（Vite Plugin）**：像装修工具，在打包时优化代码
@@ -159,6 +163,7 @@
 ```
 
 **为什么分开？**
+
 - 就像你不需要买整个工具箱，只需要一把螺丝刀
 - 如果你只用Runtime，就不需要安装CLI
 - 体积更小，速度更快
@@ -196,12 +201,12 @@ CLI工具
 
 **主要功能**：
 
-| 命令 | 作用 | 生活比喻 |
-|------|------|----------|
-| `extract` | 从代码中提取文字 | 像用吸尘器收集散落的文字 |
-| `build` | 构建翻译文件 | 像把收集的文字整理成字典 |
-| `export` | 导出Excel | 像把字典做成表格给运营看 |
-| `import` | 从Excel导入 | 像把运营填好的表格转回字典 |
+| 命令      | 作用             | 生活比喻                   |
+| --------- | ---------------- | -------------------------- |
+| `extract` | 从代码中提取文字 | 像用吸尘器收集散落的文字   |
+| `build`   | 构建翻译文件     | 像把收集的文字整理成字典   |
+| `export`  | 导出Excel        | 像把字典做成表格给运营看   |
+| `import`  | 从Excel导入      | 像把运营填好的表格转回字典 |
 
 ### 2️⃣ Runtime引擎：像"翻译大脑"
 
@@ -283,11 +288,13 @@ translink extract
 ```
 
 **做了什么**：
+
 - 扫描所有代码文件
 - 找出所有 `$tsl('...')` 里的中文
 - 生成一个"待翻译清单"
 
 **生成的文件**：
+
 ```json
 // locales/zh-CN.json（中文版本，作为参考）
 {
@@ -310,10 +317,10 @@ translink export --format excel
 
 **生成Excel表格**：
 
-| Key | zh-CN | en-US | ja-JP | Context | File | Line |
-|-----|-------|-------|-------|---------|------|------|
-| a1b2c3d4 | 登录 | (空) | (空) | button | Login.vue | 12 |
-| e5f6g7h8 | 用户名 | (空) | (空) | input | Login.vue | 15 |
+| Key      | zh-CN  | en-US | ja-JP | Context | File      | Line |
+| -------- | ------ | ----- | ----- | ------- | --------- | ---- |
+| a1b2c3d4 | 登录   | (空)  | (空)  | button  | Login.vue | 12   |
+| e5f6g7h8 | 用户名 | (空)  | (空)  | input   | Login.vue | 15   |
 
 **运营人员**：在Excel里填上英文和日文翻译
 
@@ -324,6 +331,7 @@ translink import --input translations.xlsx
 ```
 
 **更新后的文件**：
+
 ```json
 // locales/en-US.json（现在有翻译了）
 {
@@ -344,9 +352,9 @@ translink build
 
 ```vue
 <script setup>
-import { useI18n } from '@translink/i18n-runtime/vue'
+import { useI18n } from '@translink/i18n-runtime/vue';
 
-const { t } = useI18n()
+const { t } = useI18n();
 </script>
 
 <template>
@@ -365,15 +373,18 @@ const { t } = useI18n()
 **设计**：每个包都可以单独安装和使用
 
 **为什么**：
+
 - 如果你只需要Runtime，就不装CLI（省空间）
 - 如果你只需要CLI，就不装Runtime（省空间）
 - 就像买乐高，你只需要红色积木，就不买整盒
 
 **当前问题**：
+
 - Vite插件依赖CLI（不合理，应该独立）
 - CLI依赖Vika（不合理，应该可选）
 
 **未来改进**：
+
 - 每个包完全独立
 - 可选功能做成插件
 
@@ -382,11 +393,13 @@ const { t } = useI18n()
 **设计**：需要什么装什么，不需要的不装
 
 **为什么**：
+
 - 体积更小（只装需要的）
 - 速度更快（没有多余代码）
 - 更灵活（可以自由组合）
 
 **例子**：
+
 ```bash
 # 只装Runtime（最小，~50KB）
 npm install @translink/i18n-runtime
@@ -403,15 +416,18 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 **设计**：不强制使用云端服务（Vika），支持本地文件（Excel/JSON）
 
 **为什么**：
+
 - 有些团队不需要云端协作
 - 有些团队喜欢用Excel管理
 - 云端服务可能有API限制
 
 **当前问题**：
+
 - CLI强依赖Vika（不合理）
 - 没有Excel导出功能
 
 **未来改进**：
+
 - Vika变成可选插件
 - 内置Excel导出/导入
 - 支持多种工作流
@@ -421,11 +437,13 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 **设计**：解决实际问题，简单易用
 
 **为什么**：
+
 - 开发者要的是能用的工具，不是复杂的概念
 - 运营人员要的是能填的表格，不是技术文档
 - 简单比完美更重要
 
 **例子**：
+
 - Excel导出：运营人员直接填，不用学技术
 - JSON文件：开发者直接读，不用转换
 - 自动转换：写代码时用中文，工具自动处理
@@ -481,6 +499,7 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 **目标**：让项目能正常构建和开发
 
 **任务**：
+
 1. 修复TypeScript配置（分离开发/构建配置）
 2. 统一构建工具（都用tsup）
 3. 修复包依赖关系（让每个包独立）
@@ -488,6 +507,7 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 5. 优化Turbo配置（测试不依赖构建）
 
 **验收标准**：
+
 - ✅ 所有包能正确构建
 - ✅ 类型检查正常
 - ✅ 测试能独立运行
@@ -497,11 +517,13 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 **目标**：让每个包完全独立
 
 **任务**：
+
 1. 移除CLI对Vika的强依赖
 2. 移除Vite插件对CLI的依赖
 3. 确保Runtime完全独立
 
 **验收标准**：
+
 - ✅ 每个包可以单独安装使用
 - ✅ 不安装其他包也能工作
 
@@ -510,12 +532,14 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 **目标**：实现Excel工作流
 
 **任务**：
+
 1. 实现Excel导出功能
 2. 实现Excel导入功能
 3. 完善`init`命令
 4. 完善`extract`和`build`命令
 
 **验收标准**：
+
 - ✅ 可以导出Excel给运营
 - ✅ 可以从Excel导入翻译
 - ✅ 完整工作流可用
@@ -525,11 +549,13 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 **目标**：让Vika变成可选插件
 
 **任务**：
+
 1. 设计插件接口
 2. 实现插件加载机制
 3. 开发Vika插件（独立包）
 
 **验收标准**：
+
 - ✅ Vika插件可以独立安装
 - ✅ 不装Vika也能用CLI
 
@@ -538,12 +564,14 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 **目标**：完善测试和文档
 
 **任务**：
+
 1. 添加单元测试
 2. 添加集成测试
 3. 性能优化
 4. 文档更新
 
 **验收标准**：
+
 - ✅ 测试覆盖率>80%
 - ✅ 文档完整更新
 
@@ -582,4 +610,3 @@ npm install @translink/vite-plugin-i18n @translink/i18n-runtime
 **文档完成时间**：2026-01-03  
 **目标读者**：所有人（包括90岁奶奶）  
 **更新频率**：随项目进展更新
-

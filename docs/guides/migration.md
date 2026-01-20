@@ -28,6 +28,7 @@ npm install --save-dev @translink/i18n-cli
 ### 2. 配置迁移
 
 **Vue I18n 配置 (旧)**:
+
 ```typescript
 // src/i18n/index.ts
 import { createI18n } from 'vue-i18n';
@@ -39,14 +40,15 @@ const i18n = createI18n({
   fallbackLocale: 'en-US',
   messages: {
     'zh-CN': zh,
-    'en-US': en
-  }
+    'en-US': en,
+  },
 });
 
 export default i18n;
 ```
 
 **TransLink I18n 配置 (新)**:
+
 ```typescript
 // src/i18n/index.ts
 import { createI18n } from '@translink/i18n-runtime/vue';
@@ -56,13 +58,13 @@ const i18n = createI18n({
   fallbackLanguage: 'en-US',
   resources: {
     'zh-CN': () => import('virtual:i18n-language-zh-CN'),
-    'en-US': () => import('virtual:i18n-language-en-US')
+    'en-US': () => import('virtual:i18n-language-en-US'),
   },
   cache: {
     enabled: true,
     maxSize: 1000,
-    ttl: 10 * 60 * 1000
-  }
+    ttl: 10 * 60 * 1000,
+  },
 });
 
 export default i18n;
@@ -71,6 +73,7 @@ export default i18n;
 ### 3. 组件代码迁移
 
 **Vue I18n (旧)**:
+
 ```vue
 <template>
   <div>
@@ -92,6 +95,7 @@ const changeLocale = () => {
 ```
 
 **TransLink I18n (新)**:
+
 ```vue
 <template>
   <div>
@@ -116,6 +120,7 @@ const changeLocale = async () => {
 ### 4. 翻译文件迁移
 
 **Vue I18n 格式 (旧)**:
+
 ```json
 {
   "welcome": {
@@ -129,6 +134,7 @@ const changeLocale = async () => {
 ```
 
 **迁移步骤**:
+
 1. 运行文本提取：`npx translink-i18n extract`
 2. 手动映射旧的翻译到新的哈希键
 3. 构建新的语言文件：`npx translink-i18n build`
@@ -153,41 +159,41 @@ async function migrateVueI18nToTransLink() {
   const oldZhCN = JSON.parse(
     await fs.readFile('src/i18n/locales/zh-CN.json', 'utf-8')
   ) as VueI18nMessages;
-  
+
   // 读取提取的文本
   const extractedTexts = JSON.parse(
     await fs.readFile('src/locales/extracted-texts.json', 'utf-8')
   );
-  
+
   // 创建映射
   const newTranslations: TransLinkTranslations = {};
-  
+
   // 扁平化旧的翻译结构
   const flattenMessages = (obj: any, prefix = ''): Record<string, string> => {
     const result: Record<string, string> = {};
-    
+
     for (const [key, value] of Object.entries(obj)) {
       const newKey = prefix ? `${prefix}.${key}` : key;
-      
+
       if (typeof value === 'string') {
         result[newKey] = value;
       } else if (typeof value === 'object') {
         Object.assign(result, flattenMessages(value, newKey));
       }
     }
-    
+
     return result;
   };
-  
+
   const flatMessages = flattenMessages(oldZhCN);
-  
+
   // 映射到新的哈希键
   for (const extracted of extractedTexts) {
     // 尝试找到匹配的翻译
     const matchingTranslation = Object.entries(flatMessages).find(
       ([_, value]) => value === extracted.text
     );
-    
+
     if (matchingTranslation) {
       newTranslations[extracted.key] = matchingTranslation[1];
     } else {
@@ -195,13 +201,13 @@ async function migrateVueI18nToTransLink() {
       newTranslations[extracted.key] = extracted.text;
     }
   }
-  
+
   // 写入新的翻译文件
   await fs.writeFile(
     'src/locales/zh-CN.json',
     JSON.stringify(newTranslations, null, 2)
   );
-  
+
   console.log('Migration completed!');
 }
 
@@ -224,6 +230,7 @@ npm install --save-dev @translink/i18n-cli
 ### 2. 配置迁移
 
 **React i18next (旧)**:
+
 ```typescript
 // src/i18n.ts
 import i18n from 'i18next';
@@ -231,24 +238,23 @@ import { initReactI18next } from 'react-i18next';
 import zhCN from './locales/zh-CN.json';
 import enUS from './locales/en-US.json';
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      'zh-CN': { translation: zhCN },
-      'en-US': { translation: enUS }
-    },
-    lng: 'zh-CN',
-    fallbackLng: 'en-US',
-    interpolation: {
-      escapeValue: false
-    }
-  });
+i18n.use(initReactI18next).init({
+  resources: {
+    'zh-CN': { translation: zhCN },
+    'en-US': { translation: enUS },
+  },
+  lng: 'zh-CN',
+  fallbackLng: 'en-US',
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 export default i18n;
 ```
 
 **TransLink I18n (新)**:
+
 ```typescript
 // src/i18n.ts
 import { I18nEngine } from '@translink/i18n-runtime';
@@ -257,22 +263,23 @@ export const i18n = new I18nEngine({
   defaultLanguage: 'zh-CN',
   fallbackLanguage: 'en-US',
   loader: {
-    loadFunction: async (language) => {
+    loadFunction: async language => {
       const module = await import(`virtual:i18n-language-${language}`);
       return module.default;
-    }
+    },
   },
   cache: {
     enabled: true,
     maxSize: 1000,
-    ttl: 10 * 60 * 1000
-  }
+    ttl: 10 * 60 * 1000,
+  },
 });
 ```
 
 ### 3. 组件代码迁移
 
 **React i18next (旧)**:
+
 ```tsx
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
@@ -300,6 +307,7 @@ function MyComponent() {
 ```
 
 **TransLink I18n (新)**:
+
 ```tsx
 import React from 'react';
 import { useTranslation, Trans } from '@translink/i18n-runtime/react';
@@ -316,7 +324,7 @@ function MyComponent() {
         values={{ appName: 'our app' }}
         components={{ strong: <strong /> }}
       >
-        欢迎使用 <strong>{{appName}}</strong>！
+        欢迎使用 <strong>{{ appName }}</strong>！
       </Trans>
       <button onClick={() => changeLanguage('en-US')}>
         {$tsl('切换语言')}
@@ -329,6 +337,7 @@ function MyComponent() {
 ### 4. Provider 迁移
 
 **React i18next (旧)**:
+
 ```tsx
 // src/App.tsx
 import React, { Suspense } from 'react';
@@ -344,6 +353,7 @@ function App() {
 ```
 
 **TransLink I18n (新)**:
+
 ```tsx
 // src/App.tsx
 import React from 'react';
@@ -364,6 +374,7 @@ function App() {
 ### 1. 配置迁移
 
 **Nuxt I18n (旧)**:
+
 ```typescript
 // nuxt.config.ts
 export default defineNuxtConfig({
@@ -371,15 +382,16 @@ export default defineNuxtConfig({
   i18n: {
     locales: [
       { code: 'zh-CN', file: 'zh-CN.json' },
-      { code: 'en-US', file: 'en-US.json' }
+      { code: 'en-US', file: 'en-US.json' },
     ],
     defaultLocale: 'zh-CN',
-    langDir: 'locales/'
-  }
+    langDir: 'locales/',
+  },
 });
 ```
 
 **TransLink I18n + Nuxt (新)**:
+
 ```typescript
 // nuxt.config.ts
 export default defineNuxtConfig({
@@ -387,14 +399,15 @@ export default defineNuxtConfig({
   translink: {
     defaultLanguage: 'zh-CN',
     supportedLanguages: ['zh-CN', 'en-US'],
-    localesDir: 'locales'
-  }
+    localesDir: 'locales',
+  },
 });
 ```
 
 ### 2. 页面组件迁移
 
 **Nuxt I18n (旧)**:
+
 ```vue
 <template>
   <div>
@@ -411,6 +424,7 @@ const { locale, setLocale } = useI18n();
 ```
 
 **TransLink I18n (新)**:
+
 ```vue
 <template>
   <div>
@@ -452,21 +466,21 @@ async function analyzeCurrentI18n(): Promise<AnalysisResult> {
   const result: AnalysisResult = {
     translationFiles: [],
     translationKeys: new Set(),
-    usagePatterns: []
+    usagePatterns: [],
   };
 
   // 查找翻译文件
   const translationFiles = await glob('**/*.{json,js,ts}', {
-    ignore: ['node_modules/**', 'dist/**']
+    ignore: ['node_modules/**', 'dist/**'],
   });
 
   for (const file of translationFiles) {
     const content = await fs.readFile(file, 'utf-8');
-    
+
     // 检查是否包含翻译内容
     if (isTranslationFile(content)) {
       result.translationFiles.push(file);
-      
+
       // 提取翻译键
       const keys = extractTranslationKeys(content);
       keys.forEach(key => result.translationKeys.add(key));
@@ -475,16 +489,18 @@ async function analyzeCurrentI18n(): Promise<AnalysisResult> {
 
   // 分析使用模式
   const sourceFiles = await glob('src/**/*.{vue,tsx,jsx,ts,js}');
-  
+
   for (const file of sourceFiles) {
     const content = await fs.readFile(file, 'utf-8');
     const patterns = findTranslationUsage(content);
-    
-    result.usagePatterns.push(...patterns.map(pattern => ({
-      file,
-      pattern: pattern.pattern,
-      count: pattern.count
-    })));
+
+    result.usagePatterns.push(
+      ...patterns.map(pattern => ({
+        file,
+        pattern: pattern.pattern,
+        count: pattern.count,
+      }))
+    );
   }
 
   return result;
@@ -501,18 +517,22 @@ function extractTranslationKeys(content: string): string[] {
   return matches ? matches.map(m => m.replace(/["':\s]/g, '')) : [];
 }
 
-function findTranslationUsage(content: string): Array<{ pattern: string; count: number }> {
+function findTranslationUsage(
+  content: string
+): Array<{ pattern: string; count: number }> {
   // 查找翻译使用模式的逻辑
   const patterns = [
     { regex: /\$t\(['"`]([^'"`]+)['"`]\)/g, name: '$t()' },
     { regex: /t\(['"`]([^'"`]+)['"`]\)/g, name: 't()' },
-    { regex: /i18n\.t\(['"`]([^'"`]+)['"`]\)/g, name: 'i18n.t()' }
+    { regex: /i18n\.t\(['"`]([^'"`]+)['"`]\)/g, name: 'i18n.t()' },
   ];
 
-  return patterns.map(({ regex, name }) => ({
-    pattern: name,
-    count: (content.match(regex) || []).length
-  })).filter(p => p.count > 0);
+  return patterns
+    .map(({ regex, name }) => ({
+      pattern: name,
+      count: (content.match(regex) || []).length,
+    }))
+    .filter(p => p.count > 0);
 }
 ```
 
@@ -550,9 +570,9 @@ const migrationPlan: MigrationPlan = {
       '安装 TransLink I18n 依赖',
       '创建 i18n.config.ts 配置文件',
       '配置 Vite 插件',
-      '设置基础目录结构'
+      '设置基础目录结构',
     ],
-    estimatedTime: '2-4 小时'
+    estimatedTime: '2-4 小时',
   },
   phase2: {
     description: '翻译文件迁移',
@@ -560,9 +580,9 @@ const migrationPlan: MigrationPlan = {
       '分析现有翻译文件结构',
       '运行文本提取工具',
       '映射旧翻译到新哈希键',
-      '验证翻译完整性'
+      '验证翻译完整性',
     ],
-    estimatedTime: '4-8 小时'
+    estimatedTime: '4-8 小时',
   },
   phase3: {
     description: '代码迁移',
@@ -570,20 +590,15 @@ const migrationPlan: MigrationPlan = {
       '替换翻译函数调用',
       '更新组件导入',
       '修改语言切换逻辑',
-      '处理复杂的翻译场景'
+      '处理复杂的翻译场景',
     ],
-    estimatedTime: '8-16 小时'
+    estimatedTime: '8-16 小时',
   },
   phase4: {
     description: '测试和优化',
-    tasks: [
-      '运行单元测试',
-      '执行 E2E 测试',
-      '性能优化',
-      '文档更新'
-    ],
-    estimatedTime: '4-8 小时'
-  }
+    tasks: ['运行单元测试', '执行 E2E 测试', '性能优化', '文档更新'],
+    estimatedTime: '4-8 小时',
+  },
 };
 ```
 
@@ -615,7 +630,7 @@ export default defineConfig({
     patterns: ['src/**/*.{vue,ts,js,tsx,jsx}'],
     exclude: ['node_modules', 'dist', 'legacy-i18n/**'],
     functions: ['t', '$tsl', '$t'], // 包含旧的函数名以便迁移
-    extensions: ['.vue', '.ts', '.js', '.tsx', '.jsx']
+    extensions: ['.vue', '.ts', '.js', '.tsx', '.jsx'],
   },
   // ... 其他配置
 });
@@ -631,10 +646,10 @@ export default defineConfig({
       // 迁移期间的特殊配置
       migration: {
         enabled: true,
-        legacyFunctions: ['$t', 'i18n.t'] // 支持旧的函数名
-      }
-    })
-  ]
+        legacyFunctions: ['$t', 'i18n.t'], // 支持旧的函数名
+      },
+    }),
+  ],
 });
 ```
 
@@ -666,8 +681,8 @@ describe('Migration Validation', () => {
     const i18n = new I18nEngine({
       defaultLanguage: 'zh-CN',
       resources: {
-        'zh-CN': await import('../src/locales/zh-CN.json')
-      }
+        'zh-CN': await import('../src/locales/zh-CN.json'),
+      },
     });
 
     // 验证关键翻译是否存在
@@ -700,9 +715,7 @@ import path from 'path';
 import { glob } from 'glob';
 
 class AutoMigrator {
-  private readonly sourcePatterns = [
-    'src/**/*.{vue,tsx,jsx,ts,js}'
-  ];
+  private readonly sourcePatterns = ['src/**/*.{vue,tsx,jsx,ts,js}'];
 
   private readonly replacements = [
     // Vue I18n 迁移
@@ -710,20 +723,20 @@ class AutoMigrator {
       from: /\$t\(['"`]([^'"`]+)['"`](?:,\s*([^)]+))?\)/g,
       to: (match: string, key: string, params?: string) => {
         return `$tsl('${this.keyToText(key)}'${params ? `, ${params}` : ''})`;
-      }
+      },
     },
     // React i18next 迁移
     {
       from: /t\(['"`]([^'"`]+)['"`](?:,\s*([^)]+))?\)/g,
       to: (match: string, key: string, params?: string) => {
         return `$tsl('${this.keyToText(key)}'${params ? `, ${params}` : ''})`;
-      }
-    }
+      },
+    },
   ];
 
   async migrate() {
     const files = await glob(this.sourcePatterns);
-    
+
     for (const file of files) {
       await this.migrateFile(file);
     }
@@ -750,7 +763,10 @@ class AutoMigrator {
   private keyToText(key: string): string {
     // 将键名转换为实际文本的逻辑
     // 这需要根据您的具体情况实现
-    return key.replace(/\./g, ' ').replace(/([A-Z])/g, ' $1').trim();
+    return key
+      .replace(/\./g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
   }
 }
 
@@ -780,13 +796,13 @@ class TranslationMapper {
 
     for (const extracted of extractedTexts) {
       const bestMatch = this.findBestMatch(extracted.text, flatOldTranslations);
-      
+
       if (bestMatch) {
         mappings.push({
           oldKey: bestMatch.key,
           newHash: extracted.key,
           text: extracted.text,
-          confidence: bestMatch.confidence
+          confidence: bestMatch.confidence,
         });
       }
     }
@@ -821,8 +837,11 @@ class TranslationMapper {
 
     for (const translation of translations) {
       const confidence = this.calculateSimilarity(text, translation.value);
-      
-      if (confidence > 0.8 && (!bestMatch || confidence > bestMatch.confidence)) {
+
+      if (
+        confidence > 0.8 &&
+        (!bestMatch || confidence > bestMatch.confidence)
+      ) {
         bestMatch = { key: translation.key, confidence };
       }
     }
@@ -833,20 +852,20 @@ class TranslationMapper {
   private calculateSimilarity(str1: string, str2: string): number {
     // 简单的相似度计算，可以使用更复杂的算法
     if (str1 === str2) return 1;
-    
+
     const longer = str1.length > str2.length ? str1 : str2;
     const shorter = str1.length > str2.length ? str2 : str1;
-    
+
     if (longer.length === 0) return 1;
-    
+
     const distance = this.levenshteinDistance(longer, shorter);
     return (longer.length - distance) / longer.length;
   }
 
   private levenshteinDistance(str1: string, str2: string): number {
-    const matrix = Array(str2.length + 1).fill(null).map(() => 
-      Array(str1.length + 1).fill(null)
-    );
+    const matrix = Array(str2.length + 1)
+      .fill(null)
+      .map(() => Array(str1.length + 1).fill(null));
 
     for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
     for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
@@ -881,9 +900,7 @@ class TranslationMapper {
 // 渐进式迁移示例
 const useNewI18n = process.env.ENABLE_NEW_I18N === 'true';
 
-const t = useNewI18n 
-  ? useTransLinkI18n().t 
-  : useVueI18n().t;
+const t = useNewI18n ? useTransLinkI18n().t : useVueI18n().t;
 ```
 
 ### Q2: 如何处理复杂的翻译逻辑？
@@ -897,10 +914,10 @@ const t = useNewI18n
 ```typescript
 // 复杂翻译示例
 // 旧方式
-$t('items', { count }, { plural: count })
+$t('items', { count }, { plural: count });
 
 // 新方式
-$tsl('{{count}} 个项目', { count }, { count })
+$tsl('{{count}} 个项目', { count }, { count });
 ```
 
 ### Q3: 迁移后性能如何？
@@ -926,7 +943,7 @@ describe('Migration Validation', () => {
   it('should render same content as before', () => {
     const oldComponent = renderWithOldI18n(<MyComponent />);
     const newComponent = renderWithNewI18n(<MyComponent />);
-    
+
     expect(oldComponent.text()).toBe(newComponent.text());
   });
 });
@@ -935,42 +952,49 @@ describe('Migration Validation', () => {
 ## 📝 迁移检查清单
 
 ### 迁移前准备
+
 - [ ] 备份现有代码
 - [ ] 分析现有 i18n 使用情况
 - [ ] 制定迁移计划和时间表
 - [ ] 准备测试环境
 
 ### 安装和配置
+
 - [ ] 安装 TransLink I18n 依赖
 - [ ] 创建配置文件
 - [ ] 配置构建工具
 - [ ] 设置开发环境
 
 ### 翻译迁移
+
 - [ ] 提取现有翻译
 - [ ] 运行文本提取工具
 - [ ] 创建翻译映射
 - [ ] 验证翻译完整性
 
 ### 代码迁移
+
 - [ ] 更新导入语句
 - [ ] 替换翻译函数调用
 - [ ] 修改语言切换逻辑
 - [ ] 处理特殊场景
 
 ### 测试验证
+
 - [ ] 运行单元测试
 - [ ] 执行集成测试
 - [ ] 进行 E2E 测试
 - [ ] 性能测试
 
 ### 部署上线
+
 - [ ] 构建生产版本
 - [ ] 部署到测试环境
 - [ ] 用户验收测试
 - [ ] 生产环境部署
 
 ### 后续优化
+
 - [ ] 性能监控
 - [ ] 用户反馈收集
 - [ ] 持续优化

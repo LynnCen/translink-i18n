@@ -49,8 +49,8 @@ export const i18n = new I18nEngine({
   defaultLanguage: 'zh-CN',
   fallbackLanguage: 'en-US',
   interpolation: {
-    formatters
-  }
+    formatters,
+  },
 });
 
 // i18n/formatters.ts - 自定义格式化器
@@ -58,15 +58,15 @@ export const formatters = {
   currency: (value: number, currency = 'CNY') => {
     return new Intl.NumberFormat('zh-CN', {
       style: 'currency',
-      currency
+      currency,
     }).format(value);
   },
   date: (value: Date | string, format = 'short') => {
     const date = typeof value === 'string' ? new Date(value) : value;
     return new Intl.DateTimeFormat('zh-CN', {
-      dateStyle: format as any
+      dateStyle: format as any,
     }).format(date);
-  }
+  },
 };
 ```
 
@@ -76,42 +76,44 @@ export const formatters = {
 
 ```typescript
 // ✅ 好的做法
-$tsl('保存成功')
-$tsl('用户名不能为空')
-$tsl('确认删除此项目？')
+$tsl('保存成功');
+$tsl('用户名不能为空');
+$tsl('确认删除此项目？');
 
 // ❌ 避免的做法
-$tsl('您的数据已经成功保存到我们的服务器上，您可以继续进行其他操作')
-$tsl('抱歉，您输入的用户名字段似乎没有填写任何内容，请检查后重新输入')
+$tsl('您的数据已经成功保存到我们的服务器上，您可以继续进行其他操作');
+$tsl('抱歉，您输入的用户名字段似乎没有填写任何内容，请检查后重新输入');
 ```
 
 ### 2. 合理使用插值
 
 ```typescript
 // ✅ 推荐的插值使用
-$tsl('欢迎回来，{{username}}！')
-$tsl('您有 {{count}} 条新消息')
-$tsl('文件大小：{{size, fileSize}}')
+$tsl('欢迎回来，{{username}}！');
+$tsl('您有 {{count}} 条新消息');
+$tsl('文件大小：{{size, fileSize}}');
 
 // ❌ 避免复杂的插值
-$tsl('{{user.profile.firstName}} {{user.profile.lastName}} 在 {{formatDate(user.lastLogin)}} 最后登录')
+$tsl(
+  '{{user.profile.firstName}} {{user.profile.lastName}} 在 {{formatDate(user.lastLogin)}} 最后登录'
+);
 
 // ✅ 应该拆分为更简单的形式
-$tsl('{{fullName}} 最后登录时间：{{lastLogin, date}}')
+$tsl('{{fullName}} 最后登录时间：{{lastLogin, date}}');
 ```
 
 ### 3. 考虑上下文和语境
 
 ```typescript
 // ✅ 提供足够的上下文
-$tsl('删除用户') // 按钮文本
-$tsl('确认删除用户 {{username}}？') // 确认对话框
-$tsl('用户 {{username}} 已被删除') // 成功消息
+$tsl('删除用户'); // 按钮文本
+$tsl('确认删除用户 {{username}}？'); // 确认对话框
+$tsl('用户 {{username}} 已被删除'); // 成功消息
 
 // ❌ 缺乏上下文
-$tsl('删除')
-$tsl('确认？')
-$tsl('完成')
+$tsl('删除');
+$tsl('确认？');
+$tsl('完成');
 ```
 
 ### 4. 处理复数形式
@@ -125,7 +127,7 @@ $tsl('{{count}} 条评论', { count })
 {
   "hash_files": {
     "zero": "没有文件",
-    "one": "1 个文件", 
+    "one": "1 个文件",
     "other": "{{count}} 个文件"
   }
 }
@@ -142,8 +144,8 @@ export default defineConfig({
     algorithm: 'md5',
     length: 8,
     includeContext: true,
-    contextFields: ['componentName', 'functionName']
-  }
+    contextFields: ['componentName', 'functionName'],
+  },
 });
 ```
 
@@ -175,10 +177,10 @@ export default defineConfig({
 ```typescript
 // ✅ 使用上下文避免冲突
 // UserProfile.vue
-$tsl('编辑') // 生成 hash_UserProfile_edit
+$tsl('编辑'); // 生成 hash_UserProfile_edit
 
-// ProductList.vue  
-$tsl('编辑') // 生成 hash_ProductList_edit
+// ProductList.vue
+$tsl('编辑'); // 生成 hash_ProductList_edit
 
 // ❌ 不使用上下文可能导致冲突
 // 两个组件的"编辑"可能生成相同的哈希
@@ -195,8 +197,8 @@ const i18n = new I18nEngine({
     enabled: true,
     maxSize: 1000,
     ttl: 10 * 60 * 1000, // 10分钟
-    storage: 'memory'
-  }
+    storage: 'memory',
+  },
 });
 ```
 
@@ -229,11 +231,11 @@ export default defineConfig({
         manualChunks: {
           // 将语言文件分离到独立的 chunk
           'i18n-zh-CN': ['virtual:i18n-language-zh-CN'],
-          'i18n-en-US': ['virtual:i18n-language-en-US']
-        }
-      }
-    }
-  }
+          'i18n-en-US': ['virtual:i18n-language-en-US'],
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -244,8 +246,8 @@ export default defineConfig({
 export default defineConfig({
   output: {
     removeUnusedKeys: true, // 移除未使用的键
-    minify: true           // 压缩输出
-  }
+    minify: true, // 压缩输出
+  },
 });
 ```
 
@@ -259,8 +261,8 @@ export default defineConfig({
   vika: {
     apiKey: process.env.VIKA_API_KEY!,
     datasheetId: process.env.VIKA_DATASHEET_ID!,
-    autoSync: process.env.NODE_ENV === 'development'
-  }
+    autoSync: process.env.NODE_ENV === 'development',
+  },
 });
 ```
 
@@ -289,8 +291,8 @@ module.exports = {
     // 禁止硬编码中文字符串
     'no-chinese-string': 'error',
     // 要求使用 $tsl 而不是字符串字面量
-    'prefer-i18n-function': 'error'
-  }
+    'prefer-i18n-function': 'error',
+  },
 };
 ```
 
@@ -310,16 +312,16 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Extract texts
         run: npm run i18n:extract
-      
+
       - name: Check for missing translations
         run: npm run i18n:analyze
-      
+
       - name: Build language files
         run: npm run i18n:build
 ```
@@ -339,9 +341,9 @@ describe('I18n Engine', () => {
     i18n = new I18nEngine({
       defaultLanguage: 'zh-CN',
       resources: {
-        'zh-CN': { 'hash_greeting': '你好，{{name}}！' },
-        'en-US': { 'hash_greeting': 'Hello, {{name}}!' }
-      }
+        'zh-CN': { hash_greeting: '你好，{{name}}！' },
+        'en-US': { hash_greeting: 'Hello, {{name}}!' },
+      },
     });
   });
 
@@ -371,14 +373,14 @@ describe('UserProfile', () => {
     const i18n = createI18n({
       defaultLanguage: 'zh-CN',
       resources: {
-        'zh-CN': { 'hash_profile': '个人资料' }
-      }
+        'zh-CN': { hash_profile: '个人资料' },
+      },
     });
 
     const wrapper = mount(UserProfile, {
       global: {
-        plugins: [i18n]
-      }
+        plugins: [i18n],
+      },
     });
 
     expect(wrapper.text()).toContain('个人资料');
@@ -394,14 +396,14 @@ import { test, expect } from '@playwright/test';
 
 test('should switch language correctly', async ({ page }) => {
   await page.goto('/');
-  
+
   // 检查默认语言
   await expect(page.locator('h1')).toHaveText('欢迎使用我们的产品');
-  
+
   // 切换到英文
   await page.click('[data-testid="language-en"]');
   await expect(page.locator('h1')).toHaveText('Welcome to Our Product');
-  
+
   // 切换回中文
   await page.click('[data-testid="language-zh"]');
   await expect(page.locator('h1')).toHaveText('欢迎使用我们的产品');
@@ -420,9 +422,9 @@ export default defineConfig({
       // 生产环境配置
       minify: process.env.NODE_ENV === 'production',
       removeUnusedKeys: true,
-      compressTranslations: true
-    })
-  ]
+      compressTranslations: true,
+    }),
+  ],
 });
 ```
 
@@ -432,11 +434,13 @@ export default defineConfig({
 // 将语言文件部署到 CDN
 const i18n = new I18nEngine({
   loader: {
-    loadFunction: async (language) => {
-      const response = await fetch(`https://cdn.example.com/locales/${language}.json`);
+    loadFunction: async language => {
+      const response = await fetch(
+        `https://cdn.example.com/locales/${language}.json`
+      );
       return response.json();
-    }
-  }
+    },
+  },
 });
 ```
 
@@ -449,7 +453,7 @@ i18n.on('translationUsed', (key, language) => {
   analytics.track('translation_used', {
     key,
     language,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 });
 
@@ -472,7 +476,7 @@ i18n.on('translationMissing', (key, language) => {
       "lastUpdated": "2023-12-25T10:00:00Z"
     },
     "en-US": {
-      "version": "1.1.0", 
+      "version": "1.1.0",
       "hash": "def456",
       "lastUpdated": "2023-12-20T15:30:00Z"
     }
@@ -488,7 +492,7 @@ i18n.on('translationMissing', (key, language) => {
 // 验证插值参数
 const sanitizeParams = (params: Record<string, any>) => {
   const sanitized: Record<string, any> = {};
-  
+
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === 'string') {
       // 转义 HTML 特殊字符
@@ -502,7 +506,7 @@ const sanitizeParams = (params: Record<string, any>) => {
       sanitized[key] = value;
     }
   }
-  
+
   return sanitized;
 };
 
@@ -532,9 +536,11 @@ const safeT = (key: string, params?: Record<string, any>) => {
 
 ```html
 <!-- 如果使用动态加载，确保 CSP 允许相关域名 -->
-<meta http-equiv="Content-Security-Policy" 
-      content="script-src 'self' https://cdn.example.com; 
-               connect-src 'self' https://api.example.com;">
+<meta
+  http-equiv="Content-Security-Policy"
+  content="script-src 'self' https://cdn.example.com; 
+               connect-src 'self' https://api.example.com;"
+/>
 ```
 
 ## 📊 性能监控
@@ -546,20 +552,20 @@ const safeT = (key: string, params?: Record<string, any>) => {
 const performanceMonitor = {
   translationTime: new Map<string, number>(),
   cacheHitRate: 0,
-  
+
   measureTranslation(key: string, fn: () => string) {
     const start = performance.now();
     const result = fn();
     const end = performance.now();
-    
+
     this.translationTime.set(key, end - start);
     return result;
   },
-  
+
   getAverageTranslationTime() {
     const times = Array.from(this.translationTime.values());
     return times.reduce((sum, time) => sum + time, 0) / times.length;
-  }
+  },
 };
 ```
 
@@ -567,14 +573,17 @@ const performanceMonitor = {
 
 ```typescript
 // 定期清理缓存
-setInterval(() => {
-  const stats = i18n.getCacheStats();
-  
-  // 如果缓存命中率低于 50%，清理缓存
-  if (stats.hitRate < 0.5) {
-    i18n.clearCache();
-  }
-}, 5 * 60 * 1000); // 每 5 分钟检查一次
+setInterval(
+  () => {
+    const stats = i18n.getCacheStats();
+
+    // 如果缓存命中率低于 50%，清理缓存
+    if (stats.hitRate < 0.5) {
+      i18n.clearCache();
+    }
+  },
+  5 * 60 * 1000
+); // 每 5 分钟检查一次
 ```
 
 ## 🔧 调试技巧
@@ -587,8 +596,8 @@ if (process.env.NODE_ENV === 'development') {
   i18n.on('translationMissing', (key, language) => {
     console.warn(`🌐 Missing translation: ${key} for ${language}`);
   });
-  
-  i18n.on('languageChanged', (language) => {
+
+  i18n.on('languageChanged', language => {
     console.log(`🌐 Language changed to: ${language}`);
   });
 }
@@ -598,20 +607,25 @@ if (process.env.NODE_ENV === 'development') {
 
 ```typescript
 // 检查翻译覆盖率
-const checkTranslationCoverage = (baseLanguage: string, targetLanguage: string) => {
+const checkTranslationCoverage = (
+  baseLanguage: string,
+  targetLanguage: string
+) => {
   const baseKeys = new Set(Object.keys(i18n.getResources(baseLanguage) || {}));
-  const targetKeys = new Set(Object.keys(i18n.getResources(targetLanguage) || {}));
-  
+  const targetKeys = new Set(
+    Object.keys(i18n.getResources(targetLanguage) || {})
+  );
+
   const missingKeys = [...baseKeys].filter(key => !targetKeys.has(key));
   const extraKeys = [...targetKeys].filter(key => !baseKeys.has(key));
-  
+
   console.log(`Missing in ${targetLanguage}:`, missingKeys);
   console.log(`Extra in ${targetLanguage}:`, extraKeys);
-  
+
   return {
     coverage: (targetKeys.size / baseKeys.size) * 100,
     missingKeys,
-    extraKeys
+    extraKeys,
   };
 };
 ```

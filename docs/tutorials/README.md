@@ -180,4 +180,3 @@
 ---
 
 **准备好了吗？** [从第一课开始 →](./01-monorepo-architecture.md)
-
