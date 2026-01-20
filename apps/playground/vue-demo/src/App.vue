@@ -1,402 +1,384 @@
 <template>
   <div id="app">
-    <!-- 导航栏 -->
+    <!-- 顶部导航栏 -->
     <nav class="navbar">
       <div class="nav-brand">
-        <!-- 最佳实践：使用 t() 函数替代 $tsl() -->
-        <h1>{{ t('app.title') }}</h1>
+        <h1>{{ t('appTitle') }}</h1>
+        <span class="version">v1.0</span>
       </div>
-
-      <div class="nav-controls">
-        <LanguageSwitcher />
+      <div class="nav-info">
+        <span class="locale-info">{{ t('currentLocale') }}: {{ locale }}</span>
       </div>
     </nav>
 
     <!-- 加载状态 -->
-    <div v-if="!isReady" class="loading">
-      <div class="spinner" />
-      <p>{{ t('app.loading') }}</p>
+    <div v-if="!isReady" class="loading-screen">
+      <div class="spinner-large" />
+      <p>{{ t('initializing') }}</p>
     </div>
 
-    <!-- 主要内容 -->
-    <main v-else class="main-content">
-      <!-- 欢迎区域 -->
-      <section class="welcome-section">
-        <h2>{{ t('welcome.title') }}</h2>
-        <p>{{ t('welcome.description') }}</p>
-
-        <div class="feature-grid">
-          <FeatureCard
-            :title="t('features.codeTransform.title')"
-            :description="t('features.codeTransform.description')"
-            icon="🔄"
-          />
-          <FeatureCard
-            :title="t('features.hmr.title')"
-            :description="t('features.hmr.description')"
-            icon="⚡"
-          />
-          <FeatureCard
-            :title="t('features.lazyLoad.title')"
-            :description="t('features.lazyLoad.description')"
-            icon="📦"
-          />
-          <FeatureCard
-            :title="t('features.cache.title')"
-            :description="t('features.cache.description')"
-            icon="💾"
-          />
+    <!-- 主内容 -->
+    <div v-else class="container">
+      <!-- 侧边栏导航 -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h3>{{ t('demoScenes') }}</h3>
         </div>
-      </section>
+        <nav class="scene-nav">
+          <button
+            v-for="scene in scenes"
+            :key="scene.id"
+            :class="['scene-btn', { active: currentScene === scene.id }]"
+            @click="currentScene = scene.id"
+          >
+            <span class="scene-number">{{ scene.id.padStart(2, '0') }}</span>
+            <span class="scene-name">{{ t(scene.nameKey) }}</span>
+            <span class="scene-icon">{{ scene.icon }}</span>
+          </button>
+        </nav>
 
-      <!-- 交互演示区域 -->
-      <section class="demo-section">
-        <h3>{{ t('demo.title') }}</h3>
-
-        <div class="demo-grid">
-          <!-- 用户信息演示 -->
-          <div class="demo-card">
-            <h4>{{ t('demo.userProfile') }}</h4>
-            <UserProfile />
-          </div>
-
-          <!-- 表单演示 -->
-          <div class="demo-card">
-            <h4>{{ t('demo.contactForm') }}</h4>
-            <ContactForm />
-          </div>
-
-          <!-- 数据展示演示 -->
-          <div class="demo-card">
-            <h4>{{ t('demo.dataDisplay') }}</h4>
-            <DataDisplay />
-          </div>
-
-          <!-- 消息通知演示 -->
-          <div class="demo-card">
-            <h4>{{ t('demo.notifications') }}</h4>
-            <NotificationDemo />
-          </div>
+        <!-- 快捷操作 -->
+        <div class="sidebar-actions">
+          <h4>{{ t('quickActions') }}</h4>
+          <button @click="switchLanguage" class="action-btn">
+            🌐 {{ t('toggleLanguage') }}
+          </button>
+          <button @click="openDevTools" class="action-btn">
+            🛠️ {{ t('openDevTools') }}
+          </button>
         </div>
-      </section>
+      </aside>
 
-      <!-- 技术特性展示 -->
-      <section class="tech-section">
-        <h3>{{ t('tech.sectionTitle') }}</h3>
-        <TechFeatures />
-      </section>
-    </main>
+      <!-- 主内容区域 -->
+      <main class="main-content">
+        <div class="scene-container">
+          <component :is="currentComponent" :key="currentScene" />
+        </div>
 
-    <!-- 页脚 -->
-    <footer v-if="isReady" class="footer">
-      <p>{{ t('footer.copyright') }}</p>
-      <!-- 最佳实践：使用参数插值显示动态数据 -->
-      <p>
-        {{ t('footer.currentLanguage') }}: {{ languageName }} |
-        {{ t('footer.cacheHitRate') }}: {{ cacheHitRate }}%
-      </p>
-      <!-- 开发环境提示 -->
-      <p v-if="isDev" class="dev-hint">
-        {{ t('footer.devMode') }} -
-        <button class="inline-btn" @click="openDevTools">
-          {{ t('footer.openDevTools') }}
-        </button>
-      </p>
-    </footer>
+        <!-- 页脚信息 -->
+        <footer class="footer">
+          <p>{{ t('footerInfo') }}</p>
+          <div class="footer-stats">
+            <span>{{ t('footerLocale') }}: {{ locale }}</span>
+            <span>•</span>
+            <span>{{ t('footerScene') }}: {{ currentScene }}</span>
+            <span>•</span>
+            <span v-if="devToolsAvailable">
+              {{ t('footerDevtools') }}: {{ t('footerEnabled') }}
+            </span>
+          </div>
+        </footer>
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from '@translink/i18n-runtime/vue';
-import LanguageSwitcher from './components/LanguageSwitcher.vue';
-import FeatureCard from './components/FeatureCard.vue';
-import UserProfile from './components/UserProfile.vue';
-import ContactForm from './components/ContactForm.vue';
-import DataDisplay from './components/DataDisplay.vue';
-import NotificationDemo from './components/NotificationDemo.vue';
-import TechFeatures from './components/TechFeatures.vue';
+
+// 导入所有场景组件
+import BasicTranslation from './demos/01-BasicTranslation.vue';
+import LanguageSwitcher from './demos/02-LanguageSwitcher.vue';
+import ParameterInterpolation from './demos/03-ParameterInterpolation.vue';
+import PluralizationDemo from './demos/04-PluralizationDemo.vue';
+import DirectiveDemo from './demos/05-DirectiveDemo.vue';
+import TranslationComponent from './demos/06-TranslationComponent.vue';
+import GlobalProperties from './demos/07-GlobalProperties.vue';
+import LoadingStates from './demos/08-LoadingStates.vue';
+import DevToolsDemo from './demos/09-DevToolsDemo.vue';
 
 /**
- * 最佳实践 #1: 使用 useI18n Composition API
- * 提供响应式的语言切换和翻译函数
+ * TransLink I18n Vue 3 Demo
+ * 系统化验证 Runtime 提供的所有 API
  */
-const { t, locale, isReady } = useI18n();
+const { t, locale, setLocale, isReady } = useI18n();
 
-// 开发环境检测
-const isDev = import.meta.env.DEV;
+// 场景列表
+const scenes = [
+  { id: '01', nameKey: 'sceneBasicTranslation', icon: '📝', component: BasicTranslation },
+  { id: '02', nameKey: 'sceneLanguageSwitcher', icon: '🌐', component: LanguageSwitcher },
+  { id: '03', nameKey: 'sceneParameterInterpolation', icon: '🔤', component: ParameterInterpolation },
+  { id: '04', nameKey: 'scenePluralization', icon: '🔢', component: PluralizationDemo },
+  { id: '05', nameKey: 'sceneDirective', icon: '🎯', component: DirectiveDemo },
+  { id: '06', nameKey: 'sceneTranslationComponent', icon: '🧩', component: TranslationComponent },
+  { id: '07', nameKey: 'sceneGlobalProperties', icon: '🌍', component: GlobalProperties },
+  { id: '08', nameKey: 'sceneLoadingStates', icon: '⏳', component: LoadingStates },
+  { id: '09', nameKey: 'sceneDevtools', icon: '🛠️', component: DevToolsDemo },
+];
 
-// 响应式数据
-const cacheHitRate = ref(0);
+const currentScene = ref('01');
+const devToolsAvailable = ref(!!window.__TRANSLINK_DEVTOOLS__);
 
-/**
- * 最佳实践 #2: 使用 computed 缓存翻译结果
- * 避免不必要的重新计算
- */
-const languageName = computed(() => {
-  const langNames: Record<string, string> = {
-    'zh-CN': '中文',
-    'en-US': 'English',
-    'ja-JP': '日本語',
-  };
-  return langNames[locale.value] || locale.value;
+// 当前组件
+const currentComponent = computed(() => {
+  const scene = scenes.find(s => s.id === currentScene.value);
+  return scene?.component;
 });
 
-/**
- * 最佳实践 #3: 获取真实的缓存统计
- * 而不是模拟数据
- */
-const updateCacheStats = () => {
-  // 在实际项目中，这里应该从 i18n engine 获取真实统计
-  // const stats = i18n.getCacheStats();
-  // cacheHitRate.value = Math.round(stats.hitRate * 100);
-
-  // Demo 演示使用模拟数据
-  cacheHitRate.value = Math.floor(Math.random() * 20) + 80;
+// 切换语言
+const switchLanguage = async () => {
+  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN';
+  await setLocale(newLang);
 };
 
-/**
- * 最佳实践 #4: 提供 DevTools 快捷访问
- */
+// 打开 DevTools
 const openDevTools = () => {
-  if (typeof window !== 'undefined' && (window as any).__TRANSLINK_DEVTOOLS__) {
-    console.clear();
-    console.log('📊 TransLink I18n DevTools');
-    console.log('═══════════════════════════════════════');
-    (window as any).__TRANSLINK_DEVTOOLS__.printStats();
+  if (window.__TRANSLINK_DEVTOOLS__) {
+    window.__TRANSLINK_DEVTOOLS__.help();
   } else {
-    console.warn('DevTools not available.');
+    console.warn('DevTools not available');
   }
 };
-
-// 定时器引用
-let statsTimer: number;
-
-/**
- * 最佳实践 #5: 组件挂载时初始化
- */
-onMounted(() => {
-  // 初始更新
-  updateCacheStats();
-
-  // 定期更新统计信息
-  statsTimer = window.setInterval(() => {
-    updateCacheStats();
-  }, 5000);
-
-  // 开发环境提示
-  if (isDev) {
-    console.log('🚀 Vue Demo with TransLink I18n Best Practices');
-    console.log('💡 Press Ctrl+Shift+I to open DevTools');
-    console.log('📊 Try: window.__TRANSLINK_DEVTOOLS__.printStats()');
-  }
-});
-
-/**
- * 最佳实践 #6: 组件卸载时清理资源
- * 防止内存泄漏
- */
-onUnmounted(() => {
-  if (statsTimer) {
-    clearInterval(statsTimer);
-  }
-});
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 #app {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
-  color: #333;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .nav-brand h1 {
   margin: 0;
   font-size: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.version {
+  padding: 0.25rem 0.5rem;
+  background: #667eea;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
-.loading {
-  flex: 1;
+.locale-info {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.loading-screen {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  color: white;
   gap: 1rem;
 }
 
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+.spinner-large {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
-.main-content {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.welcome-section {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.welcome-section h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #2c3e50;
-}
-
-.welcome-section p {
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  max-width: 600px;
-  margin: 0 auto 2rem;
-}
-
-.feature-grid {
+.container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.demo-section {
-  margin-bottom: 3rem;
-}
-
-.demo-section h3 {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  text-align: center;
-  color: #2c3e50;
-}
-
-.demo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.demo-card {
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  max-width: 1400px;
+  margin: 2rem auto;
   background: white;
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e1e8ed;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  min-height: calc(100vh - 120px);
 }
 
-.demo-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+.sidebar {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
 }
 
-.demo-card h4 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
+.sidebar-header h3 {
+  margin: 0 0 1rem 0;
   color: #2c3e50;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
 }
 
-.tech-section {
-  margin-bottom: 3rem;
+.scene-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
 }
 
-.tech-section h3 {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  text-align: center;
-  color: #2c3e50;
+.scene-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
 }
 
-.footer {
-  background: #2c3e50;
+.scene-btn:hover {
+  background: #e8eaf6;
+  transform: translateX(4px);
+}
+
+.scene-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  text-align: center;
-  padding: 2rem;
-  margin-top: auto;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.footer p {
-  margin: 0.5rem 0;
+.scene-number {
+  font-weight: 600;
+  font-size: 0.85rem;
   opacity: 0.8;
 }
 
-.dev-hint {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  opacity: 1 !important;
+.scene-name {
+  flex: 1;
 }
 
-.inline-btn {
-  background: none;
-  border: none;
-  color: #42b983;
-  text-decoration: underline;
+.scene-icon {
+  font-size: 1.2rem;
+}
+
+.sidebar-actions {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e0e0e0;
+}
+
+.sidebar-actions h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
   cursor: pointer;
-  font-size: inherit;
-  padding: 0;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  text-align: left;
 }
 
-.inline-btn:hover {
-  color: #33a06f;
+.action-btn:hover {
+  background: #f5f7ff;
+  border-color: #667eea;
 }
 
-/* 响应式设计 */
+.main-content {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.scene-container {
+  min-height: 600px;
+}
+
+.footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e0e0e0;
+  text-align: center;
+  color: #666;
+}
+
+.footer p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.footer-stats {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .scene-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .scene-btn {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 150px;
+  }
+}
+
 @media (max-width: 768px) {
   .navbar {
-    flex-direction: column;
-    gap: 1rem;
-    position: static;
+    padding: 1rem;
+  }
+
+  .nav-brand h1 {
+    font-size: 1.2rem;
+  }
+
+  .container {
+    margin: 1rem;
   }
 
   .main-content {
     padding: 1rem;
   }
 
-  .welcome-section h2 {
-    font-size: 2rem;
-  }
-
-  .feature-grid,
-  .demo-grid {
-    grid-template-columns: 1fr;
+  .scene-btn {
+    flex: 1 1 100%;
   }
 }
 </style>
