@@ -63,6 +63,6 @@ export default defineConfig({
       command: 'cd apps/playground/react-demo && npm run dev',
       port: 3001,
       reuseExistingServer: !process.env.CI,
-    }
+    },
   ],
 });

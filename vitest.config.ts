@@ -33,7 +33,10 @@ export default defineConfig({
     alias: {
       '@translink/i18n-cli': resolve(__dirname, './packages/cli/src'),
       '@translink/i18n-runtime': resolve(__dirname, './packages/runtime/src'),
-      '@translink/vite-plugin': resolve(__dirname, './packages/vite-plugin/src'),
+      '@translink/vite-plugin': resolve(
+        __dirname,
+        './packages/vite-plugin/src'
+      ),
     },
   },
 });
