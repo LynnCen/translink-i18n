@@ -5,9 +5,7 @@
     "noEmit": true,
     "moduleResolution": "bundler"
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "dist",
     "node_modules",

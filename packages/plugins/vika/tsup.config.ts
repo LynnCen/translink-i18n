@@ -5,4 +5,3 @@ export default createConfig({
   entry: ['src/index.ts'],
   external: ['@translink/i18n-cli'],
 });
-

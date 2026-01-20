@@ -9,7 +9,14 @@ export default defineConfig({
   tsconfig: './tsconfig.build.json',
   sourcemap: true,
   clean: true,
-  external: ['vite', 'gogocode', 'fast-glob', 'chokidar', 'picocolors', 'magic-string'],
+  external: [
+    'vite',
+    'gogocode',
+    'fast-glob',
+    'chokidar',
+    'picocolors',
+    'magic-string',
+  ],
   banner: {
     js: '',
   },
@@ -18,7 +25,7 @@ export default defineConfig({
   minify: false,
   outExtension({ format }) {
     return {
-      js: format === 'cjs' ? '.cjs' : '.js'
-    }
-  }
+      js: format === 'cjs' ? '.cjs' : '.js',
+    };
+  },
 });
