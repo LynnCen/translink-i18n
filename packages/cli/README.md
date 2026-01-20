@@ -61,6 +61,7 @@ Build optimized language packages.
 Initialize configuration file.
 
 **Options**:
+
 - `--ts` - Generate TypeScript configuration (default)
 - `--js` - Generate JavaScript configuration
 
@@ -69,6 +70,7 @@ Initialize configuration file.
 Extract translation text.
 
 **Options**:
+
 - `--config <path>` - Specify configuration file
 - `--verbose` - Show detailed output
 
@@ -77,6 +79,7 @@ Extract translation text.
 Export translation data.
 
 **Options**:
+
 - `--format <type>` - Export format: excel (default), csv, json
 - `--output <path>` - Output file path
 - `--languages <langs>` - Specify languages, comma-separated
@@ -86,6 +89,7 @@ Export translation data.
 Import translation data.
 
 **Options**:
+
 - `--input <path>` - Input file path (required)
 - `--merge` - Merge mode (default: true)
 - `--force` - Force overwrite existing translations
@@ -95,6 +99,7 @@ Import translation data.
 Build language packages.
 
 **Options**:
+
 - `--minify` - Compress output
 - `--sourcemap` - Generate source map
 
@@ -103,6 +108,7 @@ Build language packages.
 Analyze translation coverage.
 
 **Options**:
+
 - `--detailed` - Show detailed analysis
 
 ### `translink translate`
@@ -110,6 +116,7 @@ Analyze translation coverage.
 Use AI to automatically translate text. 🆕
 
 **Options**:
+
 - `-f, --from <lang>` - Source language (default: configured default language)
 - `-t, --to <langs>` - Target languages, comma-separated
 - `-p, --provider <name>` - AI provider (deepseek|gemini|openai|anthropic)
@@ -217,9 +224,9 @@ export default {
       batchSize: 20,
       concurrency: 3,
       glossary: {
-        '应用': 'Application',
-        '用户': 'User',
-        '设置': 'Settings',
+        应用: 'Application',
+        用户: 'User',
+        设置: 'Settings',
       },
     },
   },
@@ -248,10 +255,13 @@ The CLI supports an extensible plugin system.
 export default {
   plugins: [
     // Use Vika plugin
-    ['@translink/plugin-vika', {
-      apiKey: process.env.VIKA_API_KEY,
-      datasheetId: process.env.VIKA_DATASHEET_ID,
-    }],
+    [
+      '@translink/plugin-vika',
+      {
+        apiKey: process.env.VIKA_API_KEY,
+        datasheetId: process.env.VIKA_DATASHEET_ID,
+      },
+    ],
   ],
 };
 ```

@@ -18,7 +18,7 @@ import { logger } from '../../utils/logger.js';
 export abstract class BaseAIProvider implements AIProvider {
   abstract name: string;
   abstract capabilities: ProviderCapabilities;
-  
+
   protected config: AIProviderConfig;
 
   constructor(config: AIProviderConfig) {
@@ -71,7 +71,8 @@ export abstract class BaseAIProvider implements AIProvider {
 
         totalTokens += result.tokensUsed || 0;
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         logger.warn(`翻译失败 [${item.key}]: ${errorMessage}`);
         // 失败时使用原文
         translations.push({
@@ -96,10 +97,8 @@ export abstract class BaseAIProvider implements AIProvider {
   async *translateStream?(
     params: TranslateParams
   ): AsyncGenerator<StreamChunk, TranslateResult> {
-    logger.debug(
-      `${this.name}: 使用默认translateStream实现（非真实流式）`
-    );
-    
+    logger.debug(`${this.name}: 使用默认translateStream实现（非真实流式）`);
+
     // 默认实现：直接调用translate并返回完整结果
     const result = await this.translate(params);
     yield {
@@ -117,9 +116,10 @@ export abstract class BaseAIProvider implements AIProvider {
     const { text, sourceLang, targetLang, context, glossary } = params;
 
     let prompt = context || this.config.contextPrompt || '';
-    
+
     if (!prompt) {
-      prompt = 'You are a professional translator. Translate the following text accurately while maintaining its original meaning, tone, and style.';
+      prompt =
+        'You are a professional translator. Translate the following text accurately while maintaining its original meaning, tone, and style.';
     }
 
     prompt += `\n\nSource Language: ${sourceLang}`;
@@ -163,13 +163,13 @@ export abstract class BaseAIProvider implements AIProvider {
   protected cleanTranslation(text: string): string {
     // 移除常见的markdown代码块标记
     text = text.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
-    
+
     // 移除引号（如果整个文本被引号包裹）
     text = text.replace(/^["'](.*)["']$/s, '$1');
-    
+
     // 移除首尾空白
     text = text.trim();
-    
+
     return text;
   }
 
@@ -187,10 +187,12 @@ export abstract class BaseAIProvider implements AIProvider {
       // 尝试匹配 [index] 格式
       const pattern = new RegExp(`^\\[${i}\\]\\s*(.+)$`);
       const line = lines.find(l => pattern.test(l));
-      
+
       if (line) {
         const match = line.match(pattern);
-        const text = match ? match[1].trim() : line.replace(`[${i}]`, '').trim();
+        const text = match
+          ? match[1].trim()
+          : line.replace(`[${i}]`, '').trim();
         translations.push({
           key: items[i].key,
           text: this.cleanTranslation(text),

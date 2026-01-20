@@ -72,7 +72,8 @@ export class RetryStrategy {
 
     // 指数退避算法
     let delay = Math.min(
-      this.config.initialDelay * Math.pow(this.config.backoffMultiplier, attempt),
+      this.config.initialDelay *
+        Math.pow(this.config.backoffMultiplier, attempt),
       this.config.maxDelay
     );
 

@@ -24,10 +24,7 @@ export class DeepSeekProvider extends BaseAIProvider {
     batchOptimized: false,
     maxBatchSize: 20,
     maxTokens: 64000,
-    supportedModels: [
-      'deepseek-chat',
-      'deepseek-coder',
-    ],
+    supportedModels: ['deepseek-chat', 'deepseek-coder'],
   };
 
   private client: OpenAI;

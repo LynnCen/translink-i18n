@@ -36,7 +36,7 @@ export class OpenAIProvider extends BaseAIProvider {
 
   constructor(config: AIProviderConfig) {
     super(config);
-    
+
     this.client = new OpenAI({
       apiKey: config.apiKey,
       baseURL: config.baseURL,
@@ -149,7 +149,7 @@ export class OpenAIProvider extends BaseAIProvider {
 
       // 返回最终结果
       const translatedText = this.cleanTranslation(fullText);
-      
+
       return {
         translatedText,
         sourceLang: params.sourceLang,

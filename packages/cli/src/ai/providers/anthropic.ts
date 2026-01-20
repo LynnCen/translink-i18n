@@ -70,7 +70,10 @@ export class AnthropicProvider extends BaseAIProvider {
         tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
       };
     } catch (error: unknown) {
-      const aiError = ErrorFactory.fromAnthropicError(error as Error, this.name);
+      const aiError = ErrorFactory.fromAnthropicError(
+        error as Error,
+        this.name
+      );
       logger.error(`Anthropic 翻译失败: ${aiError.message}`);
       throw aiError;
     }
@@ -102,7 +105,10 @@ export class AnthropicProvider extends BaseAIProvider {
         totalTokens: response.usage.input_tokens + response.usage.output_tokens,
       };
     } catch (error: unknown) {
-      const aiError = ErrorFactory.fromAnthropicError(error as Error, this.name);
+      const aiError = ErrorFactory.fromAnthropicError(
+        error as Error,
+        this.name
+      );
       logger.warn(`Anthropic 批量翻译失败，降级为逐条翻译: ${aiError.message}`);
       // 降级为逐条翻译
       return await super.translateBatch(params);
@@ -162,7 +168,10 @@ export class AnthropicProvider extends BaseAIProvider {
         tokensUsed: inputTokens + outputTokens,
       };
     } catch (error: unknown) {
-      const aiError = ErrorFactory.fromAnthropicError(error as Error, this.name);
+      const aiError = ErrorFactory.fromAnthropicError(
+        error as Error,
+        this.name
+      );
       logger.error(`Anthropic 流式翻译失败: ${aiError.message}`);
       throw aiError;
     }
