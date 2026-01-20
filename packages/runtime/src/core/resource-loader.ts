@@ -6,6 +6,20 @@
 import type { TranslationResource, LoaderResult } from '../types/index.js';
 import { EventEmitter } from '../utils/event-emitter.js';
 
+/**
+ * 最佳实践：定义明确的事件数据类型
+ */
+interface ResourceLoadedEventData {
+  language: string;
+  namespace: string;
+}
+
+interface ResourceLoadFailedEventData {
+  language: string;
+  namespace: string;
+  error: Error;
+}
+
 export interface LoaderOptions {
   loadPath: string;
   loadFunction?: (lng: string, ns: string) => Promise<TranslationResource>;
@@ -65,7 +79,11 @@ export class ResourceLoader extends EventEmitter {
 
       if (result.status === 'success') {
         this.loadedResources.set(resourceKey, result.data);
-        this.emit('resourceLoaded', language, namespace);
+        // 最佳实践：传递对象而不是多个参数
+        this.emit<ResourceLoadedEventData>('resourceLoaded', {
+          language,
+          namespace,
+        });
 
         // 设置自动重新加载
         if (this.options.reloadInterval && this.options.reloadInterval > 0) {
@@ -74,7 +92,12 @@ export class ResourceLoader extends EventEmitter {
 
         return result.data;
       } else {
-        this.emit('resourceLoadFailed', language, namespace, result.error!);
+        // 最佳实践：传递对象而不是多个参数
+        this.emit<ResourceLoadFailedEventData>('resourceLoadFailed', {
+          language,
+          namespace,
+          error: result.error!,
+        });
         throw result.error;
       }
     } finally {
@@ -194,7 +217,11 @@ export class ResourceLoader extends EventEmitter {
       ...resource,
     });
 
-    this.emit('resourceLoaded', language, namespace);
+    // 最佳实践：传递对象而不是多个参数
+    this.emit<ResourceLoadedEventData>('resourceLoaded', {
+      language,
+      namespace,
+    });
   }
 
   /**

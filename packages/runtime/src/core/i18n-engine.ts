@@ -7,8 +7,6 @@ import type {
   I18nOptions,
   TranslationResource,
   TranslationParams,
-  I18nEventType,
-  I18nEventHandler,
 } from '../types/index.js';
 import { EventEmitter } from '../utils/event-emitter.js';
 import { CacheManager } from '../cache/cache-manager.js';
@@ -17,6 +15,25 @@ import { Interpolator } from './interpolator.js';
 import { PluralResolver } from './plural-resolver.js';
 import { I18nDevTools } from './devtools.js';
 import { Logger, getDefaultLogger } from '../utils/logger.js';
+
+/**
+ * 最佳实践：定义明确的事件数据类型
+ */
+interface ResourceLoadedEventData {
+  language: string;
+  namespace: string;
+}
+
+interface ResourceLoadFailedEventData {
+  language: string;
+  namespace: string;
+  error: Error;
+}
+
+interface TranslationMissingEventData {
+  key: string;
+  language: string;
+}
 
 export class I18nEngine extends EventEmitter {
   private options: I18nOptions;
@@ -161,7 +178,11 @@ export class I18nEngine extends EventEmitter {
       );
 
       if (!translation) {
-        this.emit('translationMissing', translationKey, language);
+        // 最佳实践：传递对象而不是多个参数
+        this.emit<TranslationMissingEventData>('translationMissing', {
+          key: translationKey,
+          language,
+        });
         return defaultValue;
       }
 
@@ -416,33 +437,29 @@ export class I18nEngine extends EventEmitter {
   }
 
   /**
-   * 绑定资源加载器事件
+   * 最佳实践：绑定资源加载器事件，使用类型安全的事件数据
    */
   private bindResourceLoaderEvents(): void {
-    this.resourceLoader.on(
-      'resourceLoaded',
-      (language: string, namespace: string) => {
-        this.emit('resourceLoaded', language, namespace);
-        this.clearCacheForLanguage(language);
-      }
-    );
+    this.resourceLoader.on<ResourceLoadedEventData>('resourceLoaded', data => {
+      // 传递整个事件数据对象
+      this.emit<ResourceLoadedEventData>('resourceLoaded', data);
+      this.clearCacheForLanguage(data.language);
+    });
 
-    this.resourceLoader.on(
+    this.resourceLoader.on<ResourceLoadFailedEventData>(
       'resourceLoadFailed',
-      (language: string, namespace: string, error: Error) => {
-        this.emit('resourceLoadFailed', language, namespace, error);
+      data => {
+        // 传递整个事件数据对象
+        this.emit<ResourceLoadFailedEventData>('resourceLoadFailed', data);
       }
     );
   }
 
   /**
-   * 合并默认选项
+   * 最佳实践：合并默认选项，避免重复定义
    */
   private mergeDefaultOptions(options: I18nOptions): I18nOptions {
-    return {
-      defaultLanguage: 'en',
-      fallbackLanguage: 'en',
-      supportedLanguages: ['en'],
+    const defaults: Partial<I18nOptions> = {
       cache: {
         enabled: true,
         maxSize: 1000,
@@ -459,7 +476,19 @@ export class I18nEngine extends EventEmitter {
       },
       debug: false,
       logLevel: 'warn',
+    };
+
+    // 只在用户未提供时使用默认值
+    return {
+      ...defaults,
       ...options,
+      // 确保必需字段存在
+      defaultLanguage: options.defaultLanguage || 'en',
+      fallbackLanguage:
+        options.fallbackLanguage || options.defaultLanguage || 'en',
+      supportedLanguages: options.supportedLanguages || [
+        options.defaultLanguage || 'en',
+      ],
     };
   }
 
