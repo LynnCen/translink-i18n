@@ -33,7 +33,8 @@ export class I18nDevTools {
   private options: DevToolsOptions;
   private engine: I18nEngine;
   private missingKeys = new Map<string, MissingKeyInfo>();
-  private translationCount = new Map<string, number>();
+  // 最佳实践：移除未使用的字段
+  // private translationCount = new Map<string, number>();
 
   constructor(engine: I18nEngine, options: Partial<DevToolsOptions> = {}) {
     this.engine = engine;
@@ -53,13 +54,13 @@ export class I18nDevTools {
   }
 
   /**
-   * 初始化 DevTools
+   * 最佳实践：初始化 DevTools，使用类型安全的事件监听
    */
   private init(): void {
     // 监听翻译缺失事件
     if (this.options.trackMissingKeys) {
-      this.engine.on('translationMissing', (key: string, language: string) => {
-        this.trackMissingKey(key, language);
+      this.engine.on<{ key: string; language: string }>('translationMissing', (data) => {
+        this.trackMissingKey(data.key, data.language);
       });
     }
 

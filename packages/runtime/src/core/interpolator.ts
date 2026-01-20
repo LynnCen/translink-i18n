@@ -234,7 +234,7 @@ export class Interpolator {
    */
   private registerDefaultFormatters(): void {
     // 数字格式化
-    this.registerFormatter('number', (value, format, language, args) => {
+    this.registerFormatter('number', (value, _format, language, args) => {
       const num = Number(value);
       if (isNaN(num)) return String(value);
 
@@ -254,7 +254,7 @@ export class Interpolator {
     });
 
     // 货币格式化
-    this.registerFormatter('currency', (value, format, language, args) => {
+    this.registerFormatter('currency', (value, _format, language, args) => {
       const num = Number(value);
       if (isNaN(num)) return String(value);
 
@@ -266,7 +266,7 @@ export class Interpolator {
     });
 
     // 日期格式化
-    this.registerFormatter('date', (value, format, language, args) => {
+    this.registerFormatter('date', (value, _format, language, args) => {
       const date = value instanceof Date ? value : new Date(value);
       if (isNaN(date.getTime())) return String(value);
 
@@ -299,7 +299,7 @@ export class Interpolator {
     });
 
     // 时间格式化
-    this.registerFormatter('time', (value, format, language, args) => {
+    this.registerFormatter('time', (value, _format, language, args) => {
       const date = value instanceof Date ? value : new Date(value);
       if (isNaN(date.getTime())) return String(value);
 
@@ -311,7 +311,7 @@ export class Interpolator {
     });
 
     // 相对时间格式化
-    this.registerFormatter('relative', (value, format, language, args) => {
+    this.registerFormatter('relative', (value, _format, language, _args) => {
       const date = value instanceof Date ? value : new Date(value);
       if (isNaN(date.getTime())) return String(value);
 
@@ -348,7 +348,7 @@ export class Interpolator {
     });
 
     // 复数处理
-    this.registerFormatter('plural', (value, format, language, args) => {
+    this.registerFormatter('plural', (value, _format, _language, args) => {
       const count = Number(value);
       if (isNaN(count)) return String(value);
 
