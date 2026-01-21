@@ -410,35 +410,74 @@ npm install -D @translink/vite-plugin-i18n
 
 #### 2. Setup
 
+Create `src/i18n.ts`:
+
 ```typescript
-// main.tsx
-import { I18nProvider } from '@translink/i18n-runtime/react';
-import { i18nEngine } from './i18n';
+import { createI18n } from '@translink/i18n-runtime/react';
+
+// Create i18n instance with global t function
+export const { engine, t, Provider } = createI18n({
+  defaultLanguage: 'zh-CN',
+  fallbackLanguage: 'zh-CN',
+  supportedLanguages: ['zh-CN', 'en-US'],
+  loadFunction: async (lng) => {
+    return await import(`./locales/${lng}.json`);
+  },
+});
+```
+
+Setup in `main.tsx`:
+
+```typescript
+import { Provider } from './i18n';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <I18nProvider engine={i18nEngine}>
+    <Provider>
       <App />
-    </I18nProvider>
+    </Provider>
   </React.StrictMode>
 );
 ```
 
-#### 3. Usage
+#### 3. Usage in Components (Reactive)
 
 ```tsx
 import { useI18n } from '@translink/i18n-runtime/react';
 
 function App() {
-  const { t, tsl, setLocale } = useI18n();
+  const { t, locale, setLocale } = useI18n();
 
   return (
     <div>
-      <h1>{tsl('Welcome to TransLink I18n')}</h1>
-      <p>{t('hello', { name: 'John' })}</p>
-      <button onClick={() => setLocale('en-US')}>Switch Language</button>
+      <h1>{t('welcome')}</h1>
+      <p>{t('greeting', { name: 'John' })}</p>
+      <p>Current: {locale}</p>
+      <button onClick={() => setLocale('en-US')}>
+        Switch to English
+      </button>
     </div>
   );
+}
+```
+
+#### 4. Usage in Pure Functions (Non-Reactive)
+
+```typescript
+// utils/formatters.ts
+import { t } from './i18n';
+
+export function formatPrice(price: number) {
+  return `${price} ${t('currency')}`;
+}
+
+export class Validator {
+  static validateEmail(email: string) {
+    if (!email) {
+      return { valid: false, message: t('emailRequired') };
+    }
+    return { valid: true };
+  }
 }
 ```
 
