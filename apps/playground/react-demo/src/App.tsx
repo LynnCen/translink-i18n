@@ -1,119 +1,177 @@
-import React, { useState, useEffect } from 'react';
-import { I18nProvider } from '@translink/i18n-runtime/react';
-import { I18nEngine } from '@translink/i18n-runtime';
-import Header from './components/Header';
-import FeatureShowcase from './components/FeatureShowcase';
-import InteractiveDemo from './components/InteractiveDemo';
-import TechSpecs from './components/TechSpecs';
-import Footer from './components/Footer';
+import { useState } from 'react';
+import { useI18n } from '@translink/i18n-runtime/react';
+import { Provider } from './i18n';
 import './App.css';
 
-// 创建 i18n 引擎
-const i18nEngine = new I18nEngine({
-  defaultLanguage: 'zh-CN',
-  fallbackLanguage: 'zh-CN',
-  supportedLanguages: ['zh-CN', 'en-US', 'ja-JP'],
-  loadPath: './src/locales/{{lng}}.json',
-  cache: {
-    enabled: true,
-    maxSize: 1000,
-    ttl: 5 * 60 * 1000,
-    storage: 'localStorage',
-  },
-  debug: true,
-});
+// Import demo components
+import BasicTranslation from './demos/01-BasicTranslation';
+import LanguageSwitcher from './demos/02-LanguageSwitcher';
+import ParameterInterpolation from './demos/03-ParameterInterpolation';
+import PluralizationDemo from './demos/04-PluralizationDemo';
+import TranslationComponentDemo from './demos/05-TranslationComponent';
+import HooksDemo from './demos/06-HooksDemo';
+import LoadingStates from './demos/07-LoadingStates';
+import ErrorHandling from './demos/08-ErrorHandling';
+import PerformanceDemo from './demos/09-PerformanceDemo';
 
-function App() {
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// Scene configuration
+const scenes = [
+  { id: '01', nameKey: 'sceneBasicTranslation', icon: '📝', component: BasicTranslation },
+  { id: '02', nameKey: 'sceneLanguageSwitcher', icon: '🌐', component: LanguageSwitcher },
+  { id: '03', nameKey: 'sceneParameterInterpolation', icon: '🔤', component: ParameterInterpolation },
+  { id: '04', nameKey: 'scenePluralization', icon: '🔢', component: PluralizationDemo },
+  { id: '05', nameKey: 'sceneTranslationComponent', icon: '🧩', component: TranslationComponentDemo },
+  { id: '06', nameKey: 'sceneHooks', icon: '🪝', component: HooksDemo },
+  { id: '07', nameKey: 'sceneLoadingStates', icon: '⏳', component: LoadingStates },
+  { id: '08', nameKey: 'sceneErrorHandling', icon: '🚨', component: ErrorHandling },
+  { id: '09', nameKey: 'scenePerformance', icon: '⚡', component: PerformanceDemo },
+];
 
-  useEffect(() => {
-    // 初始化 i18n 引擎
-    i18nEngine
-      .init()
-      .then(() => {
-        setIsReady(true);
-      })
-      .catch(err => {
-        console.error('Failed to initialize i18n:', err);
-        setError($tsl('国际化系统初始化失败'));
-      });
-  }, []);
+/**
+ * 主要内容组件
+ *
+ * ✅ 最佳实践：使用 useI18n() 获取所有 i18n 功能
+ *
+ * useI18n 返回：
+ * - t: 翻译函数
+ * - locale: 当前语言
+ * - setLocale: 切换语言
+ * - isReady: 初始化状态
+ * - isLoading: 加载状态
+ * - error: 错误信息
+ */
+function AppContent() {
+  // ✅ 使用 useI18n 获取所有功能（推荐）
+  const { t, locale, setLocale, isReady } = useI18n();
+  console.log('t', t);
+  console.log('locale', locale);
+  console.log('setLocale', setLocale);
+  console.log('isReady', isReady);
 
-  if (error) {
-    return (
-      <div className="error-container">
-        <h1>❌ {error}</h1>
-        <p>{$tsl('请刷新页面重试')}</p>
-        <button onClick={() => window.location.reload()}>
-          {$tsl('刷新页面')}
-        </button>
-      </div>
-    );
-  }
+  const [currentScene, setCurrentScene] = useState('01');
+  const [devToolsAvailable] = useState(
+    typeof window !== 'undefined' && !!(window as any).__TRANSLINK_DEVTOOLS__
+  );
 
+  const CurrentComponent = scenes.find(s => s.id === currentScene)?.component;
+
+  const switchLanguage = async () => {
+    const newLang = locale === 'zh-CN' ? 'en-US' : 'zh-CN';
+    await setLocale(newLang);
+  };
+
+  const openDevTools = () => {
+    if (typeof window !== 'undefined' && (window as any).__TRANSLINK_DEVTOOLS__) {
+      (window as any).__TRANSLINK_DEVTOOLS__.help();
+    } else {
+      console.warn('DevTools not available');
+    }
+  };
+
+  // 显示加载状态
   if (!isReady) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <h2>{$tsl('正在加载国际化资源...')}</h2>
-        <p>{$tsl('请稍候，系统正在初始化多语言支持。')}</p>
+      <div className="loading-screen">
+        <div className="spinner-large" />
+        <p>Loading translations...</p>
       </div>
     );
   }
 
   return (
-    <I18nProvider
-      i18n={i18nEngine}
-      fallback={
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>{$tsl('加载中...')}</p>
+    <div id="app">
+      {/* Top Navigation Bar */}
+      <nav className="navbar">
+        <div className="nav-brand">
+          <h1>{t('appTitle')}</h1>
+          <span className="version">v1.0</span>
         </div>
-      }
-      errorFallback={({ error, retry }) => (
-        <div className="error-container">
-          <h2>❌ {$tsl('翻译加载失败')}</h2>
-          <p>{error.message}</p>
-          <button onClick={retry}>{$tsl('重试')}</button>
+        <div className="nav-info">
+          <span className="locale-info">
+            {t('currentLocale')}: {locale}
+          </span>
         </div>
-      )}
-    >
-      <div className="app">
-        <Header />
+      </nav>
 
+      {/* Main Content */}
+      <div className="container">
+        {/* Sidebar Navigation */}
+        <aside className="sidebar">
+          <div className="sidebar-header">
+            <h3>{t('demoScenes')}</h3>
+          </div>
+          <nav className="scene-nav">
+            {scenes.map(scene => (
+              <button
+                key={scene.id}
+                className={`scene-btn ${currentScene === scene.id ? 'active' : ''}`}
+                onClick={() => setCurrentScene(scene.id)}
+              >
+                <span className="scene-number">{scene.id}</span>
+                <span className="scene-name">{t(scene.nameKey)}</span>
+                <span className="scene-icon">{scene.icon}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Quick Actions */}
+          <div className="sidebar-actions">
+            <h4>{t('quickActions')}</h4>
+            <button onClick={switchLanguage} className="action-btn">
+              🌐 {t('toggleLanguage')}
+            </button>
+            <button onClick={openDevTools} className="action-btn">
+              🛠️ {t('openDevTools')}
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
         <main className="main-content">
-          {/* 欢迎区域 */}
-          <section className="hero-section">
-            <div className="hero-content">
-              <h1 className="hero-title">{$tsl('欢迎使用 TransLink I18n')}</h1>
-              <p className="hero-subtitle">
-                {$tsl(
-                  '现代化的国际化解决方案，支持 React、Vue 和原生 JavaScript'
-                )}
-              </p>
-              <div className="hero-actions">
-                <button className="btn btn-primary">{$tsl('开始使用')}</button>
-                <button className="btn btn-secondary">
-                  {$tsl('查看文档')}
-                </button>
-              </div>
+          <div className="scene-container">
+            {CurrentComponent && <CurrentComponent />}
+          </div>
+
+          {/* Footer Info */}
+          <footer className="footer">
+            <p>{t('footerInfo')}</p>
+            <div className="footer-stats">
+              <span>
+                {t('footerLocale')}: {locale}
+              </span>
+              <span>•</span>
+              <span>
+                {t('footerScene')}: {currentScene}
+              </span>
+              <span>•</span>
+              {devToolsAvailable && (
+                <span>
+                  {t('footerDevtools')}: {t('footerEnabled')}
+                </span>
+              )}
             </div>
-          </section>
-
-          {/* 功能展示 */}
-          <FeatureShowcase />
-
-          {/* 交互演示 */}
-          <InteractiveDemo />
-
-          {/* 技术规格 */}
-          <TechSpecs />
+          </footer>
         </main>
-
-        <Footer />
       </div>
-    </I18nProvider>
+    </div>
+  );
+}
+
+/**
+ * 根组件
+ *
+ * ✅ 最佳实践：使用 createI18n 创建的 Provider
+ *
+ * Provider 会自动处理：
+ * - 引擎初始化
+ * - 错误处理
+ * - 加载状态
+ */
+function App() {
+  return (
+    <Provider>
+      <AppContent />
+    </Provider>
   );
 }
 
