@@ -70,19 +70,165 @@ export const formatters = {
 };
 ```
 
+## ⚛️ React 最佳实践
+
+### 1. 使用 createI18n 初始化（推荐）
+
+```typescript
+// src/i18n.ts
+import { createI18n } from '@translink/i18n-runtime/react';
+
+export const { engine, t, Provider } = createI18n({
+  defaultLanguage: 'zh-CN',
+  fallbackLanguage: 'zh-CN',
+  supportedLanguages: ['zh-CN', 'en-US'],
+  loadFunction: async (lng) => {
+    return await import(`./locales/${lng}.json`);
+  },
+  cache: {
+    enabled: true,
+    maxSize: 1000,
+    ttl: 5 * 60 * 1000,
+    storage: 'memory',
+  },
+});
+
+// main.tsx
+import { Provider } from './i18n';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Provider>
+      <App />
+    </Provider>
+  </React.StrictMode>
+);
+```
+
+### 2. 在组件中使用 useI18n（推荐）
+
+```tsx
+import { useI18n } from '@translink/i18n-runtime/react';
+
+function MyComponent() {
+  // ✅ 推荐：一次性获取所有功能
+  const { t, locale, setLocale, isReady, isLoading } = useI18n();
+
+  if (!isReady) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <h1>{t('welcome')}</h1>
+      <p>{t('greeting', { name: 'User' })}</p>
+      <button onClick={() => setLocale('en-US')}>Switch Language</button>
+    </div>
+  );
+}
+
+// ❌ 不推荐：多次调用 Hook
+function BadComponent() {
+  const { t } = useTranslation();
+  const { locale } = useI18n();
+  const { setLocale } = useI18n(); // 重复调用
+  // ...
+}
+```
+
+### 3. 在纯函数中使用全局 t
+
+```typescript
+// utils/formatters.ts
+import { t } from './i18n';
+
+// ✅ 推荐：在纯函数中使用全局 t
+export function formatPrice(price: number) {
+  return `${price} ${t('currency')}`;
+}
+
+export class Validator {
+  static validateEmail(email: string) {
+    if (!email) {
+      return { valid: false, message: t('emailRequired') };
+    }
+    return { valid: true };
+  }
+}
+
+// 在异步函数中使用
+export async function fetchAndTranslate(url: string) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(t('networkError', { status: response.status }));
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(t('fetchFailed'), error);
+    throw error;
+  }
+}
+```
+
+### 4. 使用 Translation 组件处理富文本
+
+```tsx
+import { Translation } from '@translink/i18n-runtime/react';
+
+function RichTextComponent() {
+  return (
+    <Translation
+      i18nKey="termsText"
+      values={{ siteName: 'MyApp' }}
+      components={{
+        Link: ({ children }) => <a href="/terms">{children}</a>,
+        Bold: ({ children }) => <strong>{children}</strong>,
+      }}
+    />
+  );
+}
+```
+
+### 5. 处理加载状态
+
+```tsx
+import { useI18n } from '@translink/i18n-runtime/react';
+
+function App() {
+  const { t, isReady, isLoading, error } = useI18n();
+
+  // ✅ 推荐：处理所有状态
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  if (!isReady) {
+    return <div>Initializing...</div>;
+  }
+
+  return (
+    <div>
+      {isLoading && <div className="loading-indicator">Switching language...</div>}
+      <h1>{t('welcome')}</h1>
+    </div>
+  );
+}
+```
+
 ## ✍️ 翻译文本编写
 
 ### 1. 使用清晰、简洁的文本
 
 ```typescript
 // ✅ 好的做法
-$tsl('保存成功');
-$tsl('用户名不能为空');
-$tsl('确认删除此项目？');
+t('saveSuccess');
+t('usernameRequired');
+t('confirmDelete');
 
 // ❌ 避免的做法
-$tsl('您的数据已经成功保存到我们的服务器上，您可以继续进行其他操作');
-$tsl('抱歉，您输入的用户名字段似乎没有填写任何内容，请检查后重新输入');
+t('yourDataHasBeenSuccessfullySavedToOurServerYouCanContinueWithOtherOperations');
+t('sorryTheUsernameFieldYouEnteredDoesNotSeemToHaveAnyContentPleasCheckAndReenter');
 ```
 
 ### 2. 合理使用插值
@@ -538,7 +684,7 @@ const safeT = (key: string, params?: Record<string, any>) => {
 <!-- 如果使用动态加载，确保 CSP 允许相关域名 -->
 <meta
   http-equiv="Content-Security-Policy"
-  content="script-src 'self' https://cdn.example.com; 
+  content="script-src 'self' https://cdn.example.com;
                connect-src 'self' https://api.example.com;"
 />
 ```

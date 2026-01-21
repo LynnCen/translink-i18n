@@ -415,17 +415,62 @@ interface I18nProviderProps {
 }
 ```
 
-### useTranslation
+### createI18n
 
-React Hook for translations.
+创建 i18n 实例，返回全局 `t` 函数、`engine` 实例和 `Provider` 组件。
+
+**✅ 推荐：这是 React 项目的最佳实践**
 
 ```tsx
-import { useTranslation } from '@translink/i18n-runtime/react';
+import { createI18n } from '@translink/i18n-runtime/react';
+
+// 创建 i18n 实例
+export const { engine, t, Provider } = createI18n({
+  defaultLanguage: 'zh-CN',
+  fallbackLanguage: 'zh-CN',
+  supportedLanguages: ['zh-CN', 'en-US'],
+  loadFunction: async (lng) => {
+    return await import(`./locales/${lng}.json`);
+  },
+});
+
+// 在 main.tsx 中使用 Provider
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Provider>
+      <App />
+    </Provider>
+  </React.StrictMode>
+);
+
+// 在纯函数中使用全局 t
+export function formatPrice(price: number) {
+  return `${price} ${t('currency')}`;
+}
+```
+
+#### CreateI18nReturn
+
+```typescript
+interface CreateI18nReturn {
+  engine: I18nEngine;
+  t: (key: string, params?: TranslationParams, options?: TranslationOptions) => string;
+  Provider: React.ComponentType<{ children: React.ReactNode }>;
+}
+```
+
+### useI18n
+
+**✅ 推荐：主要 React Hook，一次性获取所有 i18n 功能**
+
+```tsx
+import { useI18n } from '@translink/i18n-runtime/react';
 
 function MyComponent() {
-  const { t, i18n, ready } = useTranslation();
+  // ✅ 推荐：一次性获取所有功能
+  const { t, locale, setLocale, isReady, isLoading } = useI18n();
 
-  if (!ready) {
+  if (!isReady) {
     return <div>Loading translations...</div>;
   }
 
@@ -433,9 +478,44 @@ function MyComponent() {
     <div>
       <h1>{t('welcome')}</h1>
       <p>{t('greeting', { name: 'React' })}</p>
-      <button onClick={() => i18n.setLocale('en-US')}>Switch to English</button>
+      <p>Current: {locale}</p>
+      <button onClick={() => setLocale('en-US')} disabled={isLoading}>
+        Switch to English
+      </button>
     </div>
   );
+}
+```
+
+#### UseI18nReturn
+
+```typescript
+interface I18nContextValue {
+  t: (key: string, params?: TranslationParams, options?: TranslationOptions) => string;
+  locale: string;
+  setLocale: (locale: string) => Promise<void>;
+  availableLocales: string[];
+  isReady: boolean;
+  isLoading: boolean;
+  error: Error | null;
+  engine: I18nEngine;
+}
+```
+
+### useTranslation
+
+支持命名空间的 Hook（内部使用 `useI18n`）。
+
+**注意：推荐直接使用 `useI18n()`，除非需要命名空间功能。**
+
+```tsx
+import { useTranslation } from '@translink/i18n-runtime/react';
+
+function MyComponent() {
+  // 带命名空间
+  const { t, i18n, ready } = useTranslation('common');
+
+  return <div>{t('key')}</div>; // 实际翻译 "common:key"
 }
 ```
 
@@ -443,41 +523,9 @@ function MyComponent() {
 
 ```typescript
 interface UseTranslationReturn {
-  t: (key: string, params?: TranslationParams) => string;
-  i18n: {
-    locale: string;
-    setLocale: (locale: string) => Promise<void>;
-    availableLocales: string[];
-    isReady: boolean;
-    isLoading: boolean;
-  };
+  t: (key: string, params?: TranslationParams, options?: TranslationOptions) => string;
+  i18n: I18nContextValue;
   ready: boolean;
-}
-```
-
-### useI18n
-
-React Hook for i18n instance.
-
-```tsx
-import { useI18n } from '@translink/i18n-runtime/react';
-
-function LanguageSwitcher() {
-  const { locale, setLocale, availableLocales, isLoading } = useI18n();
-
-  return (
-    <select
-      value={locale}
-      onChange={e => setLocale(e.target.value)}
-      disabled={isLoading}
-    >
-      {availableLocales.map(lang => (
-        <option key={lang} value={lang}>
-          {lang}
-        </option>
-      ))}
-    </select>
-  );
 }
 ```
 

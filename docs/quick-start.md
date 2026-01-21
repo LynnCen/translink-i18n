@@ -228,15 +228,30 @@ section {
 
 ### React 示例
 
+首先创建 `src/i18n.ts`:
+
+```typescript
+import { createI18n } from '@translink/i18n-runtime/react';
+
+export const { engine, t, Provider } = createI18n({
+  defaultLanguage: 'zh-CN',
+  fallbackLanguage: 'zh-CN',
+  supportedLanguages: ['zh-CN', 'en-US'],
+  loadFunction: async (lng) => {
+    return await import(`./locales/${lng}.json`);
+  },
+});
+```
+
 创建 `src/App.tsx`：
 
 ```tsx
-import React, { useState } from 'react';
-import { useTranslation } from '@translink/i18n-runtime/react';
+import { useState } from 'react';
+import { useI18n } from '@translink/i18n-runtime/react';
 import './App.css';
 
 function App() {
-  const { t, language, changeLanguage } = useTranslation();
+  const { t, locale, setLocale } = useI18n();
   const [message, setMessage] = useState('');
 
   const availableLanguages = ['zh-CN', 'en-US'];
@@ -251,9 +266,9 @@ function App() {
 
   const showMessage = () => {
     const messages = [
-      $tsl('这是一条测试消息！'),
-      $tsl('TransLink I18n 工作正常！'),
-      $tsl('恭喜您成功配置了国际化！'),
+      t('testMessage'),
+      t('workingMessage'),
+      t('successMessage'),
     ];
     setMessage(messages[Math.floor(Math.random() * messages.length)]);
   };
@@ -261,13 +276,13 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>{$tsl('欢迎使用 TransLink I18n')}</h1>
+        <h1>{t('welcome')}</h1>
         <div className="language-switcher">
           {availableLanguages.map(lang => (
             <button
               key={lang}
-              onClick={() => changeLanguage(lang)}
-              className={language === lang ? 'active' : ''}
+              onClick={() => setLocale(lang)}
+              className={locale === lang ? 'active' : ''}
             >
               {getLanguageName(lang)}
             </button>
@@ -277,24 +292,24 @@ function App() {
 
       <main>
         <section className="greeting">
-          <h2>{$tsl('个人信息')}</h2>
-          <p>{$tsl('姓名：{{name}}', { name: '张三' })}</p>
-          <p>{$tsl('邮箱：{{email}}', { email: 'zhangsan@example.com' })}</p>
+          <h2>{t('personalInfo')}</h2>
+          <p>{t('name', { name: '张三' })}</p>
+          <p>{t('email', { email: 'zhangsan@example.com' })}</p>
         </section>
 
         <section className="features">
-          <h2>{$tsl('主要功能')}</h2>
+          <h2>{t('mainFeatures')}</h2>
           <ul>
-            <li>{$tsl('自动文本提取')}</li>
-            <li>{$tsl('实时热更新')}</li>
-            <li>{$tsl('智能哈希生成')}</li>
-            <li>{$tsl('多框架支持')}</li>
+            <li>{t('autoExtract')}</li>
+            <li>{t('hotReload')}</li>
+            <li>{t('smartHash')}</li>
+            <li>{t('frameworkSupport')}</li>
           </ul>
         </section>
 
         <section className="demo">
-          <h2>{$tsl('交互演示')}</h2>
-          <button onClick={showMessage}>{$tsl('点击显示消息')}</button>
+          <h2>{t('interactiveDemo')}</h2>
+          <button onClick={showMessage}>{t('showMessage')}</button>
           {message && <p className="message">{message}</p>}
         </section>
       </main>
@@ -303,6 +318,23 @@ function App() {
 }
 
 export default App;
+```
+
+修改 `src/main.tsx`:
+
+```tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Provider } from './i18n';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Provider>
+      <App />
+    </Provider>
+  </React.StrictMode>
+);
 ```
 
 ## 🔨 第四步：初始化和提取
