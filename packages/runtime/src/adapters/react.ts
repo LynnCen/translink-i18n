@@ -179,19 +179,13 @@ export function I18nProvider({
 }
 
 /**
- * useTranslation Hook
+ * useTranslation Hook - 支持 namespace
+ *
+ * @param ns - 命名空间
+ * @returns { t, i18n, ready }
  */
 export function useTranslation(ns?: string): UseTranslationReturn {
-  const context = useContext(I18nContext);
-
-  if (!context) {
-    throw new Error(
-      'useTranslation must be used within I18nProvider. ' +
-        'Make sure to wrap your app with <I18nProvider>.'
-    );
-  }
-
-  const { engine } = context;
+  const context = useI18n();
 
   // 带命名空间的翻译函数
   const t = useCallback(
@@ -201,9 +195,9 @@ export function useTranslation(ns?: string): UseTranslationReturn {
       options?: { lng?: string; defaultValue?: string }
     ) => {
       const fullKey = ns ? `${ns}:${key}` : key;
-      return engine.t(fullKey, params, options);
+      return context.engine.t(fullKey, params, options);
     },
-    [engine, ns]
+    [context.engine, ns]
   );
 
   return {
@@ -214,7 +208,9 @@ export function useTranslation(ns?: string): UseTranslationReturn {
 }
 
 /**
- * useI18n Hook（访问完整的 i18n 实例）
+ * useI18n Hook - 主要 Hook
+ *
+ * @returns { t, locale, setLocale, availableLocales, isReady, isLoading, error, engine }
  */
 export function useI18n(): I18nContextValue {
   const context = useContext(I18nContext);
@@ -368,6 +364,47 @@ export function withTranslation<P extends object>(
 }
 
 /**
+ * 创建 I18n 实例
+ *
+ * @param options - I18n 配置选项
+ * @returns { engine, t, Provider } - engine: 引擎实例, t: 全局翻译函数, Provider: React Provider
+ */
+export function createI18n(options: ReactI18nOptions): {
+  engine: I18nEngine;
+  t: (
+    key: string,
+    params?: TranslationParams,
+    options?: {
+      lng?: string;
+      defaultValue?: string;
+    }
+  ) => string;
+  Provider: ComponentType<{ children: ReactNode }>;
+} {
+  const engine = new I18nEngine(options);
+
+  // 全局 t 函数
+  const t = (
+    key: string,
+    params?: TranslationParams,
+    options?: {
+      lng?: string;
+      defaultValue?: string;
+    }
+  ) => {
+    return engine.t(key, params, options);
+  };
+
+  // Provider 组件
+  const Provider = ({ children }: { children: ReactNode }) => {
+    return React.createElement(I18nProvider, { i18n: engine, children });
+  };
+
+  return { engine, t, Provider };
+}
+
+/**
+ * @deprecated 使用 createI18n 代替
  * 创建带初始化的 I18n 实例
  */
 export async function createI18nWithInit(options: ReactI18nOptions): Promise<{

@@ -4,10 +4,11 @@
 
 export {
   I18nProvider,
-  useTranslation,
   useI18n,
+  useTranslation,
   Translation,
   withTranslation,
+  createI18n,
   createI18nWithInit,
 } from './adapters/react.js';
 
@@ -18,7 +19,8 @@ export type {
   TranslationProps,
 } from './adapters/react.js';
 
-// 重新导出核心类型
+// 重新导出核心类型和类
+export { I18nEngine } from './core/i18n-engine.js';
 export type {
   I18nOptions,
   TranslationParams,
