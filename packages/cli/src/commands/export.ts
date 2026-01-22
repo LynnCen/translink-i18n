@@ -175,7 +175,18 @@ async function loadTranslations(
     const translationValues: Record<string, string> = {};
 
     for (const language of languages) {
-      translationValues[language] = languageData[language]?.[key] || '';
+      const rawValue = languageData[language]?.[key];
+      // ✅ 容错处理：非字符串统一处理为空字符串
+      if (typeof rawValue === 'string') {
+        translationValues[language] = rawValue;
+      } else {
+        translationValues[language] = '';
+        if (rawValue !== undefined && rawValue !== null) {
+          logger.warn(
+            `[容错] 键 "${key}" 在 ${language} 中的值不是字符串，已处理为空字符串。原始值类型: ${typeof rawValue}`
+          );
+        }
+      }
     }
 
     translations.push({

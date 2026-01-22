@@ -380,7 +380,20 @@ async function mergeTranslations(
       if (existsSync(languageFile)) {
         try {
           const content = readFileSync(languageFile, 'utf-8');
-          languageData[language] = JSON.parse(content);
+          const rawData = JSON.parse(content);
+
+          // ✅ 容错处理：过滤非字符串值
+          const filteredData: Record<string, string> = {};
+          for (const [key, value] of Object.entries(rawData)) {
+            if (typeof value === 'string') {
+              filteredData[key] = value;
+            } else {
+              logger.warn(
+                `[容错] 语言文件 ${language}.json 中的键 "${key}" 的值不是字符串，已跳过。原始值类型: ${typeof value}`
+              );
+            }
+          }
+          languageData[language] = filteredData;
         } catch (error) {
           logger.warn(`无法读取 ${language} 语言文件: ${error}`);
           languageData[language] = {};
@@ -405,6 +418,14 @@ async function mergeTranslations(
     for (const [language, translation] of Object.entries(item.translations)) {
       if (!languageData[language]) {
         languageData[language] = {};
+      }
+
+      // ✅ 容错处理：确保 translation 是字符串
+      if (typeof translation !== 'string') {
+        logger.warn(
+          `[容错] 键 "${item.key}" 在 ${language} 中的值不是字符串，已跳过。原始值类型: ${typeof translation}`
+        );
+        continue;
       }
 
       const existing = languageData[language][item.key];
