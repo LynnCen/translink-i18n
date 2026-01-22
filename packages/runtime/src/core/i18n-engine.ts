@@ -139,7 +139,6 @@ export class I18nEngine extends EventEmitter {
     try {
       // ✅ 新架构：生成 hash key
       const hashKey = generateHash(text);
-      console.log('hashKey', hashKey);
 
       // 生成缓存键
       const cacheKey = `${language}:${hashKey}:${JSON.stringify(params || {})}`;

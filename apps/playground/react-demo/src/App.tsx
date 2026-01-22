@@ -64,8 +64,6 @@ function AppContent() {
     }
   };
 
-  console.log('基础翻译', t('基础翻译'));
-  console.log('engine', engine);
 
 
   // 显示加载状态

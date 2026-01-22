@@ -33,11 +33,6 @@ export const { engine, t, Provider } = createI18n({
     escapeValue: true,
   },
 
-  // 复数化配置
-  pluralization: {
-    simplifyPluralSuffix: true,
-  },
-
   // 启用 DevTools
   devTools: {
     enabled: true,
