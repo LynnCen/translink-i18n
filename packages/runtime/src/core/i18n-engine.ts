@@ -12,21 +12,19 @@ import { EventEmitter } from '../utils/event-emitter.js';
 import { CacheManager } from '../cache/cache-manager.js';
 import { ResourceLoader } from './resource-loader.js';
 import { Interpolator } from './interpolator.js';
-import { PluralResolver } from './plural-resolver.js';
 import { I18nDevTools } from './devtools.js';
 import { Logger, getDefaultLogger } from '../utils/logger.js';
+import { generateHash } from '../utils/hash.js';
 
 /**
  * 最佳实践：定义明确的事件数据类型
  */
 interface ResourceLoadedEventData {
   language: string;
-  namespace: string;
 }
 
 interface ResourceLoadFailedEventData {
   language: string;
-  namespace: string;
   error: Error;
 }
 
@@ -41,7 +39,6 @@ export class I18nEngine extends EventEmitter {
   private cache: CacheManager<string>;
   private resourceLoader: ResourceLoader;
   private interpolator: Interpolator;
-  private pluralResolver: PluralResolver;
   private devTools?: I18nDevTools;
   private logger: Logger;
   private isInitialized = false;
@@ -73,12 +70,6 @@ export class I18nEngine extends EventEmitter {
       prefix: this.options.interpolation?.prefix || '{{',
       suffix: this.options.interpolation?.suffix || '}}',
       escapeValue: this.options.interpolation?.escapeValue ?? true,
-      format: this.options.interpolation?.format,
-    });
-
-    this.pluralResolver = new PluralResolver({
-      simplifyPluralSuffix:
-        this.options.pluralization?.simplifyPluralSuffix ?? true,
     });
 
     // 初始化 Logger
@@ -116,31 +107,42 @@ export class I18nEngine extends EventEmitter {
   }
 
   /**
-   * 翻译函数
+   * 翻译函数（新架构：基于内容 hash，简化版）
+   *
+   * @param text - 原始文本内容（不是 key）
+   * @param params - 插值参数
+   * @param options - 选项
+   * @returns 翻译后的文本
+   *
+   * 工作流程：
+   * 1. 生成 hash key: hash(text) → 'abc123'
+   * 2. 查找翻译: resources['abc123'] → '翻译文本'
+   * 3. 执行插值: 替换 {{参数}}
+   * 4. 返回结果
    */
   t(
-    key: string,
+    text: string,
     params?: TranslationParams,
     options?: {
       lng?: string;
-      ns?: string;
       defaultValue?: string;
-      count?: number;
     }
   ): string {
     if (!this.isInitialized) {
       this.logWarning('I18n engine not initialized, call init() first');
-      return options?.defaultValue || key;
+      return options?.defaultValue || text;
     }
 
     const language = options?.lng || this.currentLanguage;
-    const namespace = options?.ns || 'translation';
-    const defaultValue = options?.defaultValue || key;
-    const count = options?.count ?? params?.count;
+    const defaultValue = options?.defaultValue || text;
 
     try {
+      // ✅ 新架构：生成 hash key
+      const hashKey = generateHash(text);
+      console.log('hashKey', hashKey);
+
       // 生成缓存键
-      const cacheKey = this.generateCacheKey(key, language, namespace, params);
+      const cacheKey = `${language}:${hashKey}:${JSON.stringify(params || {})}`;
 
       // 检查缓存
       if (this.options.cache?.enabled !== false) {
@@ -150,37 +152,12 @@ export class I18nEngine extends EventEmitter {
         }
       }
 
-      // 处理复数形式
-      let translationKey = key;
-      if (
-        count !== undefined &&
-        this.options.pluralization?.enabled !== false
-      ) {
-        const pluralCategory = this.pluralResolver.resolve(language, count);
-        const pluralKey = this.pluralResolver.generateKey(key, pluralCategory);
-
-        // 尝试使用复数key，如果不存在则回退到原key
-        const pluralTranslation = this.getTranslation(
-          pluralKey,
-          language,
-          namespace
-        );
-        if (pluralTranslation) {
-          translationKey = pluralKey;
-        }
-      }
-
-      // 获取翻译文本
-      const translation = this.getTranslation(
-        translationKey,
-        language,
-        namespace
-      );
+      // 获取翻译文本（扁平化，无嵌套）
+      const translation = this.getTranslation(hashKey, language);
 
       if (!translation) {
-        // 最佳实践：传递对象而不是多个参数
         this.emit<TranslationMissingEventData>('translationMissing', {
-          key: translationKey,
+          key: hashKey,
           language,
         });
         return defaultValue;
@@ -188,7 +165,7 @@ export class I18nEngine extends EventEmitter {
 
       // 处理插值
       const result = params
-        ? this.interpolator.interpolate(translation, params, language)
+        ? this.interpolator.interpolate(translation, params)
         : translation;
 
       // 缓存结果
@@ -283,11 +260,9 @@ export class I18nEngine extends EventEmitter {
   /**
    * 检查翻译是否存在
    */
-  exists(key: string, options?: { lng?: string; ns?: string }): boolean {
+  exists(key: string, options?: { lng?: string }): boolean {
     const language = options?.lng || this.currentLanguage;
-    const namespace = options?.ns || 'translation';
-
-    return this.getTranslation(key, language, namespace) !== null;
+    return this.getTranslation(key, language) !== null;
   }
 
   /**
@@ -369,62 +344,24 @@ export class I18nEngine extends EventEmitter {
   }
 
   /**
-   * 获取翻译文本
+   * 获取翻译文本（扁平化，无嵌套）
    */
-  private getTranslation(
-    key: string,
-    language: string,
-    namespace: string
-  ): string | null {
-    const resource = this.resourceLoader.getLoadedResource(language, namespace);
+  private getTranslation(key: string, language: string): string | null {
+    const resource = this.resourceLoader.getLoadedResource(
+      language,
+      'translation'
+    );
 
     if (!resource) {
       // 尝试使用回退语言
       if (language !== this.options.fallbackLanguage) {
-        return this.getTranslation(
-          key,
-          this.options.fallbackLanguage,
-          namespace
-        );
+        return this.getTranslation(key, this.options.fallbackLanguage);
       }
       return null;
     }
 
-    return this.getNestedValue(resource, key);
-  }
-
-  /**
-   * 获取嵌套对象的值
-   */
-  private getNestedValue(
-    obj: TranslationResource,
-    path: string
-  ): string | null {
-    const keys = path.split('.');
-    let current: any = obj;
-
-    for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
-        current = current[key];
-      } else {
-        return null;
-      }
-    }
-
-    return typeof current === 'string' ? current : null;
-  }
-
-  /**
-   * 生成缓存键
-   */
-  private generateCacheKey(
-    key: string,
-    language: string,
-    namespace: string,
-    params?: TranslationParams
-  ): string {
-    const paramsStr = params ? JSON.stringify(params) : '';
-    return `${language}:${namespace}:${key}:${paramsStr}`;
+    // ✅ 直接查找，不处理嵌套
+    return typeof resource[key] === 'string' ? resource[key] : null;
   }
 
   /**
@@ -470,9 +407,6 @@ export class I18nEngine extends EventEmitter {
         prefix: '{{',
         suffix: '}}',
         escapeValue: true,
-      },
-      pluralization: {
-        enabled: true,
       },
       debug: false,
       logLevel: 'warn',
