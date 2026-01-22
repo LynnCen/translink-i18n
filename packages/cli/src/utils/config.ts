@@ -17,14 +17,6 @@ export const DEFAULT_CONFIG: I18nConfig = {
     incremental: true,
     createEmptyTranslations: true,
   },
-  hash: {
-    enabled: true,
-    algorithm: 'sha256',
-    length: 8,
-    numericOnly: true,
-    includeContext: false,
-    contextFields: ['componentName', 'functionName'],
-  },
   languages: {
     source: 'zh-CN',
     default: 'zh-CN',
@@ -171,9 +163,6 @@ export class ConfigManager {
       extract: userConfig.extract
         ? { ...defaultConfig.extract, ...userConfig.extract }
         : defaultConfig.extract,
-      hash: userConfig.hash
-        ? { ...defaultConfig.hash, ...userConfig.hash }
-        : defaultConfig.hash,
       languages: {
         ...defaultConfig.languages,
         ...userConfig.languages,

@@ -19,16 +19,6 @@ export interface I18nConfig {
     createEmptyTranslations?: boolean;
   };
 
-  // 哈希配置（可选，使用默认值）
-  hash?: {
-    enabled: boolean;
-    algorithm: 'md5' | 'sha1' | 'sha256';
-    length: number;
-    numericOnly?: boolean;
-    includeContext: boolean;
-    contextFields?: ('filePath' | 'componentName' | 'functionName')[];
-  };
-
   // 语言配置（必需）
   languages: {
     source?: string; // 源语言，默认同 default

@@ -58,7 +58,7 @@ async function analyzeCommand(options: AnalyzeOptions) {
     logger.br();
 
     // 初始化分析器
-    const hashGenerator = new HashGenerator(config.hash);
+    const hashGenerator = new HashGenerator();
     const extractor = new ASTExtractor(config.extract, hashGenerator);
 
     // 执行代码扫描
@@ -393,7 +393,7 @@ function generateHTMLReport(report: AnalysisReport): string {
     <div class="container">
         <h1>🔗 TransLink I18n 分析报告</h1>
         <p>生成时间: ${new Date().toLocaleString('zh-CN')}</p>
-        
+
         <div class="summary">
             <h2>📊 基础统计</h2>
             <p>扫描文件: <strong>${report.summary.totalFiles}</strong> 个</p>

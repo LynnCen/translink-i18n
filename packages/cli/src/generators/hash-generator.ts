@@ -1,7 +1,9 @@
-import { createHash } from 'crypto';
-import type { I18nConfig } from '../types/config.js';
+import { generateHash as baseGenerateHash } from '@translink/hash';
 import { logger } from '../utils/logger.js';
 
+/**
+ * Hash 上下文信息（用于冲突处理）
+ */
 export interface HashContext {
   filePath: string;
   componentName?: string;
@@ -9,49 +11,34 @@ export interface HashContext {
   namespace?: string;
 }
 
-export interface HashOptions {
-  content: string;
-  context: HashContext;
-  algorithm: 'md5' | 'sha1' | 'sha256';
-  length: number;
-  numericOnly?: boolean; // 🆕 只保留数字
-  includeContext: boolean;
-  contextFields: string[];
-}
-
+/**
+ * Hash 生成器
+ *
+ * 核心职责：
+ * 1. 使用 @translink/hash 生成基础 hash
+ * 2. 检测并处理极少数的 hash 冲突
+ */
 export class HashGenerator {
   private collisionMap = new Map<
     string,
     { content: string; context: HashContext }[]
   >();
-  private config: I18nConfig['hash'];
 
-  constructor(config: I18nConfig['hash']) {
-    this.config = config;
+  constructor() {
+    // 不再需要配置，hash 生成完全由 @translink/hash 管理
   }
 
   /**
    * 生成翻译键的哈希值
-   * 采用混合智能哈希算法，优先基于内容，发生碰撞时添加上下文
+   *
+   * 流程：
+   * 1. 使用 @translink/hash 生成基础 hash
+   * 2. 检测冲突
+   * 3. 如有冲突，添加文件路径重新生成
    */
   generate(content: string, context: HashContext): string {
-    const options: HashOptions = {
-      content,
-      context,
-      algorithm: this.config.algorithm,
-      length: this.config.length,
-      numericOnly: this.config.numericOnly,
-      includeContext: this.config.includeContext,
-      contextFields: this.config.contextFields || [],
-    };
-
-    // 1. 生成基础内容哈希
-    const contentHash = this.generateContentHash(
-      content,
-      options.algorithm,
-      options.length,
-      options.numericOnly
-    );
+    // 1. 生成基础内容哈希（使用 @translink/hash）
+    const contentHash = baseGenerateHash(content);
 
     // 2. 检查哈希冲突
     if (!this.hasCollision(contentHash, content, context)) {
@@ -60,15 +47,12 @@ export class HashGenerator {
       return contentHash;
     }
 
-    // 3. 发生冲突，添加上下文信息
+    // 3. 发生冲突（极少数情况），添加文件路径重新生成
     logger.debug(
       `Hash collision detected for content: "${content.substring(0, 50)}..."`
     );
-    const contextualHash = this.generateContextualHash(
-      content,
-      context,
-      options
-    );
+
+    const contextualHash = this.generateContextualHash(content, context);
 
     // 4. 记录最终哈希
     this.recordHash(contextualHash, content, context);
@@ -76,113 +60,21 @@ export class HashGenerator {
   }
 
   /**
-   * 生成基于内容的哈希
-   */
-  private generateContentHash(
-    content: string,
-    algorithm: string,
-    length: number,
-    numericOnly?: boolean
-  ): string {
-    // 标准化内容：去除多余空格、统一换行符
-    const normalizedContent = content
-      .replace(/\s+/g, ' ')
-      .replace(/\r\n|\r/g, '\n')
-      .trim();
-
-    const hash = createHash(algorithm);
-    hash.update(normalizedContent, 'utf8');
-    const hexHash = hash.digest('hex');
-
-    // 如果需要纯数字哈希
-    if (numericOnly) {
-      return this.toNumericHash(hexHash, length);
-    }
-
-    return hexHash.substring(0, length);
-  }
-
-  /**
-   * 将十六进制哈希转换为纯数字
-   */
-  private toNumericHash(hexHash: string, length: number): string {
-    let numeric = '';
-
-    // 将每个十六进制字符转换为其对应的数字值
-    for (let i = 0; i < hexHash.length && numeric.length < length; i++) {
-      const char = hexHash[i];
-      // 将十六进制字符转换为数字 (0-9 保留, a-f 转换为10-15)
-      const value = parseInt(char, 16);
-      numeric += value.toString();
-    }
-
-    return numeric.substring(0, length);
-  }
-
-  /**
-   * 生成包含上下文的哈希
+   * 生成包含上下文的哈希（用于处理冲突）
+   *
+   * 策略：将内容与文件路径组合后重新 hash
+   * 例如：'你好，世界' + '::file:App.tsx' → hash
    */
   private generateContextualHash(
     content: string,
-    context: HashContext,
-    options: HashOptions
+    context: HashContext
   ): string {
-    if (!options.includeContext) {
-      // 如果不包含上下文，使用更长的哈希
-      return this.generateContentHash(
-        content,
-        options.algorithm,
-        options.length + 4,
-        options.numericOnly
-      );
-    }
+    // 使用文件名作为上下文（最简单有效的冲突解决方案）
+    const fileName = context.filePath.split('/').pop() || 'unknown';
+    const combinedContent = `${content}::file:${fileName}`;
 
-    // 构建上下文字符串
-    const contextParts: string[] = [];
-
-    for (const field of options.contextFields) {
-      const value = this.getContextValue(context, field);
-      if (value) {
-        contextParts.push(`${field}:${value}`);
-      }
-    }
-
-    // 如果没有有效的上下文，使用文件路径的最后部分
-    if (contextParts.length === 0) {
-      const fileName = context.filePath.split('/').pop() || 'unknown';
-      contextParts.push(`file:${fileName}`);
-    }
-
-    const contextString = contextParts.join('|');
-    const combinedContent = `${content}::${contextString}`;
-
-    return this.generateContentHash(
-      combinedContent,
-      options.algorithm,
-      options.length,
-      options.numericOnly
-    );
-  }
-
-  /**
-   * 从上下文对象中获取指定字段的值
-   */
-  private getContextValue(
-    context: HashContext,
-    field: string
-  ): string | undefined {
-    switch (field) {
-      case 'filePath':
-        return context.filePath;
-      case 'componentName':
-        return context.componentName;
-      case 'functionName':
-        return context.functionName;
-      case 'namespace':
-        return context.namespace;
-      default:
-        return undefined;
-    }
+    // 使用 @translink/hash 重新生成
+    return baseGenerateHash(combinedContent);
   }
 
   /**

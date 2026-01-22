@@ -42,7 +42,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
+    "@babel/parser": "^7.28.6",
+    "@babel/traverse": "^7.28.6",
+    "@babel/types": "^7.28.6",
     "@google/generative-ai": "^0.21.0",
+    "@translink/hash": "workspace:*",
     "commander": "^11.1.0",
     "exceljs": "^4.4.0",
     "fs-extra": "^11.2.0",
