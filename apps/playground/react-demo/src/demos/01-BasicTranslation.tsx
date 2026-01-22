@@ -3,8 +3,8 @@ import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 01: Basic Translation
- * Validates: t() function, nested keys, array access, default values
+ * Scene 01: 基础翻译
+ * 测试: t() 函数基本用法、默认值
  */
 export default function BasicTranslation() {
   const { t } = useI18n();
@@ -13,54 +13,41 @@ export default function BasicTranslation() {
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">01</span>
-        {t('basicTranslationTitle')}
+        {t('基础翻译')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('basicTranslationDesc')}</p>
+        <p>{t('演示 t() 函数的基本用法和默认值功能')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: Basic Translation */}
+        {/* 测试 1: 基础翻译 */}
         <div className="test-case">
-          <h4>✅ t('key') - Basic Translation</h4>
+          <h4>✅ 基础翻译</h4>
           <div className="result">
-            <code>t('hello')</code>
-            <div className="output">{t('hello')}</div>
+            <code>t('你好，世界！')</code>
+            <div className="output">{t('你好，世界！')}</div>
           </div>
         </div>
 
-        {/* Validation 2: Nested Keys (for demonstration) */}
+        {/* 测试 2: 长文本 */}
         <div className="test-case">
-          <h4>✅ Nested Keys (for demonstration)</h4>
+          <h4>✅ 长文本翻译</h4>
           <div className="result">
-            <code>t('nested.level1.level2')</code>
-            <div className="output">{t('nested.level1.level2')}</div>
+            <code>t('欢迎使用 TransLink...')</code>
+            <div className="output">{t('欢迎使用 TransLink 国际化解决方案')}</div>
           </div>
         </div>
 
-        {/* Validation 3: Array Access (for demonstration) */}
+        {/* 测试 3: 默认值（回退） */}
         <div className="test-case">
-          <h4>✅ Array Items (for demonstration)</h4>
-          <div className="result">
-            <code>t('items[0]')</code>
-            <ul className="output-list">
-              {[0, 1, 2].map(i => (
-                <li key={i}>{t(`items[${i}]`)}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Validation 4: Default Value (Fallback) */}
-        <div className="test-case">
-          <h4>✅ Default Value (Fallback)</h4>
+          <h4>✅ 默认值（Fallback）</h4>
           <div className="result">
             <code>
-              t('nonexistentKey', {'{}'}, {'{ defaultValue: "Fallback Text" }'})
+              t('不存在的文本', {'{}'}, {'{ defaultValue: "默认值" }'})
             </code>
             <div className="output">
-              {t('nonexistentKey', {}, { defaultValue: 'Fallback Text' })}
+              {t('不存在的文本', {}, { defaultValue: '默认值' })}
             </div>
           </div>
         </div>

@@ -3,8 +3,8 @@ import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 02: Language Switcher
- * Validates: setLocale(), locale, availableLocales, isLoading
+ * Scene 02: 语言切换
+ * 测试: setLocale(), locale, availableLocales, isLoading
  */
 export default function LanguageSwitcher() {
   const { t, locale, setLocale, availableLocales, isLoading } = useI18n();
@@ -12,9 +12,9 @@ export default function LanguageSwitcher() {
   const getLanguageName = (langCode: string) => {
     switch (langCode) {
       case 'zh-CN':
-        return t('languageChinese');
+        return t('简体中文');
       case 'en-US':
-        return t('languageEnglish');
+        return t('英语');
       default:
         return langCode;
     }
@@ -38,68 +38,81 @@ export default function LanguageSwitcher() {
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">02</span>
-        {t('languageSwitcherTitle')}
+        {t('语言切换')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('languageSwitcherDesc')}</p>
+        <p>{t('演示语言切换功能和状态管理')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: Language Selector */}
+        {/* 测试 1: 语言选择器 */}
         <div className="test-case">
-          <h4>✅ setLocale(lang) - Language Selector</h4>
-          <div className="language-selector">
-            <label htmlFor="language-select">{t('selectLanguage')}:</label>
-            <select
-              id="language-select"
-              value={locale}
-              disabled={isLoading}
-              className="language-select"
-              onChange={handleLanguageChange}
-            >
-              {availableLocales.map(lang => (
-                <option key={lang} value={lang}>
-                  {getLanguageName(lang)}
-                </option>
-              ))}
-            </select>
-
-            {isLoading && (
-              <div className="loading-indicator">
-                <span className="spinner" />
-                {t('switchingLanguage')}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Validation 2: Current Language */}
-        <div className="test-case">
-          <h4>✅ locale - Current Language</h4>
+          <h4>✅ 语言选择</h4>
           <div className="result">
-            <code>locale</code>
-            <div className="output">Current Language: {locale}</div>
-          </div>
-        </div>
-
-        {/* Validation 3: Available Languages */}
-        <div className="test-case">
-          <h4>✅ availableLocales - Supported Languages</h4>
-          <div className="result">
-            <code>availableLocales</code>
+            <code>setLocale(newLanguage)</code>
             <div className="output">
-              Supported: {availableLocales.join(', ')}
+              <select
+                value={locale}
+                onChange={handleLanguageChange}
+                disabled={isLoading}
+                className="language-selector"
+              >
+                {availableLocales.map(lang => (
+                  <option key={lang} value={lang}>
+                    {getLanguageName(lang)}
+                  </option>
+                ))}
+              </select>
+              {isLoading && <span className="loading-indicator"> ⏳ {t('加载中...')}</span>}
             </div>
           </div>
         </div>
 
-        {/* Validation 4: Loading State */}
+        {/* 测试 2: 当前语言状态 */}
         <div className="test-case">
-          <h4>✅ isLoading - Language Loading State</h4>
+          <h4>✅ 当前语言</h4>
           <div className="result">
-            <code>isLoading</code>
-            <div className="output">Is Loading: {String(isLoading)}</div>
+            <code>const {'{ locale }'} = useI18n()</code>
+            <div className="output">
+              {t('当前语言')}: <strong>{getLanguageName(locale)}</strong> ({locale})
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 3: 支持的语言列表 */}
+        <div className="test-case">
+          <h4>✅ 支持的语言</h4>
+          <div className="result">
+            <code>const {'{ availableLocales }'} = useI18n()</code>
+            <div className="output">
+              <ul className="output-list">
+                {availableLocales.map(lang => (
+                  <li key={lang}>
+                    {getLanguageName(lang)} ({lang})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 4: 快速切换按钮 */}
+        <div className="test-case">
+          <h4>✅ 快速切换</h4>
+          <div className="result">
+            <div className="output button-group">
+              {availableLocales.map(lang => (
+                <button
+                  key={lang}
+                  onClick={() => setLocale(lang)}
+                  disabled={locale === lang || isLoading}
+                  className={locale === lang ? 'active' : ''}
+                >
+                  {getLanguageName(lang)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -3,81 +3,87 @@ import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 04: Pluralization
- * Validates: t(key, { count }) with auto pluralization
+ * Scene 04: 条件渲染
+ * 测试: 根据不同条件渲染不同文本（替代复数功能的简单示例）
  */
-export default function PluralizationDemo() {
+export default function ConditionalRendering() {
   const { t, locale } = useI18n();
   const [count, setCount] = useState(0);
+
+  // 简单的复数处理逻辑（应用层实现）
+  const getPluralText = (count: number) => {
+    if (count === 0) {
+      return t('没有项目');
+    } else if (count === 1) {
+      return t('1 个项目');
+    } else {
+      return t('{{count}} 个项目').replace('{{count}}', String(count));
+    }
+  };
 
   return (
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">04</span>
-        {t('pluralizationTitle')}
+        {t('条件渲染')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('pluralizationDesc')}</p>
+        <p>{t('演示根据不同条件渲染不同文本（应用层逻辑）')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: Basic Pluralization */}
+        {/* 测试 1: 数量显示 */}
         <div className="test-case">
-          <h4>✅ t(key, {'{ count }'}) - Auto Pluralization</h4>
-          <div className="counter">
-            <button onClick={() => setCount(Math.max(0, count - 1))}>-</button>
-            <span className="count-display">{count}</span>
-            <button onClick={() => setCount(count + 1)}>+</button>
-          </div>
+          <h4>✅ 数量条件</h4>
           <div className="result">
-            <code>t('items', {'{ count }'})</code>
-            <div className="output">{t('items', { count })}</div>
-          </div>
-        </div>
-
-        {/* Validation 2: Different Plural Forms */}
-        <div className="test-case">
-          <h4>✅ Different Plural Forms</h4>
-          <div className="plural-examples">
-            {[0, 1, 2, 5, 10, 21, 100].map(num => (
-              <div key={num} className="plural-item">
-                <strong>{num}:</strong> {t('items', { count: num })}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Validation 3: Language-Specific Rules */}
-        <div className="test-case">
-          <h4>✅ Language-Specific Rules</h4>
-          <div className="result">
-            <code>Different languages have different plural rules</code>
             <div className="output">
-              <div>
-                English (1, other): {t('items', { count: 1 })} /{' '}
-                {t('items', { count: 2 })}
-              </div>
-              <div>
-                Chinese (other only):{' '}
-                {locale === 'zh-CN'
-                  ? t('items', { count: 1 })
-                  : 'Switch to Chinese to see'}
-              </div>
+              <label>
+                数量:
+                <input
+                  type="number"
+                  value={count}
+                  onChange={e => setCount(parseInt(e.target.value) || 0)}
+                  min="0"
+                />
+              </label>
+              <p>{getPluralText(count)}</p>
             </div>
           </div>
         </div>
 
-        {/* Validation 4: Pluralization + Other Parameters */}
+        {/* 测试 2: 条件文本 */}
         <div className="test-case">
-          <h4>✅ Pluralization + Other Parameters</h4>
+          <h4>✅ 三元运算符</h4>
           <div className="result">
-            <code>t('key', {'{ count, user: "Alice" }'})</code>
+            <code>{count > 0 ? t('有内容') : t('无内容')}</code>
             <div className="output">
-              {t('itemsWithUser', {
-                count,
-                user: 'Alice',
-              })}
+              <p>{count > 0 ? t('有内容') : t('无内容')}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 3: 状态文本 */}
+        <div className="test-case">
+          <h4>✅ 状态描述</h4>
+          <div className="result">
+            <div className="output">
+              <p>
+                {count === 0 && t('购物车是空的')}
+                {count > 0 && count < 5 && t('购物车有少量商品')}
+                {count >= 5 && count < 10 && t('购物车有一些商品')}
+                {count >= 10 && t('购物车有很多商品')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 4: 语言相关 */}
+        <div className="test-case">
+          <h4>✅ 语言提示</h4>
+          <div className="result">
+            <div className="output">
+              <p>{t('当前语言')}: {locale === 'zh-CN' ? t('简体中文') : t('英语')}</p>
             </div>
           </div>
         </div>

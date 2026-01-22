@@ -1,116 +1,105 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 09: Performance & Optimization
- * Validates: Caching, lazy loading, batch updates
+ * Scene 09: 性能测试
+ * 测试: 缓存、大量翻译调用
  */
 export default function PerformanceDemo() {
   const { t, locale } = useI18n();
   const [renderCount, setRenderCount] = useState(0);
-  const [cacheStats, setCacheStats] = useState({ hits: 0, misses: 0 });
+  const [translationTime, setTranslationTime] = useState(0);
 
   useEffect(() => {
     setRenderCount(prev => prev + 1);
   });
 
-  useEffect(() => {
-    // Simulate cache stats retrieval
-    if (typeof window !== 'undefined') {
-      const devTools = (window as any).__TRANSLINK_DEVTOOLS__;
-      if (devTools) {
-        const stats = devTools.getStats();
-        setCacheStats({
-          hits: stats.cache?.hits || 0,
-          misses: stats.cache?.misses || 0,
-        });
-      }
-    }
-  }, [locale]);
+  const measureTranslationPerformance = () => {
+    const iterations = 1000;
+    const startTime = performance.now();
 
-  const performBatchTranslations = () => {
-    const start = performance.now();
-    const keys = Array.from({ length: 100 }, (_, i) => `test.key.${i}`);
-    keys.forEach(key => t(key));
-    const end = performance.now();
-    console.log(`Batch translation took: ${(end - start).toFixed(2)}ms`);
+    for (let i = 0; i < iterations; i++) {
+      t('性能测试文本');
+      t('另一个测试文本');
+      t('第三个测试文本');
+    }
+
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    setTranslationTime(duration);
+
+    console.log(`${iterations * 3} translations in ${duration.toFixed(2)}ms`);
+    console.log(`Average: ${(duration / (iterations * 3)).toFixed(4)}ms per translation`);
   };
 
   return (
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">09</span>
-        {t('performanceTitle')}
+        {t('性能测试')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('performanceDesc')}</p>
+        <p>{t('演示翻译缓存和性能优化')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: Render Performance */}
+        {/* 测试 1: 渲染统计 */}
         <div className="test-case">
-          <h4>✅ Render Performance</h4>
+          <h4>✅ 渲染统计</h4>
           <div className="result">
-            <code>Component Render Count</code>
             <div className="output">
-              Renders: {renderCount}
-              <p className="small-text">
-                Efficient re-rendering with React hooks
-              </p>
+              <p>{t('组件渲染次数')}: <strong>{renderCount}</strong></p>
+              <p>{t('当前语言')}: <strong>{locale}</strong></p>
             </div>
           </div>
         </div>
 
-        {/* Validation 2: Cache Statistics */}
+        {/* 测试 2: 翻译性能 */}
         <div className="test-case">
-          <h4>✅ Cache Statistics</h4>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <strong>{t('performanceCacheHits')}:</strong> {cacheStats.hits}
-            </div>
-            <div className="stat-card">
-              <strong>{t('performanceCacheMisses')}:</strong>{' '}
-              {cacheStats.misses}
-            </div>
-            <div className="stat-card">
-              <strong>{t('performanceHitRate')}:</strong>{' '}
-              {cacheStats.hits + cacheStats.misses > 0
-                ? (
-                    (cacheStats.hits /
-                      (cacheStats.hits + cacheStats.misses)) *
-                    100
-                  ).toFixed(1)
-                : 0}
-              %
-            </div>
-          </div>
-        </div>
-
-        {/* Validation 3: Batch Operations */}
-        <div className="test-case">
-          <h4>✅ Batch Operations</h4>
+          <h4>✅ 翻译性能</h4>
           <div className="result">
-            <button onClick={performBatchTranslations}>
-              {t('performanceBatchTest')}
-            </button>
-            <p className="small-text">
-              Check console for batch translation performance (100 keys)
-            </p>
-          </div>
-        </div>
-
-        {/* Validation 4: Lazy Loading */}
-        <div className="test-case">
-          <h4>✅ Lazy Loading</h4>
-          <div className="result">
-            <code>Dynamic Import Support</code>
             <div className="output">
-              <div>{t('performanceLazyLoadingEnabled')}</div>
-              <p className="small-text">
-                Language resources are loaded on-demand when switching
-              </p>
+              <button onClick={measureTranslationPerformance}>
+                {t('运行性能测试')}
+              </button>
+              {translationTime > 0 && (
+                <div className="perf-results">
+                  <p>{t('3000 次翻译调用')}: {translationTime.toFixed(2)}ms</p>
+                  <p>{t('平均每次')}: {(translationTime / 3000).toFixed(4)}ms</p>
+                  <p className="note">{t('得益于缓存机制，性能非常快')}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 3: 缓存命中率 */}
+        <div className="test-case">
+          <h4>✅ 缓存机制</h4>
+          <div className="result">
+            <div className="output">
+              <p>{t('✅ 翻译结果会被自动缓存')}</p>
+              <p>{t('✅ 相同的翻译只计算一次')}</p>
+              <p>{t('✅ 语言切换时缓存会更新')}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 4: 大量翻译 */}
+        <div className="test-case">
+          <h4>✅ 大量翻译</h4>
+          <div className="result">
+            <div className="output">
+              <div className="translation-list">
+                {Array.from({ length: 20 }, (_, i) => (
+                  <div key={i} className="translation-item">
+                    {t('列表项')} {i + 1}
+                  </div>
+                ))}
+              </div>
+              <p className="note">{t('20 个翻译调用，渲染流畅')}</p>
             </div>
           </div>
         </div>

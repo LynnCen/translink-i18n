@@ -1,94 +1,89 @@
-import React, { useState } from 'react';
-import { useI18n, Translation } from '@translink/i18n-runtime/react';
+import React from 'react';
+import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 05: Translation Component
- * Validates: <Translation> component with various props
+ * Scene 05: 组件化使用
+ * 测试: 在不同组件中使用 useI18n
  */
-export default function TranslationComponentDemo() {
+
+// 子组件 1
+function ChildComponent1() {
   const { t } = useI18n();
-  const [count, setCount] = useState(0);
+  return (
+    <div className="child-component">
+      <h5>{t('子组件 1')}</h5>
+      <p>{t('这是第一个子组件')}</p>
+    </div>
+  );
+}
+
+// 子组件 2
+function ChildComponent2() {
+  const { t, locale } = useI18n();
+  return (
+    <div className="child-component">
+      <h5>{t('子组件 2')}</h5>
+      <p>{t('当前语言')}: {locale}</p>
+    </div>
+  );
+}
+
+// 子组件 3（嵌套）
+function NestedComponent() {
+  const { t } = useI18n();
+  return (
+    <div className="nested-component">
+      <p>{t('这是一个嵌套的组件')}</p>
+    </div>
+  );
+}
+
+function ChildComponent3() {
+  const { t } = useI18n();
+  return (
+    <div className="child-component">
+      <h5>{t('子组件 3（嵌套）')}</h5>
+      <NestedComponent />
+    </div>
+  );
+}
+
+export default function TranslationComponent() {
+  const { t } = useI18n();
 
   return (
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">05</span>
-        {t('translationComponentTitle')}
+        {t('组件化使用')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('translationComponentDesc')}</p>
+        <p>{t('演示在多个组件中使用 useI18n Hook')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: Basic Usage */}
+        {/* 测试 1: 多个子组件 */}
         <div className="test-case">
-          <h4>✅ &lt;Translation i18nKey="..." /&gt; - Basic Usage</h4>
+          <h4>✅ 多个子组件</h4>
           <div className="result">
-            <code>&lt;Translation i18nKey="translationComponentBasic" /&gt;</code>
-            <div className="output">
-              <Translation i18nKey="translationComponentBasic" />
+            <code>每个组件独立调用 useI18n()</code>
+            <div className="output components-grid">
+              <ChildComponent1 />
+              <ChildComponent2 />
+              <ChildComponent3 />
             </div>
           </div>
         </div>
 
-        {/* Validation 2: With Parameters */}
+        {/* 测试 2: 共享状态 */}
         <div className="test-case">
-          <h4>
-            ✅ &lt;Translation values={'{...}'} /&gt; - With Parameters
-          </h4>
+          <h4>✅ 共享翻译状态</h4>
           <div className="result">
-            <code>
-              &lt;Translation i18nKey="translationComponentWithParams"
-              values={'{'}
-              {'{ name: "Charlie", product: "TransLink" }'} /&gt;
-            </code>
             <div className="output">
-              <Translation
-                i18nKey="translationComponentWithParams"
-                values={{ name: 'Charlie', product: 'TransLink' }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Validation 3: Pluralization Support */}
-        <div className="test-case">
-          <h4>✅ &lt;Translation values={'{'}{'{ count }'} /&gt; - Pluralization</h4>
-          <div className="counter">
-            <button onClick={() => setCount(Math.max(0, count - 1))}>-</button>
-            <span className="count-display">{count}</span>
-            <button onClick={() => setCount(count + 1)}>+</button>
-          </div>
-          <div className="result">
-            <code>
-              &lt;Translation i18nKey="translationComponentItems" values={'{'}
-              {'{ count }'} /&gt;
-            </code>
-            <div className="output">
-              <Translation
-                i18nKey="translationComponentItems"
-                values={{ count }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Validation 4: Rich Text with Components */}
-        <div className="test-case">
-          <h4>✅ &lt;Translation components={'{...}'} /&gt; - Rich Text</h4>
-          <div className="result">
-            <code>
-              &lt;Translation i18nKey="translationComponentRichText"
-              components={'{'}
-              {'{ bold: <strong /> }'} /&gt;
-            </code>
-            <div className="output html-content">
-              <Translation
-                i18nKey="translationComponentRichText"
-                components={{ bold: <strong /> }}
-              />
+              <p>{t('所有组件共享同一个翻译引擎实例')}</p>
+              <p>{t('语言切换会自动更新所有组件')}</p>
             </div>
           </div>
         </div>

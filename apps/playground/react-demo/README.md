@@ -1,260 +1,189 @@
-# TransLink I18n React Demo
+# TransLink React Demo
 
-A comprehensive React demonstration application showcasing all features and APIs of the `@translink/i18n-runtime` package.
+这是 `@translink/i18n-runtime` 的 React 集成演示应用。
 
-## 🎯 Purpose
+## 📋 功能演示
 
-This demo is designed to **systematically validate** all Runtime APIs through 9 dedicated scene-based components. Each scene focuses on specific functionality, making it easy to:
+本 Demo 专注于展示 **Runtime 功能**，不涉及 CLI 工具使用。
 
-- **Verify API correctness** during development
-- **Test edge cases** and error handling
-- **Demonstrate best practices** for integration
-- **Serve as living documentation** for developers
+### 演示场景
 
-## 📋 Demo Scenes
+1. **基础翻译** - t() 函数基本用法
+2. **语言切换** - setLocale() 和语言状态管理
+3. **参数插值** - 动态参数替换
+4. **条件渲染** - 应用层实现的条件逻辑
+5. **组件化使用** - 多组件中使用 useI18n
+6. **Hooks 示例** - useI18n 的所有返回值
+7. **加载状态** - isReady 和 isLoading 状态
+8. **错误处理** - 缺失翻译和默认值
+9. **性能测试** - 缓存和性能优化
 
-| Scene | Component | APIs Validated | Description |
-|-------|-----------|----------------|-------------|
-| 01 | BasicTranslation | `t()` | Basic translation, nested keys, array access, fallback |
-| 02 | LanguageSwitcher | `setLocale()`, `locale`, `availableLocales`, `isLoading` | Language switching and reactive state |
-| 03 | ParameterInterpolation | `t(key, params)` | String, number, date interpolation, HTML escaping |
-| 04 | PluralizationDemo | `t(key, { count })` | Auto pluralization with language-specific rules |
-| 05 | TranslationComponent | `<Translation>` | Component-based translation with rich text |
-| 06 | HooksDemo | `useI18n()` | React hooks for i18n (best practice) |
-| 07 | LoadingStates | `isReady`, `isLoading` | Loading states and conditional rendering |
-| 08 | ErrorHandling | Error boundaries, fallbacks | Missing keys, error recovery |
-| 09 | PerformanceDemo | Caching, lazy loading | Performance optimization features |
+## 🚀 快速开始
 
-## 🚀 Quick Start
+### 安装依赖
 
 ```bash
-# Install dependencies
 pnpm install
+```
 
-# Start development server
+### 开发服务器
+
+```bash
 pnpm dev
+```
 
-# Build for production
+访问 `http://localhost:5173`
+
+### 构建生产版本
+
+```bash
 pnpm build
-
-# Preview production build
-pnpm preview
 ```
 
-## 📁 File Structure
+## 📖 新架构特性
 
-```
-react-demo/
-├── src/
-│   ├── demos/                    # 9 scene-based demo components
-│   │   ├── 01-BasicTranslation.tsx
-│   │   ├── 02-LanguageSwitcher.tsx
-│   │   ├── 03-ParameterInterpolation.tsx
-│   │   ├── 04-PluralizationDemo.tsx
-│   │   ├── 05-TranslationComponent.tsx
-│   │   ├── 06-HooksDemo.tsx
-│   │   ├── 07-LoadingStates.tsx
-│   │   ├── 08-ErrorHandling.tsx
-│   │   ├── 09-PerformanceDemo.tsx
-│   │   └── demo-card-styles.css  # Shared styles
-│   ├── locales/                  # Translation files
-│   │   ├── zh-CN.json
-│   │   └── en-US.json
-│   ├── App.tsx                   # Main app with scene navigation
-│   ├── App.css                   # App styles
-│   └── main.tsx                  # Entry point
-├── package.json
-└── README.md
+### 1. 使用原始文本
+
+开发者直接使用原始文本作为翻译源：
+
+```tsx
+t('你好，世界！')          // ✅ 直接使用原文
+t('Hello, {{name}}！', { name: 'Alice' })  // ✅ 支持插值
 ```
 
-## 🎨 Features
+### 2. Hash 自动生成
 
-### ✅ Complete API Coverage
+Runtime 自动将原始文本哈希为 key：
 
-- **Core Translation**: `t()`, `locale`, `setLocale()`
-- **React Integration**: `useI18n()` (recommended), `<Translation>`, `createI18n()`
-- **Global Usage**: Global `t()` for pure functions, class methods, utilities
-- **Advanced Features**: Pluralization, interpolation, lazy loading
-- **Developer Tools**: DevTools integration, missing key tracking
-- **Performance**: Caching, batch updates, optimization
+```tsx
+// 开发者代码
+t('你好，世界！')
 
-### ✅ Best Practices Implemented
+// Runtime 内部处理
+generateHash('你好，世界！') → '11141210'
 
-1. **Lazy Loading**: Dynamic imports for language resources
-2. **Caching**: Memory cache with TTL and LRU eviction
-3. **Error Handling**: Graceful fallbacks and error boundaries
-4. **DevTools**: Development-only debugging tools
-5. **TypeScript**: Full type safety throughout
-6. **Responsive Design**: Mobile-friendly UI
-7. **Accessibility**: Semantic HTML and ARIA labels
+// 查找翻译
+resources['11141210'] → 'Hello, World!'
+```
 
-### ✅ Translation Key Structure
+### 3. 扁平化结构
 
-This demo uses **flat translation keys** for better CLI compatibility:
+移除了嵌套、复数、namespace 等复杂功能，只保留核心功能：
 
-```json
-{
-  "appTitle": "TransLink I18n React Demo",
-  "basicTranslationTitle": "Basic Translation",
-  "greeting": "Hello, {{name}}!"
+```tsx
+// ✅ 支持
+t('你好')
+t('你好，{{name}}', { name: 'Alice' })
+t('缺失的key', {}, { defaultValue: '默认值' })
+
+// ❌ 不支持
+t('nested.key.path')        // 嵌套
+t('item', { count: 5 })     // 自动复数
+```
+
+## 🔧 配置说明
+
+### `translink.config.ts`
+
+```typescript
+import { defineConfig } from '@translink/i18n-cli';
+
+export default defineConfig({
+  languages: {
+    default: 'zh-CN',
+    supported: ['zh-CN', 'en-US'],
+  },
+  extract: {
+    patterns: ['src/**/*.{tsx,ts,jsx,js}'],
+    functions: ['t', '$t', 'i18n.t'],
+  },
+  output: {
+    directory: 'src/locales',
+    format: 'json',
+  },
+});
+```
+
+### `src/i18n.ts`
+
+```typescript
+import { createI18n } from '@translink/i18n-runtime/react';
+
+export const { Provider, t } = createI18n({
+  defaultLocale: 'zh-CN',
+  resources: {
+    'zh-CN': () => import('./locales/zh-CN.json'),
+    'en-US': () => import('./locales/en-US.json'),
+  },
+});
+```
+
+## 📝 最佳实践
+
+### 1. 统一使用 useI18n
+
+```tsx
+function MyComponent() {
+  const { t, locale, setLocale, isReady, isLoading } = useI18n();
+
+  return (
+    <div>
+      <p>{t('欢迎')}</p>
+      <button onClick={() => setLocale('en-US')}>
+        {t('切换语言')}
+      </button>
+    </div>
+  );
 }
 ```
 
-**Benefits**:
-- ✅ CLI extract tool generates flat keys directly
-- ✅ Shorter code: `t('hello')` vs `t('demos.basic.hello')`
-- ✅ Better performance: single hash lookup
-- ✅ Easier maintenance: flat JSON is more readable
-
-**Nested keys** are kept only for demonstration purposes:
-- `nested.level1.level2` (testing nested access)
-- `items[0]` (testing array access)
-- `items_zero/one/other` (pluralization)
-
-## 🛠️ Development
-
-### Testing Scenarios
-
-Each scene component validates specific functionality:
+### 2. 全局 Provider
 
 ```tsx
-// Scene 01: Basic Translation
-t('hello')                                    // ✅ Basic
-t('nested.level1.level2')                     // ✅ Nested
-t('items[0]')                                 // ✅ Array
-t('missing', {}, { defaultValue: 'Fallback' }) // ✅ Fallback
+import { Provider } from './i18n';
 
-// Scene 02: Language Switcher
-setLocale('en-US')                            // ✅ Switch language
-locale                                        // ✅ Current language
-availableLocales                              // ✅ Supported languages
-isLoading                                     // ✅ Loading state
-
-// Scene 03: Parameter Interpolation
-t('greeting', { name: 'Alice' })              // ✅ String params
-t('userInfo', { age: 30, date: new Date() })  // ✅ Mixed types
-
-// Scene 04: Pluralization
-t('items', { count: 0 })                      // ✅ Zero
-t('items', { count: 1 })                      // ✅ One
-t('items', { count: 5 })                      // ✅ Other
-
-// Scene 05: Translation Component
-<Translation i18nKey="key" />                 // ✅ Basic
-<Translation i18nKey="key" values={{...}} />  // ✅ With params
-<Translation i18nKey="key" components={{...}} /> // ✅ Rich text
-
-// Scene 06: React Hooks (Best Practice)
-const { t, locale, setLocale } = useI18n()   // ✅ One hook for everything
-
-// Scene 07: Loading States
-isReady                                       // ✅ Initialization
-isLoading                                     // ✅ Resource loading
-
-// Scene 08: Error Handling
-t('missing.key')                              // ✅ Returns key
-t('missing', {}, { defaultValue: 'X' })       // ✅ Uses default
-
-// Scene 09: Performance
-// Cache statistics, batch operations, lazy loading
+function App() {
+  return (
+    <Provider>
+      <YourApp />
+    </Provider>
+  );
+}
 ```
 
-### DevTools Usage
+### 3. 非组件环境使用 t
 
-Open browser console and use:
+```typescript
+import { t } from './i18n';
 
-```javascript
-// Access DevTools
-window.__TRANSLINK_DEVTOOLS__
-
-// Get statistics
-__TRANSLINK_DEVTOOLS__.getStats()
-
-// Print missing keys
-__TRANSLINK_DEVTOOLS__.printStats()
-
-// Export missing keys as JSON
-__TRANSLINK_DEVTOOLS__.exportJSON()
-
-// Clear tracked data
-__TRANSLINK_DEVTOOLS__.clear()
-
-// Show help
-__TRANSLINK_DEVTOOLS__.help()
+// 在非 React 组件中使用
+const message = t('提示信息');
+console.log(message);
 ```
 
-## 📚 Integration with CLI
+## 🔍 CLI 工具（可选）
 
-This demo works seamlessly with `@translink/i18n-cli`:
+语言文件由 CLI 工具生成（可选）：
 
 ```bash
-# Extract translation keys from code
-pnpm i18n:extract
+# 提取文本
+npx translink extract
 
-# Translate to multiple languages with AI
-pnpm i18n:translate --provider openai
+# 导出为 Excel
+npx translink export
 
-# Export to Excel for manual editing
-pnpm i18n:export
-
-# Import from Excel after editing
-pnpm i18n:import
+# 从 Excel 导入
+npx translink import translations.xlsx
 ```
 
-## 🎯 Validation Checklist
+## 📚 相关文档
 
-Use this checklist to verify all features work correctly:
+- [Runtime API 文档](../../../docs/api/runtime.md)
+- [CLI API 文档](../../../docs/api/cli.md)
+- [架构设计文档](../../../docs/development/cli-runtime-architecture-design.md)
 
-### Core Functionality
-- [ ] Basic translation with `t()`
-- [ ] Nested key access
-- [ ] Array indexing
-- [ ] Default value fallback
-- [ ] Language switching
-- [ ] Reactive locale updates
+## 💡 提示
 
-### Advanced Features
-- [ ] Parameter interpolation (string, number, date)
-- [ ] HTML escaping
-- [ ] Pluralization (zero, one, other)
-- [ ] Language-specific plural rules
-- [ ] Translation component
-- [ ] Rich text with components
-
-### React Integration
-- [ ] `useTranslation()` hook
-- [ ] `useI18n()` hook
-- [ ] `<Translation>` component
-- [ ] `<I18nProvider>` setup
-
-### Performance & Optimization
-- [ ] Lazy loading of language resources
-- [ ] Cache hits and misses
-- [ ] Batch translation operations
-- [ ] Memory management
-
-### Error Handling
-- [ ] Missing key handling
-- [ ] Error boundaries
-- [ ] Fallback rendering
-- [ ] DevTools tracking
-
-### Loading States
-- [ ] `isReady` during initialization
-- [ ] `isLoading` during language switch
-- [ ] Conditional UI rendering
-- [ ] Loading indicators
-
-## 🔗 Related Packages
-
-- `@translink/i18n-runtime` - Runtime library
-- `@translink/i18n-cli` - CLI tools
-- `@translink/vite-plugin-i18n` - Vite plugin
-
-## 📄 License
-
-MIT
-
----
-
-**Note**: This demo is designed for **validation and testing**. For production applications, refer to the official documentation and examples in the `@translink/i18n-runtime` package.
+- **Demo 目的**：展示 Runtime 功能，不演示 CLI 工具
+- **语言文件**：已由 CLI 预先生成，开发者无需手动编辑
+- **Hash Keys**：语言文件使用 hash 作为 key，由 CLI 自动管理

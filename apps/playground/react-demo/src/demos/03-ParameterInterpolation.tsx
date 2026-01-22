@@ -1,66 +1,85 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 03: Parameter Interpolation
- * Validates: t(key, params) with various data types
+ * Scene 03: 参数插值
+ * 测试: t() 函数的参数插值功能
  */
 export default function ParameterInterpolation() {
   const { t } = useI18n();
+  const [userName, setUserName] = useState('张三');
+  const [itemCount, setItemCount] = useState(5);
 
   return (
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">03</span>
-        {t('parameterInterpolationTitle')}
+        {t('参数插值')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('parameterInterpolationDesc')}</p>
+        <p>{t('演示如何在翻译文本中使用动态参数')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: Basic String Interpolation */}
+        {/* 测试 1: 单个参数 */}
         <div className="test-case">
-          <h4>✅ t(key, {'{ name: "..." }'}) - Basic String Interpolation</h4>
+          <h4>✅ 单个参数插值</h4>
           <div className="result">
-            <code>t('greeting', {'{ name: "Alice" }'})</code>
-            <div className="output">{t('greeting', { name: 'Alice' })}</div>
-          </div>
-        </div>
-
-        {/* Validation 2: Number & Date Interpolation */}
-        <div className="test-case">
-          <h4>✅ Number & Date Interpolation</h4>
-          <div className="result">
-            <code>t('userInfo', {'{ age: 30, date: new Date() }'})</code>
+            {/* <code>t('你好，{'{{name}}'}！', {'{ name }'})}</code> */}
             <div className="output">
-              {t('userInfo', { age: 30, date: new Date().toLocaleDateString() })}
+              <input
+                type="text"
+                value={userName}
+                onChange={e => setUserName(e.target.value)}
+                placeholder="输入名字"
+              />
+              <p>{t('你好，{{name}}！', { name: userName })}</p>
             </div>
           </div>
         </div>
 
-        {/* Validation 3: HTML Escaping */}
+        {/* 测试 2: 多个参数 */}
         <div className="test-case">
-          <h4>✅ HTML Escaping (Default)</h4>
+          <h4>✅ 多个参数插值</h4>
           <div className="result">
-            <code>
-              t('escapeHtml', {'{ tag: "<strong>important</strong>" }'})
-            </code>
+            <code>t('{'{{name}}'} 有 {'{{count}}'} 个项目', {'{ name, count }'})</code>
             <div className="output">
-              {t('escapeHtml', { tag: '<strong>important</strong>' })}
+              <label>
+                数量:
+                <input
+                  type="number"
+                  value={itemCount}
+                  onChange={e => setItemCount(parseInt(e.target.value) || 0)}
+                  min="0"
+                />
+              </label>
+              <p>{t('{{name}} 有 {{count}} 个项目', { name: userName, count: itemCount })}</p>
             </div>
           </div>
         </div>
 
-        {/* Validation 4: Custom Formatters */}
+        {/* 测试 3: 数字格式化 */}
         <div className="test-case">
-          <h4>✅ Custom Formatters</h4>
+          <h4>✅ 数字显示</h4>
           <div className="result">
-            <code>t('numbers', {'{ value: 12345.67, currency: "USD" }'})</code>
+            <code>t('价格：${'{{price}}'}', {'{ price }'})</code>
             <div className="output">
-              {t('numbers', { value: 12345.67, currency: 'USD' })}
+              <p>{t('价格：${{price}}', { price: 99.99 })}</p>
+              <p>{t('总计：¥{{amount}}', { amount: 1234.56 })}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 4: HTML 转义 */}
+        <div className="test-case">
+          <h4>✅ HTML 转义（安全）</h4>
+          <div className="result">
+            <code>t('输入：{'{{input}}'}', {'{ input: "<script>" }'})</code>
+            <div className="output">
+              <p>{t('输入：{{input}}', { input: '<script>alert("xss")</script>' })}</p>
+              <small className="note">{t('特殊字符已自动转义')}</small>
             </div>
           </div>
         </div>

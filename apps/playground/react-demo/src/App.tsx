@@ -16,15 +16,15 @@ import PerformanceDemo from './demos/09-PerformanceDemo';
 
 // Scene configuration
 const scenes = [
-  { id: '01', nameKey: 'sceneBasicTranslation', icon: '📝', component: BasicTranslation },
-  { id: '02', nameKey: 'sceneLanguageSwitcher', icon: '🌐', component: LanguageSwitcher },
-  { id: '03', nameKey: 'sceneParameterInterpolation', icon: '🔤', component: ParameterInterpolation },
-  { id: '04', nameKey: 'scenePluralization', icon: '🔢', component: PluralizationDemo },
-  { id: '05', nameKey: 'sceneTranslationComponent', icon: '🧩', component: TranslationComponentDemo },
-  { id: '06', nameKey: 'sceneHooks', icon: '🪝', component: HooksDemo },
-  { id: '07', nameKey: 'sceneLoadingStates', icon: '⏳', component: LoadingStates },
-  { id: '08', nameKey: 'sceneErrorHandling', icon: '🚨', component: ErrorHandling },
-  { id: '09', nameKey: 'scenePerformance', icon: '⚡', component: PerformanceDemo },
+  { id: '01', name: '基础翻译', icon: '📝', component: BasicTranslation },
+  { id: '02', name: '语言切换', icon: '🌐', component: LanguageSwitcher },
+  { id: '03', name: '参数插值', icon: '🔤', component: ParameterInterpolation },
+  { id: '04', name: '条件渲染', icon: '🔢', component: PluralizationDemo },
+  { id: '05', name: '组件化使用', icon: '🧩', component: TranslationComponentDemo },
+  { id: '06', name: 'Hooks 示例', icon: '🪝', component: HooksDemo },
+  { id: '07', name: '加载状态', icon: '⏳', component: LoadingStates },
+  { id: '08', name: '错误处理', icon: '🚨', component: ErrorHandling },
+  { id: '09', name: '性能测试', icon: '⚡', component: PerformanceDemo },
 ];
 
 /**
@@ -42,11 +42,7 @@ const scenes = [
  */
 function AppContent() {
   // ✅ 使用 useI18n 获取所有功能（推荐）
-  const { t, locale, setLocale, isReady } = useI18n();
-  console.log('t', t);
-  console.log('locale', locale);
-  console.log('setLocale', setLocale);
-  console.log('isReady', isReady);
+  const { t, locale, setLocale, isReady, availableLocales ,engine} = useI18n();
 
   const [currentScene, setCurrentScene] = useState('01');
   const [devToolsAvailable] = useState(
@@ -68,12 +64,16 @@ function AppContent() {
     }
   };
 
+  console.log('基础翻译', t('基础翻译'));
+  console.log('engine', engine);
+
+
   // 显示加载状态
   if (!isReady) {
     return (
       <div className="loading-screen">
         <div className="spinner-large" />
-        <p>Loading translations...</p>
+        <p>{t('加载翻译资源...')}</p>
       </div>
     );
   }
@@ -83,12 +83,12 @@ function AppContent() {
       {/* Top Navigation Bar */}
       <nav className="navbar">
         <div className="nav-brand">
-          <h1>{t('appTitle')}</h1>
+          <h1>{t('TransLink React Demo')}</h1>
           <span className="version">v1.0</span>
         </div>
         <div className="nav-info">
           <span className="locale-info">
-            {t('currentLocale')}: {locale}
+            {t('当前语言')}: {locale}
           </span>
         </div>
       </nav>
@@ -98,7 +98,7 @@ function AppContent() {
         {/* Sidebar Navigation */}
         <aside className="sidebar">
           <div className="sidebar-header">
-            <h3>{t('demoScenes')}</h3>
+            <h3>{t('演示场景')}</h3>
           </div>
           <nav className="scene-nav">
             {scenes.map(scene => (
@@ -108,7 +108,7 @@ function AppContent() {
                 onClick={() => setCurrentScene(scene.id)}
               >
                 <span className="scene-number">{scene.id}</span>
-                <span className="scene-name">{t(scene.nameKey)}</span>
+                <span className="scene-name">{t(scene.name)}</span>
                 <span className="scene-icon">{scene.icon}</span>
               </button>
             ))}
@@ -116,12 +116,12 @@ function AppContent() {
 
           {/* Quick Actions */}
           <div className="sidebar-actions">
-            <h4>{t('quickActions')}</h4>
+            <h4>{t('快速操作')}</h4>
             <button onClick={switchLanguage} className="action-btn">
-              🌐 {t('toggleLanguage')}
+              🌐 {t('切换语言')}
             </button>
             <button onClick={openDevTools} className="action-btn">
-              🛠️ {t('openDevTools')}
+              🛠️ {t('打开开发工具')}
             </button>
           </div>
         </aside>
@@ -134,19 +134,19 @@ function AppContent() {
 
           {/* Footer Info */}
           <footer className="footer">
-            <p>{t('footerInfo')}</p>
+            <p>{t('TransLink 国际化解决方案 - React 演示')}</p>
             <div className="footer-stats">
               <span>
-                {t('footerLocale')}: {locale}
+                {t('语言')}: {locale}
               </span>
               <span>•</span>
               <span>
-                {t('footerScene')}: {currentScene}
+                {t('场景')}: {currentScene}
               </span>
               <span>•</span>
               {devToolsAvailable && (
                 <span>
-                  {t('footerDevtools')}: {t('footerEnabled')}
+                  {t('开发工具')}: {t('已启用')}
                 </span>
               )}
             </div>

@@ -3,70 +3,69 @@ import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 06: React Hooks
- * Validates: useI18n() hook
+ * Scene 06: Hooks 示例
+ * 测试: useI18n Hook 的所有返回值
  */
 export default function HooksDemo() {
   const { t, locale, setLocale, isReady, isLoading } = useI18n();
-
-  const toggleLanguage = async () => {
-    const newLang = locale === 'zh-CN' ? 'en-US' : 'zh-CN';
-    await setLocale(newLang);
-  };
 
   return (
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">06</span>
-        {t('hooksTitle')}
+        {t('Hooks 示例')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('hooksDesc')}</p>
+        <p>{t('演示 useI18n Hook 的所有返回值')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: useI18n Hook - Get All Features */}
+        {/* 测试 1: useI18n 返回值 */}
         <div className="test-case">
-          <h4>✅ useI18n() - Get All I18n Features</h4>
+          <h4>✅ useI18n() 返回值</h4>
           <div className="result">
             <code>const {'{ t, locale, setLocale, isReady, isLoading }'} = useI18n()</code>
-            <div className="output">
-              <div>Translation: {t('hooksUseTranslation')}</div>
-              <div>Current Locale: {locale}</div>
-              <div>Is Ready: {String(isReady)}</div>
-              <div>Is Loading: {String(isLoading)}</div>
+            <div className="output info-grid">
+              <div className="info-item">
+                <strong>t:</strong> {t('翻译函数')}
+              </div>
+              <div className="info-item">
+                <strong>locale:</strong> {locale}
+              </div>
+              <div className="info-item">
+                <strong>isReady:</strong> {isReady ? t('已就绪') : t('未就绪')}
+              </div>
+              <div className="info-item">
+                <strong>isLoading:</strong> {isLoading ? t('加载中') : t('未加载')}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Validation 2: useI18n Hook - Change Language */}
+        {/* 测试 2: setLocale 方法 */}
         <div className="test-case">
-          <h4>✅ useI18n() - Change Language</h4>
+          <h4>✅ setLocale 方法</h4>
           <div className="result">
             <code>const {'{ setLocale }'} = useI18n()</code>
             <div className="output">
-              <button onClick={toggleLanguage}>
-                {t('hooksToggleLanguage')} (Current: {locale})
+              <button
+                onClick={() => setLocale(locale === 'zh-CN' ? 'en-US' : 'zh-CN')}
+                disabled={isLoading}
+              >
+                {t('切换语言')}
               </button>
-              <p className="small-text">
-                (Using setLocale() from useI18n hook)
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Validation 3: Best Practice - One Hook for Everything */}
+        {/* 测试 3: 响应式更新 */}
         <div className="test-case">
-          <h4>✅ Best Practice - Use One Hook</h4>
+          <h4>✅ 响应式更新</h4>
           <div className="result">
-            <code>
-              // ✅ Recommended: Get everything from useI18n
-              <br />
-              const {'{ t, locale, setLocale }'} = useI18n();
-            </code>
             <div className="output">
-              {t('hooksCombinedUsage', { locale })}
+              <p>{t('当语言切换时，所有使用 t() 的文本会自动更新')}</p>
+              <p>{t('这是 React Hook 的响应式特性')}</p>
             </div>
           </div>
         </div>

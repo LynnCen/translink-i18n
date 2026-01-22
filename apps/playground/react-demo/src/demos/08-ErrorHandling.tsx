@@ -1,99 +1,84 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 08: Error Handling
- * Validates: Error boundaries, fallback handling, missing keys
+ * Scene 08: 错误处理
+ * 测试: 缺失翻译、默认值、DevTools
  */
 export default function ErrorHandling() {
   const { t } = useI18n();
-  const [missingKeysLog, setMissingKeysLog] = useState<string[]>([]);
 
   const triggerMissingKey = () => {
-    const missingKey = `missing.key.${Date.now()}`;
-    const result = t(missingKey);
-    setMissingKeysLog(prev => [...prev.slice(-4), `${missingKey} → ${result}`]);
-  };
-
-  const clearLog = () => {
-    setMissingKeysLog([]);
+    // 触发一个不存在的 key
+    const result = t('这个文本不存在于翻译文件中');
+    console.log('Missing key result:', result);
   };
 
   return (
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">08</span>
-        {t('errorHandlingTitle')}
+        {t('错误处理')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('errorHandlingDesc')}</p>
+        <p>{t('演示缺失翻译的处理和 DevTools 功能')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: Missing Translation Keys */}
+        {/* 测试 1: 缺失的翻译 */}
         <div className="test-case">
-          <h4>✅ Missing Translation Keys</h4>
+          <h4>✅ 缺失的翻译</h4>
           <div className="result">
-            <code>t('nonexistent.key')</code>
-            <div className="output">{t('nonexistent.key')}</div>
-            <p className="small-text">
-              Returns the key itself when translation is missing
-            </p>
-          </div>
-        </div>
-
-        {/* Validation 2: Default Value Fallback */}
-        <div className="test-case">
-          <h4>✅ Default Value Fallback</h4>
-          <div className="result">
-            <code>
-              t('missing.key', {'{}'}, {'{ defaultValue: "Fallback" }'})
-            </code>
+            <code>t('不存在的key')</code>
             <div className="output">
-              {t('missing.key', {}, { defaultValue: 'Fallback Text' })}
+              <p>{t('这个key不存在')}</p>
+              <p className="note">{t('返回原始文本作为后备')}</p>
             </div>
           </div>
         </div>
 
-        {/* Validation 3: Interactive Missing Keys Test */}
+        {/* 测试 2: 使用默认值 */}
         <div className="test-case">
-          <h4>✅ Interactive Missing Keys Test</h4>
+          <h4>✅ 默认值</h4>
           <div className="result">
-            <div className="button-group">
-              <button onClick={triggerMissingKey}>
-                {t('errorHandlingTriggerMissing')}
+            <code>t('不存在', {'{}'}, {'{ defaultValue: "默认值" }'})</code>
+            <div className="output">
+              <p>
+                {t('这个也不存在', {}, { defaultValue: '这是默认值' })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 3: DevTools */}
+        <div className="test-case">
+          <h4>✅ DevTools</h4>
+          <div className="result">
+            <div className="output">
+              <button onClick={triggerMissingKey} className="devtools-trigger">
+                {t('触发缺失 Key')}
               </button>
-              <button onClick={clearLog}>{t('errorHandlingClearLog')}</button>
+              <p className="note">
+                {t('打开浏览器控制台查看 DevTools 日志')}
+              </p>
+              {typeof window !== 'undefined' &&
+                (window as any).__TRANSLINK_DEVTOOLS__ && (
+                  <p className="success">{t('✅ DevTools 已启用')}</p>
+                )}
             </div>
-            {missingKeysLog.length > 0 && (
-              <div className="log-output">
-                <strong>Missing Keys Log:</strong>
-                {missingKeysLog.map((log, index) => (
-                  <div key={index} className="log-entry">
-                    {log}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Validation 4: DevTools Integration */}
+        {/* 测试 4: 安全渲染 */}
         <div className="test-case">
-          <h4>✅ DevTools Integration</h4>
+          <h4>✅ 安全渲染</h4>
           <div className="result">
-            <code>window.__TRANSLINK_DEVTOOLS__</code>
             <div className="output">
-              {typeof window !== 'undefined' &&
-              (window as any).__TRANSLINK_DEVTOOLS__
-                ? t('errorHandlingDevtoolsAvailable')
-                : t('errorHandlingDevtoolsNotAvailable')}
+              <p>{t('即使翻译缺失，应用也不会崩溃')}</p>
+              <p>{t('始终返回可用的文本（原文或默认值）')}</p>
             </div>
-            <p className="small-text">
-              Open browser console to check DevTools for tracked missing keys
-            </p>
           </div>
         </div>
       </div>

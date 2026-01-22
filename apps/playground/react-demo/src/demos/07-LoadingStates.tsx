@@ -1,87 +1,96 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useI18n } from '@translink/i18n-runtime/react';
 import './demo-card-styles.css';
 
 /**
- * Scene 07: Loading States
- * Validates: isReady, isLoading states
+ * Scene 07: 加载状态
+ * 测试: isReady, isLoading 状态
  */
 export default function LoadingStates() {
   const { t, isReady, isLoading, setLocale, locale } = useI18n();
-  const [simulating, setSimulating] = useState(false);
 
-  const simulateLoading = async () => {
-    setSimulating(true);
-    const targetLang = locale === 'zh-CN' ? 'en-US' : 'zh-CN';
-
-    try {
-      await setLocale(targetLang);
-      console.log(`Simulated language switch to: ${targetLang}`);
-    } catch (error) {
-      console.error('Simulated loading failed:', error);
-    } finally {
-      setSimulating(false);
-    }
+  const handleLanguageSwitch = async () => {
+    const newLang = locale === 'zh-CN' ? 'en-US' : 'zh-CN';
+    await setLocale(newLang);
   };
 
   return (
     <div className="demo-card">
       <h3 className="demo-title">
         <span className="demo-number">07</span>
-        {t('loadingStatesTitle')}
+        {t('加载状态')}
       </h3>
 
       <div className="demo-description">
-        <p>{t('loadingStatesDesc')}</p>
+        <p>{t('演示 isReady 和 isLoading 状态管理')}</p>
       </div>
 
       <div className="demo-content">
-        {/* Validation 1: isReady Status */}
+        {/* 测试 1: isReady 状态 */}
         <div className="test-case">
-          <h4>✅ isReady - I18n Engine Initialization Status</h4>
+          <h4>✅ isReady 状态</h4>
           <div className="result">
-            <code>isReady</code>
+            <code>const {'{ isReady }'} = useI18n()</code>
             <div className="output">
-              Status:{' '}
-              <span className={isReady ? 'status-ready' : 'status-loading'}>
+              <div className={`status-badge ${isReady ? 'ready' : 'not-ready'}`}>
+                {isReady ? t('✅ 已就绪') : t('⏳ 未就绪')}
+              </div>
+              <p>
                 {isReady
-                  ? t('loadingStatesReady')
-                  : t('loadingStatesInitializing')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Validation 2: isLoading Status */}
-        <div className="test-case">
-          <h4>✅ isLoading - Language Resource Loading Status</h4>
-          <div className="result">
-            <code>isLoading</code>
-            <div className="output">
-              Status:{' '}
-              <span className={isLoading ? 'status-loading' : 'status-ready'}>
-                {isLoading
-                  ? t('loadingStatesSwitching')
-                  : t('loadingStatesIdle')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Validation 3: Simulate Loading */}
-        <div className="test-case">
-          <h4>✅ Simulate Loading</h4>
-          <div className="result">
-            <button onClick={simulateLoading} disabled={isLoading}>
-              {isLoading
-                ? t('loadingStatesSimulating')
-                : t('loadingStatesSimulate')}
-            </button>
-            {simulating && (
-              <p className="loading-message">
-                {t('loadingStatesSimulatingMessage')}
+                  ? t('翻译引擎已初始化，可以正常使用')
+                  : t('正在初始化翻译引擎...')}
               </p>
-            )}
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 2: isLoading 状态 */}
+        <div className="test-case">
+          <h4>✅ isLoading 状态</h4>
+          <div className="result">
+            <code>const {'{ isLoading }'} = useI18n()</code>
+            <div className="output">
+              <div className={`status-badge ${isLoading ? 'loading' : 'idle'}`}>
+                {isLoading ? t('⏳ 加载中') : t('✅ 空闲')}
+              </div>
+              <p>
+                {isLoading
+                  ? t('正在加载语言资源...')
+                  : t('没有进行中的加载操作')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 3: 切换时的加载状态 */}
+        <div className="test-case">
+          <h4>✅ 切换语言时的状态</h4>
+          <div className="result">
+            <div className="output">
+              <button onClick={handleLanguageSwitch} disabled={isLoading}>
+                {isLoading ? t('切换中...') : t('切换语言')}
+              </button>
+              <p className="note">
+                {t('点击按钮观察 isLoading 状态变化')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试 4: 状态组合 */}
+        <div className="test-case">
+          <h4>✅ 状态组合</h4>
+          <div className="result">
+            <div className="output info-grid">
+              <div className="info-item">
+                <strong>isReady:</strong>{' '}
+                {isReady ? t('真') : t('假')}
+              </div>
+              <div className="info-item">
+                <strong>isLoading:</strong>{' '}
+                {isLoading ? t('真') : t('假')}
+              </div>
+            </div>
           </div>
         </div>
       </div>
