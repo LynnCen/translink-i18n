@@ -7,7 +7,6 @@
 export { I18nEngine } from './core/i18n-engine.js';
 export { ResourceLoader } from './core/resource-loader.js';
 export { Interpolator } from './core/interpolator.js';
-export { PluralResolver } from './core/plural-resolver.js';
 export { I18nDevTools } from './core/devtools.js';
 
 // 缓存系统
@@ -49,7 +48,6 @@ export type {
   I18nEventMap,
   I18nEventType,
   I18nEventHandler,
-  InterpolationOptions,
   FormatFunction,
   TypedTranslationResource,
   TypedTranslationParams,

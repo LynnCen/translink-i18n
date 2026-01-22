@@ -1,23 +1,17 @@
 /**
- * TransLink I18n Runtime 类型定义
+ * TransLink I18n Runtime 类型定义（简化版）
  */
 
-// 翻译资源类型（支持嵌套）
-export interface TranslationResource {
-  [key: string]: string | TranslationResource;
-}
+// 翻译资源类型（扁平化，只支持字符串值）
+export type TranslationResource = Record<string, string>;
 
-// 严格的翻译资源类型（仅字符串值，用于运行时）
-export type StrictTranslationResource = Record<string, string>;
+// 严格的翻译资源类型（已与 TranslationResource 合并）
+export type StrictTranslationResource = TranslationResource;
 
 // 带类型推断的翻译资源
-export type TypedTranslationResource<T extends Record<string, any>> = {
-  [K in keyof T]: T[K] extends Record<string, any>
-    ? TypedTranslationResource<T[K]>
-    : string;
-};
+export type TypedTranslationResource<T extends Record<string, string>> = T;
 
-// 泛型化的 I18nOptions，支持类型推断
+// I18nOptions 配置
 export interface I18nOptions<
   TResource extends TranslationResource = TranslationResource,
 > {
@@ -29,7 +23,7 @@ export interface I18nOptions<
   // 资源配置
   resources?: Record<string, TResource>;
   loadPath?: string;
-  loadFunction?: (lng: string, ns: string) => Promise<TResource>;
+  loadFunction?: (lng: string) => Promise<TResource>;
 
   // 缓存配置
   cache?: {
@@ -39,19 +33,11 @@ export interface I18nOptions<
     storage: 'memory' | 'localStorage' | 'sessionStorage';
   };
 
-  // 插值配置
+  // 插值配置（简化版）
   interpolation?: {
     prefix: string;
     suffix: string;
     escapeValue: boolean;
-    format?: (value: any, format: string, lng: string) => string;
-  };
-
-  // 复数配置
-  pluralization?: {
-    enabled?: boolean;
-    simplifyPluralSuffix?: boolean;
-    rules?: Record<string, (count: number) => number>;
   };
 
   // 调试配置
@@ -70,7 +56,7 @@ export interface I18nOptions<
   };
 }
 
-// 翻译参数类型
+// 翻译参数类型（简化版）
 export type TranslationParamValue =
   | string
   | number
@@ -80,15 +66,12 @@ export type TranslationParamValue =
   | undefined;
 
 export interface TranslationParams {
-  [key: string]: TranslationParamValue | TranslationParams; // 支持嵌套对象
-  count?: number; // 用于复数处理
+  [key: string]: TranslationParamValue;
 }
 
 // 类型安全的翻译参数
 export type TypedTranslationParams<T extends Record<string, any>> = {
-  [K in keyof T]: T[K] extends object
-    ? TypedTranslationParams<T[K]>
-    : TranslationParamValue;
+  [K in keyof T]: TranslationParamValue;
 };
 
 export interface LoaderResult {
@@ -105,14 +88,11 @@ export interface CacheEntry<T = any> {
   lastAccessed: number;
 }
 
+// I18n 事件类型（简化版，删除 namespace）
 export interface I18nEventMap {
   languageChanged: (language: string) => void;
-  resourceLoaded: (language: string, namespace: string) => void;
-  resourceLoadFailed: (
-    language: string,
-    namespace: string,
-    error: Error
-  ) => void;
+  resourceLoaded: (language: string) => void;
+  resourceLoadFailed: (language: string, error: Error) => void;
   translationMissing: (key: string, language: string) => void;
   ready: () => void;
 }
@@ -120,32 +100,12 @@ export interface I18nEventMap {
 export type I18nEventType = keyof I18nEventMap;
 export type I18nEventHandler<T extends I18nEventType> = I18nEventMap[T];
 
-export interface PluralRule {
-  (count: number): number;
-}
-
-export interface PluralRules {
-  [language: string]: PluralRule;
-}
-
+// 格式化函数类型（保留用于向后兼容，但已不再使用）
 export interface FormatFunction {
   (value: any, format: string, lng: string, options?: any): string;
 }
 
-export interface InterpolationOptions {
-  prefix: string;
-  suffix: string;
-  escapeValue: boolean;
-  format: FormatFunction;
-  defaultVariables?: Record<string, any>;
-}
-
-export interface NamespaceOptions {
-  defaultNS: string;
-  fallbackNS: string | string[];
-  ns: string | string[];
-}
-
+// Backend 选项
 export interface BackendOptions {
   loadPath: string;
   addPath?: string;
