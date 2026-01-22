@@ -3,18 +3,18 @@
     <!-- 顶部导航栏 -->
     <nav class="navbar">
       <div class="nav-brand">
-        <h1>{{ t('appTitle') }}</h1>
+        <h1>{{ t('TransLink Vue Demo') }}</h1>
         <span class="version">v1.0</span>
       </div>
       <div class="nav-info">
-        <span class="locale-info">{{ t('currentLocale') }}: {{ locale }}</span>
+        <span class="locale-info">{{ t('当前语言') }}: {{ locale }}</span>
       </div>
     </nav>
 
     <!-- 加载状态 -->
     <div v-if="!isReady" class="loading-screen">
       <div class="spinner-large" />
-      <p>{{ t('initializing') }}</p>
+      <p>{{ t('加载翻译资源...') }}</p>
     </div>
 
     <!-- 主内容 -->
@@ -22,7 +22,7 @@
       <!-- 侧边栏导航 -->
       <aside class="sidebar">
         <div class="sidebar-header">
-          <h3>{{ t('demoScenes') }}</h3>
+          <h3>{{ t('演示场景') }}</h3>
         </div>
         <nav class="scene-nav">
           <button
@@ -31,20 +31,20 @@
             :class="['scene-btn', { active: currentScene === scene.id }]"
             @click="currentScene = scene.id"
           >
-            <span class="scene-number">{{ scene.id.padStart(2, '0') }}</span>
-            <span class="scene-name">{{ t(scene.nameKey) }}</span>
+            <span class="scene-number">{{ scene.id }}</span>
+            <span class="scene-name">{{ t(scene.name) }}</span>
             <span class="scene-icon">{{ scene.icon }}</span>
           </button>
         </nav>
 
         <!-- 快捷操作 -->
         <div class="sidebar-actions">
-          <h4>{{ t('quickActions') }}</h4>
+          <h4>{{ t('快速操作') }}</h4>
           <button @click="switchLanguage" class="action-btn">
-            🌐 {{ t('toggleLanguage') }}
+            🌐 {{ t('切换语言') }}
           </button>
           <button @click="openDevTools" class="action-btn">
-            🛠️ {{ t('openDevTools') }}
+            🛠️ {{ t('打开开发工具') }}
           </button>
         </div>
       </aside>
@@ -57,14 +57,14 @@
 
         <!-- 页脚信息 -->
         <footer class="footer">
-          <p>{{ t('footerInfo') }}</p>
+          <p>{{ t('TransLink 国际化解决方案 - Vue 演示') }}</p>
           <div class="footer-stats">
-            <span>{{ t('footerLocale') }}: {{ locale }}</span>
+            <span>{{ t('语言') }}: {{ locale }}</span>
             <span>•</span>
-            <span>{{ t('footerScene') }}: {{ currentScene }}</span>
+            <span>{{ t('场景') }}: {{ currentScene }}</span>
             <span>•</span>
             <span v-if="devToolsAvailable">
-              {{ t('footerDevtools') }}: {{ t('footerEnabled') }}
+              {{ t('开发工具') }}: {{ t('已启用') }}
             </span>
           </div>
         </footer>
@@ -96,25 +96,29 @@ const { t, locale, setLocale, isReady } = useI18n();
 
 // 场景列表
 const scenes = [
-  { id: '01', nameKey: 'sceneBasicTranslation', icon: '📝', component: BasicTranslation },
-  { id: '02', nameKey: 'sceneLanguageSwitcher', icon: '🌐', component: LanguageSwitcher },
-  { id: '03', nameKey: 'sceneParameterInterpolation', icon: '🔤', component: ParameterInterpolation },
-  { id: '04', nameKey: 'scenePluralization', icon: '🔢', component: PluralizationDemo },
-  { id: '05', nameKey: 'sceneDirective', icon: '🎯', component: DirectiveDemo },
-  { id: '06', nameKey: 'sceneTranslationComponent', icon: '🧩', component: TranslationComponent },
-  { id: '07', nameKey: 'sceneGlobalProperties', icon: '🌍', component: GlobalProperties },
-  { id: '08', nameKey: 'sceneLoadingStates', icon: '⏳', component: LoadingStates },
-  { id: '09', nameKey: 'sceneDevtools', icon: '🛠️', component: DevToolsDemo },
+  { id: '01', name: '基础翻译', icon: '📝', component: BasicTranslation },
+  { id: '02', name: '语言切换', icon: '🌐', component: LanguageSwitcher },
+  { id: '03', name: '参数插值', icon: '🔤', component: ParameterInterpolation },
+  { id: '04', name: '条件渲染', icon: '🔢', component: PluralizationDemo },
+  { id: '05', name: '指令使用', icon: '⚡', component: DirectiveDemo },
+  { id: '06', name: '组件化使用', icon: '🧩', component: TranslationComponent },
+  { id: '07', name: '全局属性', icon: '🌍', component: GlobalProperties },
+  { id: '08', name: '加载状态', icon: '⏳', component: LoadingStates },
+  { id: '09', name: '开发工具', icon: '🛠️', component: DevToolsDemo },
 ];
 
+// 当前场景
 const currentScene = ref('01');
-const devToolsAvailable = ref(!!window.__TRANSLINK_DEVTOOLS__);
 
 // 当前组件
 const currentComponent = computed(() => {
-  const scene = scenes.find(s => s.id === currentScene.value);
-  return scene?.component;
+  return scenes.find(s => s.id === currentScene.value)?.component;
 });
+
+// DevTools 可用性
+const devToolsAvailable = ref(
+  typeof window !== 'undefined' && !!(window as any).__TRANSLINK_DEVTOOLS__
+);
 
 // 切换语言
 const switchLanguage = async () => {
@@ -124,8 +128,8 @@ const switchLanguage = async () => {
 
 // 打开 DevTools
 const openDevTools = () => {
-  if (window.__TRANSLINK_DEVTOOLS__) {
-    window.__TRANSLINK_DEVTOOLS__.help();
+  if (typeof window !== 'undefined' && (window as any).__TRANSLINK_DEVTOOLS__) {
+    (window as any).__TRANSLINK_DEVTOOLS__.help();
   } else {
     console.warn('DevTools not available');
   }
@@ -133,69 +137,70 @@ const openDevTools = () => {
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
-}
-
+/* 应用容器 */
 #app {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
 }
 
+/* 导航栏 */
 .navbar {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .nav-brand h1 {
   margin: 0;
   font-size: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.version {
-  padding: 0.25rem 0.5rem;
-  background: #667eea;
-  color: white;
-  border-radius: 12px;
-  font-size: 0.75rem;
   font-weight: 600;
 }
 
-.locale-info {
-  color: #666;
-  font-size: 0.9rem;
+.version {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
 }
 
+.locale-info {
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
+
+/* 加载屏幕 */
 .loading-screen {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 80px);
-  color: white;
-  gap: 1rem;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .spinner-large {
   width: 60px;
   height: 60px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 4px solid var(--color-border);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -206,69 +211,71 @@ const openDevTools = () => {
   }
 }
 
+/* 容器 */
 .container {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 0;
+  flex: 1;
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
   max-width: 1400px;
-  margin: 2rem auto;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  min-height: calc(100vh - 120px);
+  width: 100%;
+  margin: 0 auto;
 }
 
+/* 侧边栏 */
 .sidebar {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-right: 1px solid #e0e0e0;
+  width: 280px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
 }
 
 .sidebar-header h3 {
-  margin: 0 0 1rem 0;
-  color: #2c3e50;
-  font-size: 1.1rem;
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color-text);
 }
 
+/* 场景导航 */
 .scene-nav {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  flex: 1;
 }
 
 .scene-btn {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.875rem;
-  border: none;
-  border-radius: 8px;
-  background: white;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 0.875rem 1rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-text);
   font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
 }
 
 .scene-btn:hover {
-  background: #e8eaf6;
+  background: var(--bg-hover);
+  border-color: var(--color-primary);
   transform: translateX(4px);
 }
 
 .scene-btn.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  border-color: transparent;
+  font-weight: 600;
 }
 
 .scene-number {
-  font-weight: 600;
-  font-size: 0.85rem;
-  opacity: 0.8;
+  font-weight: 700;
+  font-size: 1.1rem;
+  min-width: 28px;
 }
 
 .scene-name {
@@ -276,109 +283,78 @@ const openDevTools = () => {
 }
 
 .scene-icon {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 
+/* 快捷操作 */
 .sidebar-actions {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  padding-top: 1rem;
+  border-top: 2px solid var(--color-border);
 }
 
 .sidebar-actions h4 {
-  margin: 0 0 0.75rem 0;
-  font-size: 0.9rem;
-  color: #666;
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
 }
 
 .action-btn {
   width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text);
   font-size: 0.9rem;
-  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .action-btn:hover {
-  background: #f5f7ff;
-  border-color: #667eea;
+  background: var(--bg-hover);
+  border-color: var(--color-primary);
 }
 
+/* 主内容区域 */
 .main-content {
-  padding: 2rem;
-  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .scene-container {
-  min-height: 600px;
+  flex: 1;
+  margin-bottom: 2rem;
 }
 
+/* 页脚 */
 .footer {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
   text-align: center;
-  color: #666;
 }
 
 .footer p {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
 }
 
 .footer-stats {
   display: flex;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 1rem;
   font-size: 0.85rem;
+  color: var(--color-text-secondary);
 }
 
-/* 响应式 */
-@media (max-width: 1024px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
-  .scene-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .scene-btn {
-    flex: 1 1 calc(50% - 0.25rem);
-    min-width: 150px;
-  }
-}
-
-@media (max-width: 768px) {
-  .navbar {
-    padding: 1rem;
-  }
-
-  .nav-brand h1 {
-    font-size: 1.2rem;
-  }
-
-  .container {
-    margin: 1rem;
-  }
-
-  .main-content {
-    padding: 1rem;
-  }
-
-  .scene-btn {
-    flex: 1 1 100%;
-  }
+.footer-stats span:nth-child(even) {
+  opacity: 0.5;
 }
 </style>

@@ -2,179 +2,109 @@
   <div class="demo-card">
     <h3 class="demo-title">
       <span class="demo-number">06</span>
-      {{ t('translationComponentTitle') }}
+      {{ t('组件化使用') }}
     </h3>
 
     <div class="demo-description">
-      <p>{{ t('translationComponentDesc') }}</p>
+      <p>{{ t('演示在多个组件中使用 useI18n') }}</p>
     </div>
 
     <div class="demo-content">
-      <!-- 验证点 1: 基础组件用法 -->
+      <!-- 测试 1: 多个子组件 -->
       <div class="test-case">
-        <h4>✅ &lt;Translation keypath="" /&gt; - Basic Component</h4>
+        <h4>✅ 多个子组件</h4>
         <div class="result">
-          <code>&lt;Translation keypath="translationComponentBasic" /&gt;</code>
-          <div class="output">
-            <Translation keypath="translationComponentBasic" />
+          <code>每个组件独立调用 useI18n()</code>
+          <div class="output components-grid">
+            <ChildComponent1 />
+            <ChildComponent2 />
+            <ChildComponent3 />
           </div>
         </div>
       </div>
 
-      <!-- 验证点 2: 带参数 -->
+      <!-- 测试 2: 共享状态 -->
       <div class="test-case">
-        <h4>✅ With Parameters</h4>
+        <h4>✅ 共享翻译状态</h4>
         <div class="result">
-          <code>&lt;Translation keypath="key" :params="{ name: 'Charlie' }" /&gt;</code>
           <div class="output">
-            <Translation
-              keypath="translationComponentWithParams"
-              :params="{ name: 'Charlie', role: 'Developer' }"
-            />
+            <p>{{ t('所有组件共享同一个翻译引擎实例') }}</p>
+            <p>{{ t('语言切换会自动更新所有组件') }}</p>
           </div>
         </div>
       </div>
-
-      <!-- 验证点 3: 复数支持 -->
-      <div class="test-case">
-        <h4>✅ With Pluralization</h4>
-        <div class="counter">
-          <button @click="itemCount = Math.max(0, itemCount - 1)">-</button>
-          <span class="count-display">{{ itemCount }}</span>
-          <button @click="itemCount++">+</button>
-        </div>
-        <div class="result">
-          <code>&lt;Translation keypath="key" :plural="itemCount" /&gt;</code>
-          <div class="output">
-            <Translation
-              keypath="items"
-              :plural="itemCount"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- 验证点 4: 自定义标签 -->
-      <div class="test-case">
-        <h4>✅ Custom Tag</h4>
-        <div class="result">
-          <code>&lt;Translation keypath="key" tag="h2" /&gt;</code>
-          <div class="output">
-            <Translation
-              keypath="translationComponentCustomTag"
-              tag="h2"
-              class="custom-heading"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- 验证点 5: Render Prop -->
-      <div class="test-case">
-        <h4>✅ Render Prop (Slot)</h4>
-        <div class="result">
-          <code>&lt;Translation keypath="key"&gt;...&lt;/Translation&gt;</code>
-          <div class="output">
-            <Translation keypath="translationComponentBasic">
-              <template #default="{ translation }">
-                <div class="fancy-box">
-                  <span class="icon">✨</span>
-                  {{ translation }}
-                  <span class="icon">✨</span>
-                </div>
-              </template>
-            </Translation>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="demo-api">
-      <h4>🎯 Runtime API Validated:</h4>
-      <ul>
-        <li><code>&lt;Translation keypath="" /&gt;</code> - Basic usage</li>
-        <li><code>:params</code> - Parameter support</li>
-        <li><code>:plural</code> - Pluralization</li>
-        <li><code>tag</code> - Custom HTML tag</li>
-        <li>Slot/Render prop support</li>
-      </ul>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useI18n, Translation } from '@translink/i18n-runtime/vue';
+import { useI18n } from '@translink/i18n-runtime/vue';
 
-/**
- * 场景 06: Translation 组件
- *
- * 验证 Runtime API:
- * - <Translation> 组件各种用法
- * - props: keypath, params, plural, tag
- * - slot 支持
- */
 const { t } = useI18n();
-
-const itemCount = ref(3);
 </script>
 
-<style scoped>
-@import './demo-card-styles.css';
+<script lang="ts">
+// 子组件 1
+import { defineComponent } from 'vue';
 
-.counter {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
+const ChildComponent1 = defineComponent({
+  name: 'ChildComponent1',
+  setup() {
+    const { t } = useI18n();
+    return { t };
+  },
+  template: `
+    <div class="child-component">
+      <h5>{{ t('子组件 1') }}</h5>
+      <p>{{ t('这是第一个子组件') }}</p>
+    </div>
+  `,
+});
 
-.counter button {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+// 子组件 2
+const ChildComponent2 = defineComponent({
+  name: 'ChildComponent2',
+  setup() {
+    const { t, locale } = useI18n();
+    return { t, locale };
+  },
+  template: `
+    <div class="child-component">
+      <h5>{{ t('子组件 2') }}</h5>
+      <p>{{ t('当前语言') }}: {{ locale }}</p>
+    </div>
+  `,
+});
 
-.counter button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
+// 嵌套组件
+const NestedComponent = defineComponent({
+  name: 'NestedComponent',
+  setup() {
+    const { t } = useI18n();
+    return { t };
+  },
+  template: `
+    <div class="nested-component">
+      <p>{{ t('这是一个嵌套的组件') }}</p>
+    </div>
+  `,
+});
 
-.count-display {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #667eea;
-  min-width: 60px;
-  text-align: center;
-}
+// 子组件 3（包含嵌套）
+const ChildComponent3 = defineComponent({
+  name: 'ChildComponent3',
+  components: { NestedComponent },
+  setup() {
+    const { t } = useI18n();
+    return { t };
+  },
+  template: `
+    <div class="child-component">
+      <h5>{{ t('子组件 3（嵌套）') }}</h5>
+      <NestedComponent />
+    </div>
+  `,
+});
+</script>
 
-.custom-heading {
-  color: #667eea;
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.fancy-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.fancy-box .icon {
-  font-size: 1.5rem;
-}
-</style>
+<style scoped src="./demo-card-styles.css"></style>
