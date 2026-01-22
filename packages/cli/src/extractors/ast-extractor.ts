@@ -1,4 +1,6 @@
-import $ from 'gogocode';
+import * as parser from '@babel/parser';
+import traverse from '@babel/traverse';
+import * as t from '@babel/types';
 import { readFileSync } from 'fs';
 import { glob } from 'glob';
 import { relative } from 'path';
@@ -11,7 +13,7 @@ export interface ExtractionStats {
   totalFiles: number;
   processedFiles: number;
   totalExtractions: number;
-  chineseTexts: number;
+  extractedTexts: number; // 提取的文本数量（不限语言）
   errors: number;
   processedFilesList: string[]; // 🆕 已处理的文件列表
   filesWithExtractions: string[]; // 🆕 包含提取结果的文件列表
@@ -24,7 +26,7 @@ export class ASTExtractor {
     totalFiles: 0,
     processedFiles: 0,
     totalExtractions: 0,
-    chineseTexts: 0,
+    extractedTexts: 0,
     errors: 0,
     processedFilesList: [],
     filesWithExtractions: [],
@@ -73,7 +75,7 @@ export class ASTExtractor {
 
       logger.stopSpinner(
         `✓ 提取完成！处理了 ${this.stats.processedFiles} 个文件，` +
-          `提取了 ${this.stats.chineseTexts} 个中文文本`
+          `提取了 ${this.stats.extractedTexts} 个文本`
       );
 
       return this.deduplicateResults(results);
@@ -191,100 +193,121 @@ export class ASTExtractor {
   }
 
   /**
-   * 从 JSX/TSX 文件提取翻译文本
+   * 从 JSX/TSX 文件提取翻译文本（使用 Babel）
    */
   private extractFromJSXFile(
     content: string,
     filePath: string
   ): ExtractResult[] {
     try {
-      const ast = $(content, {
-        parseOptions: {
-          language: 'typescript',
-          plugins: ['jsx', 'typescript'],
-        },
+      const ast = parser.parse(content, {
+        sourceType: 'module',
+        plugins: ['jsx', 'typescript', 'decorators-legacy'],
       });
-      return this.extractFromAST(ast, filePath);
+
+      return this.extractFromBabelAST(ast, filePath);
     } catch (error) {
       logger.debug(`解析 JSX 文件 ${filePath} 失败: ${error}`);
-      // 降级到普通 JS 解析
-      return this.extractFromJSContent(content, filePath);
-    }
-  }
-
-  /**
-   * 从 JS/TS 文件提取翻译文本
-   */
-  private extractFromJSFile(
-    content: string,
-    filePath: string
-  ): ExtractResult[] {
-    return this.extractFromJSContent(content, filePath);
-  }
-
-  /**
-   * 从 JavaScript 内容提取翻译文本
-   */
-  private extractFromJSContent(
-    content: string,
-    filePath: string
-  ): ExtractResult[] {
-    try {
-      const ast = $(content);
-      return this.extractFromAST(ast, filePath);
-    } catch (error) {
-      logger.debug(`解析 JS 内容失败 ${filePath}: ${error}`);
       return [];
     }
   }
 
   /**
-   * 从 AST 中提取翻译函数调用
+   * 从 JS/TS 文件提取翻译文本（使用 Babel）
    */
-  private extractFromAST(ast: any, filePath: string): ExtractResult[] {
+  private extractFromJSFile(
+    content: string,
+    filePath: string
+  ): ExtractResult[] {
+    try {
+      const ast = parser.parse(content, {
+        sourceType: 'module',
+        plugins: ['typescript', 'decorators-legacy'],
+      });
+
+      return this.extractFromBabelAST(ast, filePath);
+    } catch (error) {
+      logger.debug(`解析 JS 文件 ${filePath} 失败: ${error}`);
+      return [];
+    }
+  }
+
+  /**
+   * 从 Babel AST 中提取翻译函数调用
+   */
+  private extractFromBabelAST(ast: any, filePath: string): ExtractResult[] {
     const results: ExtractResult[] = [];
+    let callCount = 0;
 
-    // 查找翻译函数调用
-    ast.find('CallExpression').each((node: any) => {
-      try {
-        const callee = node.attr('callee');
-        const functionName = this.getFunctionName(callee);
+    traverse(ast, {
+      CallExpression: (path) => {
+        callCount++;
+        try {
+          const { node } = path;
+          const functionName = this.getBabelFunctionName(node.callee);
 
-        if (this.config.functions.includes(functionName)) {
-          const args = node.attr('arguments');
-          const textArg = args?.[0];
+          if (this.config.functions.includes(functionName)) {
+            const firstArg = node.arguments[0];
 
-          if (textArg && this.isStringLiteral(textArg)) {
-            const text = textArg.value;
+            if (t.isStringLiteral(firstArg)) {
+              const text = firstArg.value;
 
-            if (this.isChineseText(text)) {
-              const context = this.extractContext(node, filePath);
-              const key = this.hashGenerator.generate(text, context);
+              // ✅ 新架构：提取所有文本，不区分语言
+              if (text && text.trim()) {
+                const context: HashContext = {
+                  filePath,
+                  componentName: this.extractComponentName(filePath),
+                };
 
-              results.push({
-                key,
-                text,
-                filePath,
-                line: node.attr('loc.start.line') || 0,
-                column: node.attr('loc.start.column') || 0,
-                context: {
-                  componentName: context.componentName,
-                  functionName: context.functionName,
-                  namespace: context.namespace,
-                },
-              });
+                const key = this.hashGenerator.generate(text, context);
 
-              this.stats.totalExtractions++;
-              this.stats.chineseTexts++;
+                results.push({
+                  key,
+                  text,
+                  filePath,
+                  line: node.loc?.start.line || 0,
+                  column: node.loc?.start.column || 0,
+                  context: {
+                    componentName: context.componentName,
+                    functionName: context.functionName,
+                    namespace: context.namespace,
+                  },
+                });
+
+                this.stats.totalExtractions++;
+                this.stats.extractedTexts++;
+              }
             }
           }
+        } catch (error) {
+          logger.debug(`处理 AST 节点时出错: ${error}`);
         }
-      } catch (error) {
-        logger.debug(`处理 AST 节点时出错: ${error}`);
-      }
+      },
     });
 
+    logger.debug(`[DEBUG] File: ${filePath}, Found ${callCount} call expressions, extracted ${results.length} texts`);
+
     return results;
+  }
+
+  /**
+   * 获取 Babel AST 中的函数名
+   */
+  private getBabelFunctionName(callee: any): string {
+    if (t.isIdentifier(callee)) {
+      return callee.name;
+    }
+
+    if (t.isMemberExpression(callee)) {
+      const object = callee.object;
+      const property = callee.property;
+
+      if (t.isIdentifier(object) && t.isIdentifier(property)) {
+        return `${object.name}.${property.name}`;
+      }
+    }
+
+    return '';
   }
 
   /**
@@ -315,7 +338,8 @@ export class ASTExtractor {
       while ((match = pattern.exec(templateContent)) !== null) {
         // 获取文本内容（可能在不同的捕获组）
         const text = match[2] || match[1];
-        if (text && this.isChineseText(text)) {
+        // ✅ 新架构：提取所有文本，不区分语言
+        if (text && text.trim()) {
           const context: HashContext = {
             filePath,
             componentName: this.extractComponentName(filePath),
@@ -337,7 +361,7 @@ export class ASTExtractor {
           });
 
           this.stats.totalExtractions++;
-          this.stats.chineseTexts++;
+          this.stats.extractedTexts++;
         }
       }
     });
@@ -380,7 +404,8 @@ export class ASTExtractor {
   }
 
   /**
-   * 检查文本是否包含中文
+   * 检查文本是否包含中文（已废弃，保留用于向后兼容）
+   * @deprecated 新架构不再区分语言，提取所有文本
    */
   private isChineseText(text: string): boolean {
     return /[\u4e00-\u9fa5]/.test(text);
@@ -485,8 +510,10 @@ export class ASTExtractor {
       totalFiles: 0,
       processedFiles: 0,
       totalExtractions: 0,
-      chineseTexts: 0,
+      extractedTexts: 0,
       errors: 0,
+      processedFilesList: [],
+      filesWithExtractions: [],
     };
   }
 }

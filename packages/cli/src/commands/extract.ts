@@ -75,7 +75,7 @@ async function extractCommand(options: ExtractOptions) {
     logger.br();
 
     // 初始化提取器
-    const hashGenerator = new HashGenerator(config.hash);
+    const hashGenerator = new HashGenerator();
     const extractor = new ASTExtractor(config.extract, hashGenerator);
 
     // 执行提取
@@ -106,11 +106,11 @@ async function extractCommand(options: ExtractOptions) {
 
     if (results.length === 0) {
       logger.br();
-      logger.warn('未发现需要翻译的中文文本');
+      logger.warn('未发现需要翻译的文本');
       logger.info('请检查：');
       logger.info('  1. 扫描模式是否正确');
       logger.info('  2. 代码中是否使用了配置的翻译函数');
-      logger.info('  3. 是否包含中文文本');
+      logger.info('  3. 翻译函数是否包含有效的文本参数');
       return;
     }
 
@@ -120,7 +120,7 @@ async function extractCommand(options: ExtractOptions) {
     logger.info(`  扫描文件: ${stats.totalFiles} 个`);
     logger.info(`  处理文件: ${stats.processedFiles} 个`);
     logger.info(`  包含翻译: ${stats.filesWithExtractions.length} 个`);
-    logger.info(`  提取文本: ${stats.chineseTexts} 个`);
+    logger.info(`  提取文本: ${stats.extractedTexts} 个`);
     logger.info(`  生成哈希: ${hashStats.totalHashes} 个`);
 
     if (hashStats.collisions > 0) {
@@ -267,7 +267,18 @@ async function generateLanguageFiles(
       if (existsSync(filePath)) {
         try {
           const content = readFileSync(filePath, 'utf-8');
-          existingData = JSON.parse(content);
+          const rawData = JSON.parse(content);
+
+          // ✅ 容错处理：过滤非字符串值
+          for (const [key, value] of Object.entries(rawData)) {
+            if (typeof value === 'string') {
+              existingData[key] = value;
+            } else {
+              logger.warn(
+                `[容错] 语言文件 ${language}.${config.output.format} 中的键 "${key}" 的值不是字符串，已跳过。原始值类型: ${typeof value}`
+              );
+            }
+          }
         } catch (error) {
           logger.warn(`读取现有 ${language} 文件失败，将创建新文件`);
         }
@@ -279,6 +290,7 @@ async function generateLanguageFiles(
       // 保留已有的翻译
       for (const key of Object.keys(existingData)) {
         if (newKeys.has(key)) {
+          // ✅ 已经过滤，existingData[key] 确保是字符串
           mergedData[key] = existingData[key];
         }
       }
@@ -287,8 +299,10 @@ async function generateLanguageFiles(
       for (const key of newKeys) {
         if (!(key in mergedData)) {
           if (language === sourceLanguage) {
+            // ✅ newTranslations[key] 来自 AST 提取，确保是字符串
             mergedData[key] = newTranslations[key];
           } else {
+            // ✅ 已经过滤，existingData[key] 确保是字符串或 undefined
             mergedData[key] = existingData[key] || '';
           }
         }
